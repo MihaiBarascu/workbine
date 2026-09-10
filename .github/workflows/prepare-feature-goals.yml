@@ -1,0 +1,43 @@
+name: prepare-feature-goals
+
+on:
+  push:
+    branches:
+      - feature/goals
+    paths:
+      - .github/workflows/prepare-feature-goals.yml
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout feature
+        uses: actions/checkout@v7
+        with:
+          ref: feature/goals
+          fetch-depth: 0
+
+      - name: Add Laravel Socialite
+        run: composer require laravel/socialite:^5.29 --no-interaction --no-progress
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          npm install
+
+      - name: Validate application
+        run: composer ci:check
+
+      - name: Commit dependency lock
+        run: |
+          rm -f .env
+          git config user.name "Workbine CI"
+          git config user.email "actions@users.noreply.github.com"
+          git add composer.json composer.lock
+          git diff --cached --quiet || git commit -m "feat: add Laravel Socialite"
+          git push origin feature/goals
