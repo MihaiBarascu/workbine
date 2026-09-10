@@ -2,11 +2,11 @@
 
 Workbine is a community-driven platform for discovering how people actually do things in practice.
 
-A person can create a goal such as `How to build a SaaS with Gemini`, publish their own method, and explain exactly how they did it. Other people can publish alternative methods, validate what they tried, show evidence, thank creators, and build reputation by helping others.
+A person can start a topic such as `How do you build a useful SaaS with Gemini?`, publish the method that worked for them, and explain exactly how they did it. Other people can publish alternative methods, validate what they tried, show evidence, thank creators, and build reputation by helping others.
 
 ## Core idea
 
-`Goal -> Methods -> Real experiences -> Evidence -> Current reputation`
+`Topic -> Methods -> Real experiences -> Evidence -> Reputation`
 
 The product prioritizes practical experience, freshness, credibility, and helpfulness over simple popularity.
 

@@ -2,15 +2,15 @@
 
 namespace Database\Factories;
 
-use App\Models\Goal;
+use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-/** @extends Factory<Goal> */
-class GoalFactory extends Factory
+/** @extends Factory<Topic> */
+class TopicFactory extends Factory
 {
-    protected $model = Goal::class;
+    protected $model = Topic::class;
 
     public function definition(): array
     {

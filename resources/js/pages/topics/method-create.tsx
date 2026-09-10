@@ -1,0 +1,131 @@
+import { Form, Head, Link } from '@inertiajs/react';
+import { ArrowLeft, Lightbulb } from 'lucide-react';
+import InputError from '@/components/input-error';
+import { PublicShell } from '@/components/public-shell';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+
+type Props = {
+    topic: {
+        id: number;
+        title: string;
+        slug: string;
+    };
+};
+
+export default function MethodCreate({ topic }: Props) {
+    return (
+        <PublicShell>
+            <Head title={`Share what worked - ${topic.title}`} />
+
+            <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+                <Button asChild variant="ghost" className="mb-6 -ml-3">
+                    <Link href={`/topics/${topic.slug}`}>
+                        <ArrowLeft />
+                        Back to topic
+                    </Link>
+                </Button>
+
+                <div className="mb-9">
+                    <div className="bg-muted text-muted-foreground mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium">
+                        <Lightbulb className="size-4" />
+                        Share what worked
+                    </div>
+                    <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
+                        How did you actually do it?
+                    </h1>
+                    <p className="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
+                        Topic:{' '}
+                        <span className="text-foreground font-medium">
+                            {topic.title}
+                        </span>
+                    </p>
+                    <p className="text-muted-foreground mt-2 max-w-2xl text-base leading-7">
+                        Explain the method as you would to a friend who wants to
+                        try the same thing. Specific steps and context are more
+                        useful than generic advice.
+                    </p>
+                </div>
+
+                <Form
+                    action={`/topics/${topic.slug}/methods`}
+                    method="post"
+                    disableWhileProcessing
+                    className="space-y-6"
+                >
+                    {({ processing, errors }) => (
+                        <>
+                            <div className="grid gap-2">
+                                <Label htmlFor="title">Method title</Label>
+                                <Input
+                                    id="title"
+                                    name="title"
+                                    required
+                                    autoFocus
+                                    maxLength={160}
+                                    placeholder="Build the smallest paid version first"
+                                />
+                                <InputError message={errors.title} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="body">
+                                    What worked for you?
+                                </Label>
+                                <textarea
+                                    id="body"
+                                    name="body"
+                                    required
+                                    rows={12}
+                                    maxLength={10000}
+                                    placeholder="Explain what you did, why you chose it, the important steps, what went wrong, and what you would repeat..."
+                                    className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-56 w-full rounded-md border px-3 py-2 text-sm leading-6 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                                />
+                                <InputError message={errors.body} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="source_url">
+                                    Source link{' '}
+                                    <span className="text-muted-foreground font-normal">
+                                        (optional)
+                                    </span>
+                                </Label>
+                                <Input
+                                    id="source_url"
+                                    name="source_url"
+                                    type="url"
+                                    maxLength={2048}
+                                    placeholder="https://..."
+                                />
+                                <p className="text-muted-foreground text-sm">
+                                    Add the original source when you are sharing
+                                    or adapting a method you found elsewhere.
+                                </p>
+                                <InputError message={errors.source_url} />
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3 pt-2">
+                                <Button
+                                    type="submit"
+                                    size="lg"
+                                    disabled={processing}
+                                >
+                                    {processing && <Spinner />}
+                                    Share method
+                                </Button>
+                                <Button asChild variant="ghost" size="lg">
+                                    <Link href={`/topics/${topic.slug}`}>
+                                        Cancel
+                                    </Link>
+                                </Button>
+                            </div>
+                        </>
+                    )}
+                </Form>
+            </main>
+        </PublicShell>
+    );
+}
