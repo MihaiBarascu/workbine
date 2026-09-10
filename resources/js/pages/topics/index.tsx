@@ -68,9 +68,16 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 The useful part is in the details.
                             </h2>
                             <ol className="text-muted-foreground mt-4 list-decimal space-y-3 pl-5 text-sm leading-6 marker:text-teal-700 dark:marker:text-teal-300">
-                                <li>Ask something you want a practical answer to.</li>
-                                <li>Share a method and the context behind it.</li>
-                                <li>Credit your sources. Be honest about limits.</li>
+                                <li>
+                                    Ask something you want a practical answer
+                                    to.
+                                </li>
+                                <li>
+                                    Share a method and the context behind it.
+                                </li>
+                                <li>
+                                    Credit your sources. Be honest about limits.
+                                </li>
                             </ol>
                         </aside>
                     </div>
@@ -106,7 +113,9 @@ export default function TopicsIndex({ topics, view }: Props) {
                             >
                                 <Link
                                     href="/topics#topics"
-                                    aria-current={unanswered ? undefined : 'page'}
+                                    aria-current={
+                                        unanswered ? undefined : 'page'
+                                    }
                                 >
                                     Latest
                                 </Link>
@@ -118,7 +127,9 @@ export default function TopicsIndex({ topics, view }: Props) {
                             >
                                 <Link
                                     href="/topics?view=unanswered#topics"
-                                    aria-current={unanswered ? 'page' : undefined}
+                                    aria-current={
+                                        unanswered ? 'page' : undefined
+                                    }
                                 >
                                     Needs a method
                                 </Link>
@@ -135,7 +146,7 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 >
                                     <Link
                                         href={`/topics/${topic.slug}`}
-                                        className="hover:bg-muted/40 focus-visible:ring-ring group flex flex-col gap-4 p-5 transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:outline-none sm:flex-row sm:items-center sm:gap-6 sm:p-6"
+                                        className="hover:bg-muted/40 focus-visible:ring-ring group flex flex-col gap-4 p-5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset sm:flex-row sm:items-center sm:gap-6 sm:p-6"
                                     >
                                         <div className="min-w-0 flex-1">
                                             <div className="text-muted-foreground mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
@@ -143,14 +154,23 @@ export default function TopicsIndex({ topics, view }: Props) {
                                                     aria-hidden="true"
                                                     className="flex size-6 shrink-0 items-center justify-center rounded-full bg-teal-100 font-semibold text-teal-900 dark:bg-teal-900 dark:text-teal-100"
                                                 >
-                                                    {Array.from(topic.user.name.trim())[0] ?? '?'}
+                                                    {Array.from(
+                                                        topic.user.name.trim(),
+                                                    )[0] ?? '?'}
                                                 </span>
                                                 <span className="[overflow-wrap:anywhere]">
                                                     {topic.user.name}
                                                 </span>
                                                 {topic.created_at && (
-                                                    <time dateTime={topic.created_at}>
-                                                        · {formatDate(topic.created_at)}
+                                                    <time
+                                                        dateTime={
+                                                            topic.created_at
+                                                        }
+                                                    >
+                                                        ·{' '}
+                                                        {formatDate(
+                                                            topic.created_at,
+                                                        )}
                                                     </time>
                                                 )}
                                             </div>
@@ -169,13 +189,18 @@ export default function TopicsIndex({ topics, view }: Props) {
                                                     aria-hidden="true"
                                                 />
                                                 {topic.methods_count}{' '}
-                                                {topic.methods_count === 1 ? 'method' : 'methods'}
+                                                {topic.methods_count === 1
+                                                    ? 'method'
+                                                    : 'methods'}
                                             </span>
                                             <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
                                                 {topic.methods_count === 0
                                                     ? 'Be the first to share'
                                                     : 'See what worked'}
-                                                <ArrowRight className="size-3.5" aria-hidden="true" />
+                                                <ArrowRight
+                                                    className="size-3.5"
+                                                    aria-hidden="true"
+                                                />
                                             </span>
                                         </div>
                                     </Link>
@@ -199,8 +224,16 @@ export default function TopicsIndex({ topics, view }: Props) {
                                     : 'Bring something you are figuring out. Give people enough context to share a useful answer.'}
                             </p>
                             <Button asChild className="mt-6">
-                                <Link href={unanswered ? '/topics#topics' : '/topics/create'}>
-                                    {unanswered ? 'Explore all topics' : 'Start the first topic'}
+                                <Link
+                                    href={
+                                        unanswered
+                                            ? '/topics#topics'
+                                            : '/topics/create'
+                                    }
+                                >
+                                    {unanswered
+                                        ? 'Explore all topics'
+                                        : 'Start the first topic'}
                                 </Link>
                             </Button>
                         </div>
@@ -217,7 +250,11 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 disabled={!topics.prev_page_url}
                             >
                                 {topics.prev_page_url ? (
-                                    <Link href={`${topics.prev_page_url}#topics`}>Previous</Link>
+                                    <Link
+                                        href={`${topics.prev_page_url}#topics`}
+                                    >
+                                        Previous
+                                    </Link>
                                 ) : (
                                     <span>Previous</span>
                                 )}
@@ -231,7 +268,11 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 disabled={!topics.next_page_url}
                             >
                                 {topics.next_page_url ? (
-                                    <Link href={`${topics.next_page_url}#topics`}>Next</Link>
+                                    <Link
+                                        href={`${topics.next_page_url}#topics`}
+                                    >
+                                        Next
+                                    </Link>
                                 ) : (
                                     <span>Next</span>
                                 )}
