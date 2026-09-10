@@ -18,13 +18,13 @@ export function PublicShell({ children }: Props) {
 
     return (
         <div className="bg-background text-foreground min-h-screen">
-            <header className="border-border/70 bg-background/90 sticky top-0 z-20 border-b backdrop-blur">
+            <header className="border-border/70 bg-background/90 sticky top-0 z-20 border-b backdrop-blur-xl">
                 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
                     <Link
                         href="/"
-                        className="flex items-center gap-2 font-semibold"
+                        className="flex items-center gap-2 font-semibold tracking-tight"
                     >
-                        <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg text-sm font-bold">
+                        <span className="bg-foreground text-background flex size-8 rotate-3 items-center justify-center rounded-xl text-sm font-bold shadow-sm">
                             W
                         </span>
                         <span>Workbine</span>
@@ -32,17 +32,19 @@ export function PublicShell({ children }: Props) {
 
                     <nav className="flex items-center gap-2">
                         <Button asChild variant="ghost" size="sm">
-                            <Link href="/goals">Explore</Link>
+                            <Link href="/topics">Explore</Link>
                         </Button>
 
                         {auth.user ? (
                             <>
                                 <Button asChild variant="ghost" size="sm">
-                                    <Link href="/dashboard">Dashboard</Link>
+                                    <Link href="/settings/profile">
+                                        {auth.user.name}
+                                    </Link>
                                 </Button>
                                 <Button asChild size="sm">
-                                    <Link href="/goals/create">
-                                        Share a goal
+                                    <Link href="/topics/create">
+                                        Start a topic
                                     </Link>
                                 </Button>
                             </>
