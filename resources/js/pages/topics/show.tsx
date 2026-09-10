@@ -1,5 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, ExternalLink, Lightbulb, Link2, MessageSquareText, Plus } from 'lucide-react';
+import {
+    ArrowLeft,
+    ExternalLink,
+    Lightbulb,
+    Link2,
+    MessageSquareText,
+    Plus,
+} from 'lucide-react';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type { MethodSummary, TopicSummary } from '@/types';
@@ -51,21 +58,31 @@ export default function TopicShow({ topic, methods }: Props) {
                         </div>
 
                         {topic.description && (
-                            <p className="text-muted-foreground mt-6 text-base leading-8 whitespace-pre-wrap [overflow-wrap:anywhere] sm:text-lg">
+                            <p className="text-muted-foreground mt-6 text-base leading-8 [overflow-wrap:anywhere] whitespace-pre-wrap sm:text-lg">
                                 {topic.description}
                             </p>
                         )}
 
-                        <section aria-labelledby="methods-heading" className="mt-10 border-t pt-8">
+                        <section
+                            aria-labelledby="methods-heading"
+                            className="mt-10 border-t pt-8"
+                        >
                             <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <h2 id="methods-heading" className="text-2xl font-semibold tracking-tight">
+                                    <h2
+                                        id="methods-heading"
+                                        className="text-2xl font-semibold tracking-tight"
+                                    >
                                         What worked for people
                                     </h2>
                                     <p className="text-muted-foreground mt-1 text-sm">
                                         {topic.methods_count}{' '}
-                                        {topic.methods_count === 1 ? 'method shared' : 'methods shared'}
-                                        {topic.methods_count > 0 ? ' · Newest first' : ''}
+                                        {topic.methods_count === 1
+                                            ? 'method shared'
+                                            : 'methods shared'}
+                                        {topic.methods_count > 0
+                                            ? ' · Newest first'
+                                            : ''}
                                     </p>
                                 </div>
                                 <Button asChild>
@@ -94,8 +111,15 @@ export default function TopicShow({ topic, methods }: Props) {
                                                         </span>
                                                     </p>
                                                     {method.created_at && (
-                                                        <time dateTime={method.created_at} className="text-muted-foreground mt-1 block text-xs">
-                                                            {formatDate(method.created_at)}
+                                                        <time
+                                                            dateTime={
+                                                                method.created_at
+                                                            }
+                                                            className="text-muted-foreground mt-1 block text-xs"
+                                                        >
+                                                            {formatDate(
+                                                                method.created_at,
+                                                            )}
                                                         </time>
                                                     )}
                                                 </div>
@@ -104,7 +128,10 @@ export default function TopicShow({ topic, methods }: Props) {
                                                     aria-label={`Link to method: ${method.title}`}
                                                     className="text-muted-foreground hover:bg-muted focus-visible:ring-ring shrink-0 rounded-md p-2 focus-visible:ring-2 focus-visible:outline-none"
                                                 >
-                                                    <Link2 className="size-4" aria-hidden="true" />
+                                                    <Link2
+                                                        className="size-4"
+                                                        aria-hidden="true"
+                                                    />
                                                 </a>
                                             </div>
                                             <h3
@@ -113,7 +140,7 @@ export default function TopicShow({ topic, methods }: Props) {
                                             >
                                                 {method.title}
                                             </h3>
-                                            <p className="text-foreground/90 mt-4 text-base leading-8 whitespace-pre-wrap [overflow-wrap:anywhere]">
+                                            <p className="text-foreground/90 mt-4 text-base leading-8 [overflow-wrap:anywhere] whitespace-pre-wrap">
                                                 {method.body}
                                             </p>
 
@@ -126,8 +153,13 @@ export default function TopicShow({ topic, methods }: Props) {
                                                         className="focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-medium text-teal-700 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none dark:text-teal-300"
                                                     >
                                                         Original source
-                                                        <ExternalLink className="size-4" aria-hidden="true" />
-                                                        <span className="sr-only">(opens in a new tab)</span>
+                                                        <ExternalLink
+                                                            className="size-4"
+                                                            aria-hidden="true"
+                                                        />
+                                                        <span className="sr-only">
+                                                            (opens in a new tab)
+                                                        </span>
                                                     </a>
                                                     <p className="text-muted-foreground mt-2 text-xs leading-5 [overflow-wrap:anywhere]">
                                                         {method.source_url}
@@ -139,17 +171,24 @@ export default function TopicShow({ topic, methods }: Props) {
                                 </div>
                             ) : (
                                 <div className="rounded-2xl border border-dashed bg-teal-50/50 px-6 py-12 text-center dark:bg-teal-950/20">
-                                    <MessageSquareText className="mx-auto size-9 text-teal-700 dark:text-teal-300" aria-hidden="true" />
+                                    <MessageSquareText
+                                        className="mx-auto size-9 text-teal-700 dark:text-teal-300"
+                                        aria-hidden="true"
+                                    />
                                     <h3 className="mt-4 text-xl font-semibold">
-                                        Your experience could be the starting point
+                                        Your experience could be the starting
+                                        point
                                     </h3>
                                     <p className="text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-6">
-                                        You do not need the perfect answer. Share what
-                                        you tried, the steps you took, and what you
-                                        would do differently next time.
+                                        You do not need the perfect answer.
+                                        Share what you tried, the steps you
+                                        took, and what you would do differently
+                                        next time.
                                     </p>
                                     <Button asChild className="mt-6">
-                                        <Link href={contributionUrl}>Share the first method</Link>
+                                        <Link href={contributionUrl}>
+                                            Share the first method
+                                        </Link>
                                     </Button>
                                 </div>
                             )}
@@ -158,19 +197,31 @@ export default function TopicShow({ topic, methods }: Props) {
 
                     <aside aria-label="Contribution guidance">
                         <div className="rounded-2xl border bg-teal-50/50 p-6 lg:sticky lg:top-24 dark:bg-teal-950/20">
-                            <Lightbulb className="mb-4 size-6 text-teal-700 dark:text-teal-300" aria-hidden="true" />
-                            <h2 className="text-lg font-semibold">Help someone try it tomorrow.</h2>
+                            <Lightbulb
+                                className="mb-4 size-6 text-teal-700 dark:text-teal-300"
+                                aria-hidden="true"
+                            />
+                            <h2 className="text-lg font-semibold">
+                                Help someone try it tomorrow.
+                            </h2>
                             <p className="text-muted-foreground mt-3 text-sm leading-6">
-                                A useful method explains the situation, the steps,
-                                and the result. Mention what did not work, too.
+                                A useful method explains the situation, the
+                                steps, and the result. Mention what did not
+                                work, too.
                             </p>
                             <p className="text-muted-foreground mt-3 text-sm leading-6">
                                 Learned it from someone else? Include the source
                                 and make that clear. A shared method is not an
                                 independently verified result.
                             </p>
-                            <Button asChild variant="outline" className="mt-5 w-full">
-                                <Link href={contributionUrl}>Add your approach</Link>
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="mt-5 w-full"
+                            >
+                                <Link href={contributionUrl}>
+                                    Add your approach
+                                </Link>
                             </Button>
                         </div>
                     </aside>
