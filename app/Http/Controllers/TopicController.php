@@ -17,10 +17,20 @@ class TopicController extends Controller
     public function index(Request $request): Response
     {
         $view = $request->query('view') === 'unanswered' ? 'unanswered' : 'latest';
+        $input = $request->query('q', '');
+        $search = is_string($input) ? Str::limit(Str::squish($input), 120, '') : '';
         $query = Topic::query();
 
         if ($view === 'unanswered') {
             $query->doesntHave('methods');
+        }
+
+        if ($search !== '') {
+            // Literal substring matching, including %, _ and !, on SQLite and PostgreSQL.
+            $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($search)).'%';
+            $query->where(fn ($query) => $query
+                ->whereRaw("LOWER(title) LIKE ? ESCAPE '!'", [$pattern])
+                ->orWhereRaw("LOWER(description) LIKE ? ESCAPE '!'", [$pattern]));
         }
 
         $topics = $query
@@ -29,12 +39,13 @@ class TopicController extends Controller
             ->latest()
             ->orderByDesc('id')
             ->paginate(12)
-            ->withQueryString()
+            ->appends(['view' => $view, 'q' => $search])
             ->through(fn (Topic $topic): array => $this->serializeTopic($topic));
 
         return Inertia::render('topics/index', [
             'topics' => $topics,
             'view' => $view,
+            'search' => $search,
         ]);
     }
 
@@ -69,7 +80,9 @@ class TopicController extends Controller
 
         $methods = $topic->methods()
             ->with('user:id,name')
+            ->withCount('experiences')
             ->latest()
+            ->orderByDesc('id')
             ->get()
             ->map(fn (Method $method): array => $this->serializeMethod($method));
 
@@ -105,6 +118,7 @@ class TopicController extends Controller
             'body' => $method->body,
             'source_url' => $method->source_url,
             'created_at' => $method->created_at?->toIso8601String(),
+            'experiences_count' => $method->experiences_count ?? 0,
             'user' => [
                 'id' => $method->user->id,
                 'name' => $method->user->name,

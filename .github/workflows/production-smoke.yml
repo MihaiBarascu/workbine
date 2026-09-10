@@ -1,0 +1,79 @@
+name: Production read-only smoke
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      DEPLOY_COMMIT: ${{ github.sha }}
+    steps:
+      - name: Wait for the public release without writing production data
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          base = 'https://workbine.com'
+          query = 'workbine-deploy-' + os.environ['DEPLOY_COMMIT']
+          headers = {
+              'User-Agent': 'Workbine-Deployment-Smoke/1.0',
+              'Accept': 'application/json',
+              'X-Inertia': 'true',
+              'X-Requested-With': 'XMLHttpRequest',
+              'Cache-Control': 'no-cache',
+          }
+
+          def read_page(path):
+              request = urllib.request.Request(base + path, headers=headers)
+              with urllib.request.urlopen(request, timeout=15) as response:
+                  return json.load(response)
+
+          last_error = ''
+          for attempt in range(1, 25):
+              try:
+                  with urllib.request.urlopen(base + '/up', timeout=15) as response:
+                      assert response.status == 200, 'Health endpoint did not return HTTP 200'
+                  result = read_page('/topics?q=' + query)
+                  assert result.get('component') == 'topics/index', 'Unexpected public page'
+                  assert result.get('props', {}).get('search') == query, 'Search release is not visible yet'
+                  listing = read_page('/topics')
+                  topics = listing.get('props', {}).get('topics', {}).get('data', [])
+                  if topics:
+                      topic = read_page('/topics/' + urllib.parse.quote(topics[0]['slug']))
+                      assert topic.get('component') == 'topics/show', 'Topic detail failed'
+                      methods = topic.get('props', {}).get('methods', [])
+                      for method in methods[:1]:
+                          assert 'experiences_count' in method, 'Experience release is not visible yet'
+                          experience = read_page('/topics/' + urllib.parse.quote(topics[0]['slug']) + '/methods/' + str(method['id']) + '/experiences')
+                          assert experience.get('component') == 'experiences/index', 'Public experiences page failed'
+                  message = 'PASS: live health, search release and available public topic/experience reads. No production content was created.'
+                  print(message)
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+                      summary.write('## Production read-only smoke\n' + message + '\n\nAuthenticated Google login is not covered. This checks feature availability, not a deployed-commit fingerprint.\n')
+                  break
+              except urllib.error.HTTPError as error:
+                  last_error = f'HTTP {error.code}; cf-mitigated={error.headers.get("cf-mitigated", "not present")}'
+              except Exception as error:
+                  last_error = f'{type(error).__name__}: {error}'
+              print(f'Attempt {attempt}/24: {last_error}', flush=True)
+              if attempt < 24:
+                  time.sleep(10)
+          else:
+              raise SystemExit('Live release could not be confirmed from the runner: ' + last_error)
+          PY

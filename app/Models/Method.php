@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -16,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property string $title
  * @property string $body
  * @property string|null $source_url
+ * @property int|null $experiences_count
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Topic $topic
@@ -37,5 +39,11 @@ class Method extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return HasMany<Experience, $this> */
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(Experience::class);
     }
 }

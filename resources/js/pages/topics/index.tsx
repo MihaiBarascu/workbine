@@ -1,12 +1,21 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowRight, Lightbulb, MessageCircleMore, Plus } from 'lucide-react';
+import { Form, Head, Link } from '@inertiajs/react';
+import {
+    ArrowRight,
+    Lightbulb,
+    MessageCircleMore,
+    Plus,
+    Search,
+} from 'lucide-react';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { PaginatedTopics } from '@/types';
 
 type Props = {
     topics: PaginatedTopics;
     view: 'latest' | 'unanswered';
+    search: string;
 };
 
 function formatDate(value: string): string {
@@ -18,19 +27,19 @@ function formatDate(value: string): string {
     }).format(new Date(value));
 }
 
-export default function TopicsIndex({ topics, view }: Props) {
+export default function TopicsIndex({ topics, view, search }: Props) {
     const unanswered = view === 'unanswered';
+    const filterUrl = (value: string) =>
+        `/topics?${new URLSearchParams({ view: value, q: search })}#topics`;
 
     return (
         <PublicShell>
-            <Head title="Find what works" />
-
+            <Head title={search ? `Search: ${search}` : 'Find what works'} />
             <main>
                 <section className="border-b bg-teal-50/60 dark:bg-teal-950/20">
-                    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center lg:px-8 lg:py-16">
+                    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center lg:px-8 lg:py-16">
                         <div>
-                            <p className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-teal-800 dark:text-teal-300">
-                                <span className="size-2 rounded-full bg-teal-600 dark:bg-teal-400" />
+                            <p className="mb-5 text-sm font-medium text-teal-800 dark:text-teal-300">
                                 Practical knowledge. Real people.
                             </p>
                             <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl lg:text-6xl">
@@ -40,9 +49,8 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 </span>
                             </h1>
                             <p className="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
-                                Not another list of things you could try. Find
-                                out what someone actually did, how they did it,
-                                and what they learned along the way.
+                                Find out what someone actually did, how they did
+                                it, and what happened when others tried it.
                             </p>
                             <div className="mt-7 flex flex-wrap gap-3">
                                 <Button asChild size="lg">
@@ -59,7 +67,7 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 </Button>
                             </div>
                         </div>
-                        <aside className="bg-background rounded-2xl border p-6 shadow-sm">
+                        <aside className="bg-background hidden rounded-2xl border p-6 shadow-sm lg:block">
                             <Lightbulb
                                 className="mb-4 size-6 text-teal-700 dark:text-teal-300"
                                 aria-hidden="true"
@@ -67,16 +75,12 @@ export default function TopicsIndex({ topics, view }: Props) {
                             <h2 className="text-lg font-semibold tracking-tight">
                                 The useful part is in the details.
                             </h2>
-                            <ol className="text-muted-foreground mt-4 list-decimal space-y-3 pl-5 text-sm leading-6 marker:text-teal-700 dark:marker:text-teal-300">
+                            <ol className="text-muted-foreground mt-4 list-decimal space-y-3 pl-5 text-sm leading-6">
+                                <li>Ask a practical question.</li>
+                                <li>Share a method with steps and context.</li>
                                 <li>
-                                    Ask something you want a practical answer
-                                    to.
-                                </li>
-                                <li>
-                                    Share a method and the context behind it.
-                                </li>
-                                <li>
-                                    Credit your sources. Be honest about limits.
+                                    Try it. Share the result, including the
+                                    limits.
                                 </li>
                             </ol>
                         </aside>
@@ -88,8 +92,50 @@ export default function TopicsIndex({ topics, view }: Props) {
                     aria-labelledby="topics-heading"
                     className="mx-auto max-w-6xl scroll-mt-36 px-4 py-10 sm:px-6 lg:px-8"
                 >
+                    <Form
+                        key={`${view}:${search}`}
+                        action="/topics#topics"
+                        method="get"
+                        className="mb-8"
+                        role="search"
+                    >
+                        {({ processing }) => (
+                            <>
+                                <Label
+                                    htmlFor="topic-search"
+                                    className="mb-2 block"
+                                >
+                                    Search topics
+                                </Label>
+                                <div className="flex flex-col gap-3 sm:flex-row">
+                                    <Input
+                                        id="topic-search"
+                                        name="q"
+                                        type="search"
+                                        maxLength={120}
+                                        defaultValue={search}
+                                        placeholder="What are you figuring out?"
+                                        className="h-11 flex-1"
+                                    />
+                                    <input
+                                        type="hidden"
+                                        name="view"
+                                        value={view}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="h-11"
+                                    >
+                                        <Search aria-hidden="true" />
+                                        Search
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
                     <div className="mb-6 flex flex-wrap items-end justify-between gap-5">
-                        <div>
+                        <div className="min-w-0">
                             <p className="text-muted-foreground text-sm">
                                 From the community
                             </p>
@@ -97,10 +143,26 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 id="topics-heading"
                                 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl"
                             >
-                                {unanswered
-                                    ? 'A good question needs your experience'
-                                    : 'What are people figuring out?'}
+                                {search
+                                    ? 'Find a useful starting point'
+                                    : unanswered
+                                      ? 'A good question needs your experience'
+                                      : 'What are people figuring out?'}
                             </h2>
+                            {search && (
+                                <p
+                                    role="status"
+                                    className="text-muted-foreground mt-2 text-sm [overflow-wrap:anywhere]"
+                                >
+                                    Matching “{search}” ·{' '}
+                                    <Link
+                                        className="underline underline-offset-4"
+                                        href={`/topics?view=${view}#topics`}
+                                    >
+                                        Clear search
+                                    </Link>
+                                </p>
+                            )}
                         </div>
                         <nav
                             aria-label="Filter topics"
@@ -112,7 +174,7 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 size="sm"
                             >
                                 <Link
-                                    href="/topics#topics"
+                                    href={filterUrl('latest')}
                                     aria-current={
                                         unanswered ? undefined : 'page'
                                     }
@@ -126,7 +188,7 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 size="sm"
                             >
                                 <Link
-                                    href="/topics?view=unanswered#topics"
+                                    href={filterUrl('unanswered')}
                                     aria-current={
                                         unanswered ? 'page' : undefined
                                     }
@@ -167,7 +229,6 @@ export default function TopicsIndex({ topics, view }: Props) {
                                                             topic.created_at
                                                         }
                                                     >
-                                                        ·{' '}
                                                         {formatDate(
                                                             topic.created_at,
                                                         )}
@@ -214,26 +275,30 @@ export default function TopicsIndex({ topics, view }: Props) {
                                 aria-hidden="true"
                             />
                             <h3 className="mt-4 text-xl font-semibold">
-                                {unanswered
-                                    ? 'No topics are waiting for a first method'
-                                    : 'Every useful method starts with a question'}
+                                {search
+                                    ? 'No matching topics yet'
+                                    : unanswered
+                                      ? 'No topics are waiting for a first method'
+                                      : 'Every useful method starts with a question'}
                             </h3>
                             <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm leading-6">
-                                {unanswered
-                                    ? 'Explore existing topics to add another approach, or start a question of your own.'
-                                    : 'Bring something you are figuring out. Give people enough context to share a useful answer.'}
+                                {search
+                                    ? 'Try fewer words, change the filter, or bring your question to the community.'
+                                    : unanswered
+                                      ? 'Explore existing topics to add another approach, or start a question of your own.'
+                                      : 'Bring something you are figuring out. Give people enough context to share a useful answer.'}
                             </p>
                             <Button asChild className="mt-6">
                                 <Link
                                     href={
-                                        unanswered
+                                        unanswered && !search
                                             ? '/topics#topics'
                                             : '/topics/create'
                                     }
                                 >
-                                    {unanswered
+                                    {unanswered && !search
                                         ? 'Explore all topics'
-                                        : 'Start the first topic'}
+                                        : 'Start a topic'}
                                 </Link>
                             </Button>
                         </div>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\MethodController;
 use App\Http\Controllers\TopicController;
 use Illuminate\Support\Facades\Route;
@@ -16,9 +17,19 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', fn () => to_route('topics.index'))->name('dashboard');
     Route::get('topics/create', [TopicController::class, 'create'])->name('topics.create');
-    Route::post('topics', [TopicController::class, 'store'])->name('topics.store');
+    Route::post('topics', [TopicController::class, 'store'])->middleware('throttle:20,1')->name('topics.store');
     Route::get('topics/{topic}/methods/create', [MethodController::class, 'create'])->name('methods.create');
-    Route::post('topics/{topic}/methods', [MethodController::class, 'store'])->name('methods.store');
+    Route::post('topics/{topic}/methods', [MethodController::class, 'store'])->middleware('throttle:20,1')->name('methods.store');
+});
+
+Route::scopeBindings()->group(function () {
+    Route::get('topics/{topic}/methods/{method}/experiences', [ExperienceController::class, 'index'])->name('experiences.index');
+
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('topics/{topic}/methods/{method}/experiences/create', [ExperienceController::class, 'create'])->name('experiences.create');
+        Route::put('topics/{topic}/methods/{method}/experience', [ExperienceController::class, 'store'])->middleware('throttle:20,1')->name('experiences.store');
+        Route::delete('topics/{topic}/methods/{method}/experience', [ExperienceController::class, 'destroy'])->middleware('throttle:20,1')->name('experiences.destroy');
+    });
 });
 
 Route::get('topics/{topic}', [TopicController::class, 'show'])->name('topics.show');

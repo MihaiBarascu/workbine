@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     ExternalLink,
@@ -7,14 +7,12 @@ import {
     MessageSquareText,
     Plus,
 } from 'lucide-react';
+import { CopyLinkButton } from '@/components/copy-link-button';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
-import type { MethodSummary, TopicSummary } from '@/types';
+import type { MethodSummary, TopicSummary, User } from '@/types';
 
-type Props = {
-    topic: TopicSummary;
-    methods: MethodSummary[];
-};
+type Props = { topic: TopicSummary; methods: MethodSummary[] };
 
 function formatDate(value: string): string {
     return new Intl.DateTimeFormat('en', {
@@ -26,12 +24,12 @@ function formatDate(value: string): string {
 }
 
 export default function TopicShow({ topic, methods }: Props) {
+    const { auth } = usePage<{ auth: { user: User | null } }>().props;
     const contributionUrl = `/topics/${topic.slug}/methods/create`;
 
     return (
         <PublicShell>
             <Head title={topic.title} />
-
             <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
                 <Button asChild variant="ghost" className="mb-6 -ml-3">
                     <Link href="/topics#topics">
@@ -39,7 +37,6 @@ export default function TopicShow({ topic, methods }: Props) {
                         All topics
                     </Link>
                 </Button>
-
                 <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
                     <div className="min-w-0">
                         <p className="text-sm font-medium text-teal-700 dark:text-teal-300">
@@ -56,12 +53,14 @@ export default function TopicShow({ topic, methods }: Props) {
                                 </time>
                             )}
                         </div>
-
                         {topic.description && (
                             <p className="text-muted-foreground mt-6 text-base leading-8 [overflow-wrap:anywhere] whitespace-pre-wrap sm:text-lg">
                                 {topic.description}
                             </p>
                         )}
+                        <div className="mt-5">
+                            <CopyLinkButton path={`/topics/${topic.slug}`} />
+                        </div>
 
                         <section
                             aria-labelledby="methods-heading"
@@ -92,7 +91,6 @@ export default function TopicShow({ topic, methods }: Props) {
                                     </Link>
                                 </Button>
                             </div>
-
                             {methods.length > 0 ? (
                                 <div className="space-y-6">
                                     {methods.map((method) => (
@@ -143,7 +141,6 @@ export default function TopicShow({ topic, methods }: Props) {
                                             <p className="text-foreground/90 mt-4 text-base leading-8 [overflow-wrap:anywhere] whitespace-pre-wrap">
                                                 {method.body}
                                             </p>
-
                                             {method.source_url && (
                                                 <div className="mt-6 border-t pt-4">
                                                     <a
@@ -166,6 +163,32 @@ export default function TopicShow({ topic, methods }: Props) {
                                                     </p>
                                                 </div>
                                             )}
+                                            <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
+                                                <Link
+                                                    href={`/topics/${topic.slug}/methods/${method.id}/experiences`}
+                                                    className="text-sm font-medium text-teal-700 underline underline-offset-4 dark:text-teal-300"
+                                                >
+                                                    {method.experiences_count}{' '}
+                                                    {method.experiences_count ===
+                                                    1
+                                                        ? 'experience'
+                                                        : 'experiences'}
+                                                </Link>
+                                                {auth.user?.id !==
+                                                    method.user.id && (
+                                                    <Button
+                                                        asChild
+                                                        variant="outline"
+                                                        size="sm"
+                                                    >
+                                                        <Link
+                                                            href={`/topics/${topic.slug}/methods/${method.id}/experiences/create`}
+                                                        >
+                                                            I tried this
+                                                        </Link>
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </article>
                                     ))}
                                 </div>
@@ -194,7 +217,6 @@ export default function TopicShow({ topic, methods }: Props) {
                             )}
                         </section>
                     </div>
-
                     <aside aria-label="Contribution guidance">
                         <div className="rounded-2xl border bg-teal-50/50 p-6 lg:sticky lg:top-24 dark:bg-teal-950/20">
                             <Lightbulb
@@ -210,9 +232,13 @@ export default function TopicShow({ topic, methods }: Props) {
                                 work, too.
                             </p>
                             <p className="text-muted-foreground mt-3 text-sm leading-6">
-                                Learned it from someone else? Include the source
-                                and make that clear. A shared method is not an
-                                independently verified result.
+                                Learned it from someone else? Include the
+                                source. Tried a method here? Share your result
+                                so the next person has more context.
+                            </p>
+                            <p className="text-muted-foreground mt-3 text-xs leading-5">
+                                Methods and experiences are self-reported, not
+                                independently verified results.
                             </p>
                             <Button
                                 asChild
