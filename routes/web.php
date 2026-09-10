@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\MethodController;
 use App\Http\Controllers\TopicController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', fn () => to_route('topics.index'))->name('dashboard');
     Route::get('topics/create', [TopicController::class, 'create'])->name('topics.create');
     Route::post('topics', [TopicController::class, 'store'])->name('topics.store');
+    Route::get('topics/{topic}/methods/create', [MethodController::class, 'create'])->name('methods.create');
+    Route::post('topics/{topic}/methods', [MethodController::class, 'store'])->name('methods.store');
 });
 
 Route::get('topics/{topic}', [TopicController::class, 'show'])->name('topics.show');
