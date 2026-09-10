@@ -17,6 +17,7 @@ use Illuminate\Support\Collection;
  * @property string $title
  * @property string $slug
  * @property string|null $description
+ * @property int|null $methods_count
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
