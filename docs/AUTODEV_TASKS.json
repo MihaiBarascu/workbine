@@ -1,0 +1,18 @@
+[
+    {
+        "id": "UI-001",
+        "instruction": "In the empty search state of the notebook feed, carry the current search phrase into the existing protected topic creation URL as a safely URL-encoded title query parameter. Preserve all current labels, filters and the unchanged no-search empty state. The backend already accepts initialTitle. Change only the necessary link construction; do not publish content."
+    },
+    {
+        "id": "UI-002",
+        "instruction": "Prevent duplicate submissions while the notebook composer or search is processing, using the existing Inertia Form disableWhileProcessing support. Preserve field names, visible button labels, native required validation and existing form destinations. Do not add request code or dependencies."
+    },
+    {
+        "id": "UI-003",
+        "instruction": "Ensure CopyLinkButton does not display a stale copied confirmation or stale manual-copy fallback URL after its path prop changes. Keep the clipboard-denied fallback functional and preserve the Copy link label. Prefer a small component-state solution consistent with React 19 rather than adding timers or dependencies."
+    },
+    {
+        "id": "UI-004",
+        "instruction": "Make notebook topics and field-guide fragment targets visible below the sticky public header on desktop and narrow mobile widths using restrained scroll-margin styling. Preserve the established layout, typography and colors. A stylesheet change will be left for visual review instead of automatic merge."
+    }
+]
