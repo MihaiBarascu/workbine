@@ -123,6 +123,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         <Form
                             action="/topics/create"
                             method="get"
+                            disableWhileProcessing
                             className="wb-compose"
                         >
                             <label htmlFor="new-question">
@@ -156,6 +157,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             key={`${view}:${search}`}
                             action="/topics#topics"
                             method="get"
+                            disableWhileProcessing
                             role="search"
                             className="wb-search"
                         >
