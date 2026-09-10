@@ -29,6 +29,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           npm install
+          php artisan wayfinder:generate --with-form --no-interaction
 
       - name: Format application
         run: |
@@ -36,7 +37,9 @@ jobs:
           composer lint
 
       - name: Validate application
-        run: composer ci:check
+        run: |
+          npm run build
+          composer ci:check
 
       - name: Commit prepared feature
         run: |
