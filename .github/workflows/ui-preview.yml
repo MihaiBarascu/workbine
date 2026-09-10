@@ -45,6 +45,7 @@ jobs:
         run: |
           php artisan tinker --execute='
             $author = App\Models\User::factory()->create(["name" => "A community contributor with a deliberately long name"]);
+            App\Models\User::factory()->create(["name" => "Preview Contributor", "email" => "preview-contributor@example.test", "password" => Illuminate\Support\Facades\Hash::make("preview-only-password")]);
             $topic = App\Models\Topic::factory()->create(["user_id" => $author->id, "slug" => "preview-first-customer", "title" => "How do you find the first customer for a small SaaS?", "description" => "I have a working prototype and limited time outside my day job. What helped you find a real problem someone would pay to solve?"]);
             App\Models\Method::factory()->create(["topic_id" => $topic->id, "user_id" => $author->id, "title" => "Watch one person do the work before writing more code", "body" => "I asked a shop owner to walk me through a weekly product import.\n\nFirst, we noted which steps repeated. Then I automated only the slowest part and tested it on a copy of the data.\n\nIt saved time in that situation, but I still needed to handle unusual supplier files manually. Start with one workflow, not an entire platform.", "source_url" => "https://example.com/a-source-with-a-deliberately-long-path-to-check-small-screen-wrapping"]);
             App\Models\Topic::factory()->create(["user_id" => $author->id, "slug" => "preview-unanswered", "title" => "How do you keep a side project moving with only a few hours a week?", "description" => "I am looking for a routine that people have actually kept up, not an ideal schedule."]);
@@ -62,19 +63,24 @@ jobs:
           cat /tmp/workbine-preview-server.log
           exit 1
 
-      - name: Install preview browser
-        run: npx --yes --package=playwright@1.56.1 playwright install --with-deps chromium
+      - name: Install preview browser outside application dependencies
+        run: |
+          npm install --prefix /tmp/workbine-browser --no-save --package-lock=false playwright@1.56.1
+          node /tmp/workbine-browser/node_modules/playwright/cli.js install --with-deps chromium
 
       - name: Capture desktop, mobile, empty and dark states
         run: |
           mkdir -p /tmp/workbine-ui-preview
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "1440,1080" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics /tmp/workbine-ui-preview/topics-desktop.png
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics /tmp/workbine-ui-preview/topics-mobile.png
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "1440,1080" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-desktop.png
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-mobile.png
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "375,812" --color-scheme dark --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-mobile-dark.png
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "#methods-heading" http://127.0.0.1:8000/topics/preview-unanswered /tmp/workbine-ui-preview/topic-without-methods-mobile.png
-          npx --yes --package=playwright@1.56.1 playwright screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" "http://127.0.0.1:8000/topics?view=unanswered" /tmp/workbine-ui-preview/unanswered-feed-mobile.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "1440,1080" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics /tmp/workbine-ui-preview/topics-desktop.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics /tmp/workbine-ui-preview/topics-mobile.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "1440,1080" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-desktop.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-mobile.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --color-scheme dark --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-mobile-dark.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "#methods-heading" http://127.0.0.1:8000/topics/preview-unanswered /tmp/workbine-ui-preview/topic-without-methods-mobile.png
+          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" "http://127.0.0.1:8000/topics?view=unanswered" /tmp/workbine-ui-preview/unanswered-feed-mobile.png
+
+      - name: Exercise real browser contribution and discovery flows
+        run: node tests/browser/community-flow.cjs
 
       - name: Upload review screenshots
         if: always()
