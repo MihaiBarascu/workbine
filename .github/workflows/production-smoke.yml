@@ -20,31 +20,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Wait for Workbine production
+      - name: Check Workbine production
         run: |
           set -euo pipefail
 
-          for attempt in $(seq 1 30); do
-            echo "Production check ${attempt}/30"
+          curl --fail --silent --show-error --location --max-time 15 \
+            --user-agent "WorkbineProductionSmoke/1.0" \
+            https://workbine.com/ \
+            --output /tmp/workbine-home.html
 
-            if curl --fail --silent --show-error --location --max-time 15 \
-              --user-agent "WorkbineProductionSmoke/1.0" \
-              https://workbine.com/ \
-              --output /tmp/workbine-home.html; then
-              if grep -q 'topics/index' /tmp/workbine-home.html; then
-                echo "Workbine production is healthy and serving the Topics experience."
-                exit 0
-              fi
+          echo "workbine.com returned successfully."
 
-              echo "Site responded, but the new Topics deployment is not live yet."
-            else
-              echo "Site is not reachable yet."
-            fi
+          if grep -q 'topics/index' /tmp/workbine-home.html; then
+            echo "Detected production component: topics/index"
+            exit 0
+          fi
 
-            sleep 10
-          done
+          if grep -q 'goals/index' /tmp/workbine-home.html; then
+            echo "Detected production component: goals/index (old deployment)"
+            exit 1
+          fi
 
-          echo "Production did not become ready within 5 minutes."
-          echo "Last response preview:"
-          head -c 1500 /tmp/workbine-home.html 2>/dev/null || true
+          echo "Could not identify the Inertia root component."
+          grep -oE '(goals|topics)[^&< ]{0,30}' /tmp/workbine-home.html | head -20 || true
           exit 1
