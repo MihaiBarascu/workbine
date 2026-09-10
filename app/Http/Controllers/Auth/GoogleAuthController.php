@@ -25,7 +25,7 @@ class GoogleAuthController extends Controller
 
         $email = $googleUser->getEmail();
         $googleId = $googleUser->getId();
-        $raw = $googleUser->user;
+        $raw = $googleUser->getRaw();
 
         abort_unless(
             is_string($email) && $email !== '' && ($raw['email_verified'] ?? false) === true,
@@ -33,10 +33,17 @@ class GoogleAuthController extends Controller
             'Google did not provide a verified email address.'
         );
 
-        $user = User::query()
-            ->where('google_id', $googleId)
-            ->orWhere('email', $email)
-            ->first();
+        $user = User::query()->where('google_id', $googleId)->first();
+
+        if (! $user) {
+            $user = User::query()->where('email', $email)->first();
+
+            abort_if(
+                $user?->google_id !== null && $user->google_id !== $googleId,
+                409,
+                'This email address is already linked to another Google account.'
+            );
+        }
 
         if ($user) {
             $user->forceFill([
