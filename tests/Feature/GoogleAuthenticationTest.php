@@ -26,9 +26,7 @@ class GoogleAuthenticationTest extends TestCase
             'name' => 'Workbine User',
             'email' => 'user@example.com',
             'avatar' => 'https://example.com/avatar.jpg',
-            'user' => [
-                'email_verified' => true,
-            ],
+            'email_verified' => true,
         ]));
 
         $this->get(route('google.callback'))->assertRedirect(route('home'));
@@ -51,9 +49,7 @@ class GoogleAuthenticationTest extends TestCase
             'id' => 'google-existing',
             'name' => 'Existing User',
             'email' => 'existing@example.com',
-            'user' => [
-                'email_verified' => true,
-            ],
+            'email_verified' => true,
         ]));
 
         $this->get(route('google.callback'))->assertRedirect(route('home'));
@@ -62,6 +58,22 @@ class GoogleAuthenticationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'google_id' => 'google-existing',
+        ]);
+    }
+
+    public function test_google_callback_rejects_unverified_email(): void
+    {
+        Socialite::fake('google', SocialiteUser::fake([
+            'id' => 'google-unverified',
+            'email' => 'unverified@example.com',
+            'email_verified' => false,
+        ]));
+
+        $this->get(route('google.callback'))->assertForbidden();
+
+        $this->assertGuest();
+        $this->assertDatabaseMissing('users', [
+            'email' => 'unverified@example.com',
         ]);
     }
 }
