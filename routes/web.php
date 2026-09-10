@@ -1,11 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\GoalController;
+use App\Http\Controllers\TopicController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [GoalController::class, 'index'])->name('home');
-Route::get('goals', [GoalController::class, 'index'])->name('goals.index');
+Route::get('/', [TopicController::class, 'index'])->name('home');
+Route::get('topics', [TopicController::class, 'index'])->name('topics.index');
 
 Route::middleware('guest')->group(function () {
     Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
@@ -13,11 +13,14 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
-    Route::get('goals/create', [GoalController::class, 'create'])->name('goals.create');
-    Route::post('goals', [GoalController::class, 'store'])->name('goals.store');
+    Route::get('dashboard', fn () => to_route('topics.index'))->name('dashboard');
+    Route::get('topics/create', [TopicController::class, 'create'])->name('topics.create');
+    Route::post('topics', [TopicController::class, 'store'])->name('topics.store');
 });
 
-Route::get('goals/{goal}', [GoalController::class, 'show'])->name('goals.show');
+Route::get('topics/{topic}', [TopicController::class, 'show'])->name('topics.show');
+
+Route::redirect('goals', '/topics', 301);
+Route::redirect('goals/create', '/topics/create', 301);
 
 require __DIR__.'/settings.php';
