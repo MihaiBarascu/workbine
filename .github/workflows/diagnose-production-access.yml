@@ -1,0 +1,111 @@
+name: Diagnose production access (read-only)
+
+on:
+  push:
+    branches: [chore/read-only-production-diagnostics]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Compare anonymous public endpoints and response metadata
+        run: |
+          python3 - <<'PY'
+          import json
+          import re
+          import urllib.request
+          import urllib.error
+          from html.parser import HTMLParser
+
+          class Title(HTMLParser):
+              active = False
+              text = ''
+              def handle_starttag(self, tag, attrs):
+                  if tag == 'title': self.active = True
+              def handle_endtag(self, tag):
+                  if tag == 'title': self.active = False
+              def handle_data(self, data):
+                  if self.active: self.text += data
+
+          for path in ['/', '/up', '/topics?q=workbine-release-check']:
+              for agent in ['Workbine-Deployment-Smoke/1.0', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36']:
+                  req = urllib.request.Request('https://workbine.com' + path, headers={'User-Agent': agent, 'Accept': 'text/html', 'Cache-Control': 'no-cache'})
+                  try:
+                      response = urllib.request.urlopen(req, timeout=15)
+                  except urllib.error.HTTPError as error:
+                      response = error
+                  except Exception as error:
+                      print(json.dumps({'path': path, 'error': type(error).__name__, 'detail': str(error)[:200]}))
+                      continue
+                  body = response.read(500000).decode('utf-8', errors='replace')
+                  parser = Title(); parser.feed(body)
+                  print(json.dumps({
+                      'path': path,
+                      'agent': 'service' if agent.startswith('Workbine') else 'browser-style',
+                      'status': response.status,
+                      'headers': {key: response.headers.get(key) for key in ['server', 'cf-ray', 'cf-mitigated', 'content-type', 'location', 'x-robots-tag']},
+                      'title': parser.text[:160],
+                      'cloudflare_text': 'cloudflare' in body.lower(),
+                      'challenge_text': 'challenge-platform' in body or 'cf-chl-' in body,
+                      'inertia_mount': 'data-page=' in body,
+                      'cloudflare_error_codes': re.findall(r'\b(?:1006|1007|1008|1009|1010|1012|1015|1020)\b', body)[:3],
+                  }))
+          PY
+
+      - name: Install isolated browser tooling
+        run: |
+          npm install --prefix /tmp/workbine-live-browser --no-save --package-lock=false playwright@1.56.1
+          node /tmp/workbine-live-browser/node_modules/playwright/cli.js install --with-deps chromium
+
+      - name: Read the live homepage in Chromium without logging in or submitting forms
+        run: |
+          node <<'JS'
+          const fs = require('node:fs/promises');
+          const { chromium } = require('/tmp/workbine-live-browser/node_modules/playwright');
+          (async () => {
+              const browser = await chromium.launch();
+              const page = await browser.newPage({ viewport: { width: 1440, height: 1080 } });
+              await fs.mkdir('/tmp/workbine-live-read', { recursive: true });
+              const report = { requests: [] };
+              page.on('response', response => {
+                  if (response.request().isNavigationRequest()) {
+                      const headers = response.headers();
+                      report.requests.push({ url: response.url(), status: response.status(), server: headers.server, cfRay: headers['cf-ray'], cfMitigated: headers['cf-mitigated'] });
+                  }
+              });
+              try {
+                  const response = await page.goto('https://workbine.com/', { waitUntil: 'domcontentloaded', timeout: 30000 });
+                  await page.waitForTimeout(8000);
+                  report.title = await page.title();
+                  report.finalUrl = page.url();
+                  report.hasSearch = await page.locator('input[name="q"]').count() > 0;
+                  report.hasPublicShell = await page.getByRole('navigation', { name: 'Main navigation' }).count() > 0;
+                  if (response && [200, 403].includes(response.status())) {
+                      await page.screenshot({ path: '/tmp/workbine-live-read/homepage.png', fullPage: true, animations: 'disabled' });
+                  }
+                  console.log(JSON.stringify(report));
+                  await fs.writeFile('/tmp/workbine-live-read/report.json', JSON.stringify(report, null, 2));
+              } catch (error) {
+                  report.error = error.message;
+                  console.log(JSON.stringify(report));
+                  await fs.writeFile('/tmp/workbine-live-read/report.json', JSON.stringify(report, null, 2));
+                  process.exitCode = 1;
+              } finally {
+                  await browser.close();
+              }
+          })().catch(error => { console.error(error.message); process.exitCode = 1; });
+          JS
+
+      - name: Upload public access diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: workbine-live-read-only-diagnostic
+          path: /tmp/workbine-live-read/
+          retention-days: 3
+          if-no-files-found: warn
