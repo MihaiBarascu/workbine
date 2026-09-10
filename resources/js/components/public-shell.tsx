@@ -21,7 +21,7 @@ export function PublicShell({ children }: Props) {
         <div className="bg-background text-foreground flex min-h-screen flex-col">
             <a
                 href="#main-content"
-                className="bg-background focus:ring-ring sr-only z-50 rounded-md px-4 py-3 focus:fixed focus:top-3 focus:left-3 focus:not-sr-only focus:ring-2"
+                className="bg-background focus:ring-ring sr-only z-50 rounded-md px-4 py-3 focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:ring-2"
             >
                 Skip to content
             </a>
