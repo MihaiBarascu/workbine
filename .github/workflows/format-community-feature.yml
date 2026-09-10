@@ -24,16 +24,46 @@ jobs:
           php artisan key:generate
           npm ci
           php artisan wayfinder:generate --with-form --no-interaction
+      - name: Apply reviewed public-layout and screenshot fixes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('resources/js/app.tsx')
+          text = path.read_text()
+          old = "case name === 'welcome' || name.startsWith('topics/'):"
+          if old in text:
+              text = text.replace(old, "case name === 'welcome' || name.startsWith('topics/') || name.startsWith('experiences/'):")
+              path.write_text(text)
+          else:
+              assert "name.startsWith('experiences/')" in text
+          path = Path('resources/js/pages/experiences/index.tsx')
+          text = path.read_text()
+          text = text.replace('className="mt-8 grid gap-3 sm:grid-cols-3"', 'className="mt-8 grid grid-cols-3 gap-2 sm:gap-3"')
+          text = text.replace('className="bg-card rounded-xl border p-4"', 'className="bg-card rounded-xl border p-3 sm:p-4"')
+          text = text.replace('className="text-muted-foreground mt-1 text-sm"', 'className="text-muted-foreground mt-1 text-xs sm:text-sm"')
+          path.write_text(text)
+          path = Path('tests/browser/community-flow.cjs')
+          text = path.read_text()
+          anchor = r'        await page.waitForURL(/\/experiences#share$/);'
+          if 'Community pages must not use the starter layout' not in text:
+              assert anchor in text
+              text = text.replace(anchor, anchor + '\n        assert.equal(await page.locator(\'[data-slot="sidebar-trigger"]\').count(), 0, "Community pages must not use the starter layout");')
+          anchor = '        await page.screenshot({\n            path: `${output}/experience-mobile.png`,'
+          if 'document.querySelectorAll' not in text:
+              assert anchor in text
+              text = text.replace(anchor, '        await page.waitForFunction(() => document.querySelectorAll(\'[data-sonner-toast]\').length === 0);\n' + anchor)
+          path.write_text(text)
+          PY
       - name: Apply repository formatters to the feature
         run: |
           npm run check:fix
           vendor/bin/pint --parallel
           git diff --check
-          git add resources/js/components/copy-link-button.tsx resources/js/components/experience-form.tsx resources/js/pages/experiences/index.tsx resources/js/pages/topics/index.tsx resources/js/pages/topics/show.tsx tests/Feature/TopicSearchTest.php tests/browser/community-flow.cjs
+          git add resources/js/app.tsx resources/js/components/copy-link-button.tsx resources/js/components/experience-form.tsx resources/js/pages/experiences/index.tsx resources/js/pages/topics/index.tsx resources/js/pages/topics/show.tsx tests/Feature/TopicSearchTest.php tests/browser/community-flow.cjs
           if git diff --cached --quiet; then
             exit 0
           fi
           git config user.name 'Workbine formatting bot'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'style: apply repository formatters to community features'
+          git commit -m 'fix: keep experiences in the public layout and refine mobile outcome summaries'
           git push origin HEAD:refs/heads/feat/real-experiences-and-search
