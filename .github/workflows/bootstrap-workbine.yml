@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout Workbine
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: chore/bootstrap-laravel
           fetch-depth: 0
@@ -24,7 +24,11 @@ jobs:
       - name: Copy official Laravel React starter
         run: |
           git clone --depth 1 https://github.com/laravel/react-starter-kit.git /tmp/laravel-react-starter
-          rsync -a --exclude='.git' --exclude='README.md' /tmp/laravel-react-starter/ ./
+          rsync -a \
+            --exclude='.git' \
+            --exclude='README.md' \
+            --exclude='.github/workflows' \
+            /tmp/laravel-react-starter/ ./
 
       - name: Configure Workbine defaults
         run: |
