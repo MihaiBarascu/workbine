@@ -6,6 +6,7 @@ on:
       - feature/goals
     paths:
       - .github/workflows/prepare-feature-goals.yml
+  workflow_dispatch:
 
 permissions:
   contents: write
