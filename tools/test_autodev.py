@@ -1,6 +1,8 @@
 import json
 import unittest
+from html import escape
 from autodev import progress_document, verify_files
+from inertia_page import parse_page
 
 NAME = 'resources/js/pages/topics/index.tsx'
 
@@ -54,6 +56,21 @@ class ScopeTests(unittest.TestCase):
         for state, task, run in [({}, 'other', '123'), ({}, 'UI-001', 'bad'), ({'completed': 'bad'}, 'UI-001', '123')]:
             with self.subTest(state=state, task=task, run=run), self.assertRaises(ValueError):
                 progress_document(state, task, run)
+
+    def test_inertia_script_page_is_decoded_without_running_javascript(self):
+        page = {'component': 'topics/index', 'props': {'search': 'café & 10%_'}, 'version': 'v1'}
+        markup = '<script type="application/json" data-page="app">' + json.dumps(page) + '</script><div id="app"></div>'
+        self.assertEqual(parse_page(markup), page)
+
+    def test_legacy_inertia_attribute_decodes_html_entities(self):
+        page = {'component': 'topics/index', 'props': {'search': '"quoted" & query'}}
+        markup = '<div id="app" data-page="' + escape(json.dumps(page), quote=True) + '"></div>'
+        self.assertEqual(parse_page(markup), page)
+
+    def test_missing_or_invalid_page_payload_cannot_pass_the_smoke_check(self):
+        for markup in ['<h1>Forbidden</h1>', '<script type="application/json" data-page="app">{"component":123,"props":[]}</script>']:
+            with self.subTest(markup=markup), self.assertRaises(ValueError):
+                parse_page(markup)
 
 
 if __name__ == '__main__':
