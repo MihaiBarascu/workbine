@@ -146,8 +146,8 @@ const { chromium } = browserRequire('playwright');
         await page.setViewportSize({ width: 320, height: 812 });
         await checkLayout();
         await page.emulateMedia({ colorScheme: 'dark' });
-        await page.waitForFunction(
-            () => document.documentElement.classList.contains('dark'),
+        await page.waitForFunction(() =>
+            document.documentElement.classList.contains('dark'),
         );
         await page.screenshot({
             path: `${output}/experience-small-dark.png`,
