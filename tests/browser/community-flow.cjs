@@ -141,20 +141,29 @@ const { chromium } = browserRequire('playwright');
         await page.screenshot({
             path: `${output}/experience-mobile.png`,
             fullPage: true,
+            animations: 'disabled',
         });
         await page.setViewportSize({ width: 320, height: 812 });
         await checkLayout();
         await page.emulateMedia({ colorScheme: 'dark' });
+        await page.waitForFunction(
+            () => document.documentElement.classList.contains('dark'),
+        );
         await page.screenshot({
             path: `${output}/experience-small-dark.png`,
             fullPage: true,
+            animations: 'disabled',
         });
         await page.emulateMedia({ colorScheme: 'light' });
+        await page.waitForFunction(
+            () => !document.documentElement.classList.contains('dark'),
+        );
         await page.setViewportSize({ width: 1440, height: 1080 });
         await checkLayout();
         await page.screenshot({
             path: `${output}/experience-desktop.png`,
             fullPage: true,
+            animations: 'disabled',
         });
 
         await page.goto(`${root}/topics/create`);
