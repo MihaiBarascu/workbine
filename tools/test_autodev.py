@@ -1,5 +1,6 @@
+import json
 import unittest
-from autodev import verify_files
+from autodev import progress_document, verify_files
 
 NAME = 'resources/js/pages/topics/index.tsx'
 
@@ -36,6 +37,23 @@ class ScopeTests(unittest.TestCase):
     def test_binary_content_is_rejected(self):
         with self.assertRaises(ValueError):
             verify_files({NAME: 'null\x00byte'}, {NAME: 'original'})
+
+    def test_progress_migrates_lists_without_mutating_or_duplicating_entries(self):
+        before = {'completed': ['UI-001']}
+        result = progress_document(before, 'UI-002', '123')
+        parsed = json.loads(result)
+        self.assertEqual(before, {'completed': ['UI-001']})
+        self.assertEqual(parsed['completed'], {'UI-001': True, 'UI-002': True})
+        self.assertEqual(result, progress_document(parsed, 'UI-002', '123'))
+
+    def test_progress_uses_four_space_object_format_and_final_newline(self):
+        expected = '{\n    "completed": {\n        "UI-001": true\n    },\n    "last_task": "UI-001",\n    "last_run": "123"\n}\n'
+        self.assertEqual(progress_document({}, 'UI-001', '123'), expected)
+
+    def test_invalid_progress_identifiers_and_states_are_rejected(self):
+        for state, task, run in [({}, 'other', '123'), ({}, 'UI-001', 'bad'), ({'completed': 'bad'}, 'UI-001', '123')]:
+            with self.subTest(state=state, task=task, run=run), self.assertRaises(ValueError):
+                progress_document(state, task, run)
 
 
 if __name__ == '__main__':
