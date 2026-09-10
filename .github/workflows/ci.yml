@@ -32,3 +32,10 @@ jobs:
 
       - name: Run quality checks and tests
         run: composer ci:check
+
+      - name: Show formatting suggestions on failure
+        if: failure()
+        run: |
+          npm run check:fix || true
+          vendor/bin/pint --parallel || true
+          git diff -- resources/js resources/css app tests
