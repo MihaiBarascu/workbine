@@ -33,14 +33,7 @@ jobs:
           import json
 
           env = Path('.env.example')
-          text = env.read_text()
-          text = text.replace('APP_NAME=Laravel', 'APP_NAME=Workbine')
-          text = text.replace('DB_CONNECTION=sqlite', 'DB_CONNECTION=pgsql')
-          text = text.replace('# DB_HOST=127.0.0.1', 'DB_HOST=127.0.0.1')
-          text = text.replace('# DB_PORT=3306', 'DB_PORT=5432')
-          text = text.replace('# DB_DATABASE=laravel', 'DB_DATABASE=workbine')
-          text = text.replace('# DB_USERNAME=root', 'DB_USERNAME=workbine')
-          text = text.replace('# DB_PASSWORD=', 'DB_PASSWORD=')
+          text = env.read_text().replace('APP_NAME=Laravel', 'APP_NAME=Workbine')
           env.write_text(text)
 
           composer = Path('composer.json')
@@ -53,6 +46,7 @@ jobs:
       - name: Add Dokploy-friendly Docker runtime
         run: |
           mkdir -p docker
+
           cat > Dockerfile <<'EOF'
           FROM node:22-bookworm-slim AS node
 
@@ -71,6 +65,7 @@ jobs:
           COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
           COPY --from=node /usr/local/bin/node /usr/local/bin/node
           COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+
           RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
               && ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
@@ -78,6 +73,7 @@ jobs:
           COPY . .
 
           RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
+              && php artisan wayfinder:generate --with-form --no-interaction \
               && npm install \
               && npm run build \
               && rm -rf node_modules /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx \
@@ -139,7 +135,6 @@ jobs:
           cp .env.example .env
           composer install --prefer-dist --no-interaction --no-progress
           php artisan key:generate
-          LARAVEL_INSTALLER_NO_NODE=true php artisan install:features --no-interaction
           npm install
           npm run build
           composer ci:check
@@ -162,6 +157,8 @@ jobs:
           ## Stack
 
           Laravel 13 + React 19 + Inertia 3 + TypeScript + PostgreSQL.
+
+          Production uses PostgreSQL through environment variables. Local setup and CI keep Laravel's lightweight SQLite defaults.
 
           The application is intentionally kept as a single deployable monolith for fast product iteration. A Dockerfile and `/up` health check are included for Dokploy deployment.
           EOF
