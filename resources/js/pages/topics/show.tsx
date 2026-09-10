@@ -1,15 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    ExternalLink,
-    Lightbulb,
-    MessageSquareText,
-    Plus,
-    UserRound,
-} from 'lucide-react';
+import { ArrowLeft, ExternalLink, Lightbulb, Link2, MessageSquareText, Plus } from 'lucide-react';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { MethodSummary, TopicSummary } from '@/types';
 
 type Props = {
@@ -17,170 +9,170 @@ type Props = {
     methods: MethodSummary[];
 };
 
-function formatDate(value: string | null): string {
-    if (!value) {
-        return '';
-    }
-
+function formatDate(value: string): string {
     return new Intl.DateTimeFormat('en', {
         month: 'long',
         day: 'numeric',
         year: 'numeric',
+        timeZone: 'UTC',
     }).format(new Date(value));
 }
 
 export default function TopicShow({ topic, methods }: Props) {
+    const contributionUrl = `/topics/${topic.slug}/methods/create`;
+
     return (
         <PublicShell>
             <Head title={topic.title} />
 
-            <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+            <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
                 <Button asChild variant="ghost" className="mb-6 -ml-3">
-                    <Link href="/topics">
-                        <ArrowLeft />
+                    <Link href="/topics#topics">
+                        <ArrowLeft aria-hidden="true" />
                         All topics
                     </Link>
                 </Button>
 
-                <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]">
-                    <div>
-                        <p className="text-muted-foreground text-sm font-medium">
-                            Community topic
+                <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
+                    <div className="min-w-0">
+                        <p className="text-sm font-medium text-teal-700 dark:text-teal-300">
+                            A question for the community
                         </p>
-                        <h1 className="mt-2 max-w-4xl text-3xl font-semibold tracking-[-0.03em] text-balance sm:text-4xl lg:text-5xl">
+                        <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-[-0.03em] text-balance [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
                             {topic.title}
                         </h1>
+                        <div className="text-muted-foreground mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm [overflow-wrap:anywhere]">
+                            <span>Started by {topic.user.name}</span>
+                            {topic.created_at && (
+                                <time dateTime={topic.created_at}>
+                                    · {formatDate(topic.created_at)}
+                                </time>
+                            )}
+                        </div>
 
                         {topic.description && (
-                            <p className="text-muted-foreground mt-6 max-w-3xl text-lg leading-8 whitespace-pre-wrap">
+                            <p className="text-muted-foreground mt-6 text-base leading-8 whitespace-pre-wrap [overflow-wrap:anywhere] sm:text-lg">
                                 {topic.description}
                             </p>
                         )}
 
-                        <section className="mt-12">
-                            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                        <section aria-labelledby="methods-heading" className="mt-10 border-t pt-8">
+                            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
                                 <div>
-                                    <p className="text-muted-foreground text-sm font-medium">
-                                        {topic.methods_count}{' '}
-                                        {topic.methods_count === 1
-                                            ? 'method'
-                                            : 'methods'}
-                                    </p>
-                                    <h2 className="mt-1 text-2xl font-semibold sm:text-3xl">
-                                        How people actually do it
+                                    <h2 id="methods-heading" className="text-2xl font-semibold tracking-tight">
+                                        What worked for people
                                     </h2>
+                                    <p className="text-muted-foreground mt-1 text-sm">
+                                        {topic.methods_count}{' '}
+                                        {topic.methods_count === 1 ? 'method shared' : 'methods shared'}
+                                        {topic.methods_count > 0 ? ' · Newest first' : ''}
+                                    </p>
                                 </div>
                                 <Button asChild>
-                                    <Link
-                                        href={`/topics/${topic.slug}/methods/create`}
-                                    >
-                                        <Plus />
-                                        Share what worked
+                                    <Link href={contributionUrl}>
+                                        <Plus aria-hidden="true" />
+                                        Share a method
                                     </Link>
                                 </Button>
                             </div>
 
                             {methods.length > 0 ? (
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     {methods.map((method) => (
-                                        <Card
+                                        <article
                                             key={method.id}
-                                            className="overflow-hidden"
+                                            id={`method-${method.id}`}
+                                            aria-labelledby={`method-title-${method.id}`}
+                                            className="bg-card scroll-mt-36 rounded-2xl border p-5 sm:p-6"
                                         >
-                                            <CardHeader className="bg-muted/20 border-b">
-                                                <div className="flex items-start gap-3">
-                                                    <div className="bg-foreground text-background mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl">
-                                                        <Lightbulb className="size-4" />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <CardTitle className="text-xl leading-7">
-                                                            {method.title}
-                                                        </CardTitle>
-                                                        <p className="text-muted-foreground mt-1 text-sm">
-                                                            Shared by{' '}
+                                            <div className="mb-5 flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                    <p className="text-muted-foreground text-sm [overflow-wrap:anywhere]">
+                                                        Shared by{' '}
+                                                        <span className="text-foreground font-medium">
                                                             {method.user.name}
-                                                            {method.created_at
-                                                                ? ` · ${formatDate(method.created_at)}`
-                                                                : ''}
-                                                        </p>
-                                                    </div>
+                                                        </span>
+                                                    </p>
+                                                    {method.created_at && (
+                                                        <time dateTime={method.created_at} className="text-muted-foreground mt-1 block text-xs">
+                                                            {formatDate(method.created_at)}
+                                                        </time>
+                                                    )}
                                                 </div>
-                                            </CardHeader>
-                                            <CardContent className="pt-6">
-                                                <p className="text-foreground/90 text-base leading-7 whitespace-pre-wrap">
-                                                    {method.body}
-                                                </p>
+                                                <a
+                                                    href={`#method-${method.id}`}
+                                                    aria-label={`Link to method: ${method.title}`}
+                                                    className="text-muted-foreground hover:bg-muted focus-visible:ring-ring shrink-0 rounded-md p-2 focus-visible:ring-2 focus-visible:outline-none"
+                                                >
+                                                    <Link2 className="size-4" aria-hidden="true" />
+                                                </a>
+                                            </div>
+                                            <h3
+                                                id={`method-title-${method.id}`}
+                                                className="text-xl leading-7 font-semibold tracking-tight [overflow-wrap:anywhere]"
+                                            >
+                                                {method.title}
+                                            </h3>
+                                            <p className="text-foreground/90 mt-4 text-base leading-8 whitespace-pre-wrap [overflow-wrap:anywhere]">
+                                                {method.body}
+                                            </p>
 
-                                                {method.source_url && (
+                                            {method.source_url && (
+                                                <div className="mt-6 border-t pt-4">
                                                     <a
                                                         href={method.source_url}
                                                         target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-muted-foreground hover:text-foreground mt-6 inline-flex items-center gap-2 text-sm font-medium underline underline-offset-4"
+                                                        rel="noopener noreferrer nofollow ugc"
+                                                        className="focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-medium text-teal-700 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none dark:text-teal-300"
                                                     >
-                                                        View original source
-                                                        <ExternalLink className="size-4" />
+                                                        Original source
+                                                        <ExternalLink className="size-4" aria-hidden="true" />
+                                                        <span className="sr-only">(opens in a new tab)</span>
                                                     </a>
-                                                )}
-                                            </CardContent>
-                                        </Card>
+                                                    <p className="text-muted-foreground mt-2 text-xs leading-5 [overflow-wrap:anywhere]">
+                                                        {method.source_url}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </article>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="border-border bg-muted/20 rounded-2xl border border-dashed px-6 py-12 text-center">
-                                    <MessageSquareText className="text-muted-foreground mx-auto size-9" />
-                                    <h3 className="mt-4 text-lg font-semibold">
-                                        Be the first to share a real method
+                                <div className="rounded-2xl border border-dashed bg-teal-50/50 px-6 py-12 text-center dark:bg-teal-950/20">
+                                    <MessageSquareText className="mx-auto size-9 text-teal-700 dark:text-teal-300" aria-hidden="true" />
+                                    <h3 className="mt-4 text-xl font-semibold">
+                                        Your experience could be the starting point
                                     </h3>
-                                    <p className="text-muted-foreground mx-auto mt-2 max-w-lg text-sm leading-6">
-                                        If you have actually done this, explain
-                                        what you did as if you were helping a
-                                        friend try it tomorrow.
+                                    <p className="text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-6">
+                                        You do not need the perfect answer. Share what
+                                        you tried, the steps you took, and what you
+                                        would do differently next time.
                                     </p>
                                     <Button asChild className="mt-6">
-                                        <Link
-                                            href={`/topics/${topic.slug}/methods/create`}
-                                        >
-                                            Share what worked
-                                        </Link>
+                                        <Link href={contributionUrl}>Share the first method</Link>
                                     </Button>
                                 </div>
                             )}
                         </section>
                     </div>
 
-                    <aside>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-base">
-                                    About this topic
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4 text-sm">
-                                <div className="flex items-start gap-3">
-                                    <UserRound className="text-muted-foreground mt-0.5 size-4" />
-                                    <div>
-                                        <p className="text-muted-foreground">
-                                            Started by
-                                        </p>
-                                        <p className="font-medium">
-                                            {topic.user.name}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {topic.created_at && (
-                                    <div>
-                                        <p className="text-muted-foreground">
-                                            Published
-                                        </p>
-                                        <p className="font-medium">
-                                            {formatDate(topic.created_at)}
-                                        </p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                    <aside aria-label="Contribution guidance">
+                        <div className="rounded-2xl border bg-teal-50/50 p-6 lg:sticky lg:top-24 dark:bg-teal-950/20">
+                            <Lightbulb className="mb-4 size-6 text-teal-700 dark:text-teal-300" aria-hidden="true" />
+                            <h2 className="text-lg font-semibold">Help someone try it tomorrow.</h2>
+                            <p className="text-muted-foreground mt-3 text-sm leading-6">
+                                A useful method explains the situation, the steps,
+                                and the result. Mention what did not work, too.
+                            </p>
+                            <p className="text-muted-foreground mt-3 text-sm leading-6">
+                                Learned it from someone else? Include the source
+                                and make that clear. A shared method is not an
+                                independently verified result.
+                            </p>
+                            <Button asChild variant="outline" className="mt-5 w-full">
+                                <Link href={contributionUrl}>Add your approach</Link>
+                            </Button>
+                        </div>
                     </aside>
                 </div>
             </main>
