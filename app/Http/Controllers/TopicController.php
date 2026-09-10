@@ -7,23 +7,34 @@ use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class TopicController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $topics = Topic::query()
+        $view = $request->query('view') === 'unanswered' ? 'unanswered' : 'latest';
+        $query = Topic::query();
+
+        if ($view === 'unanswered') {
+            $query->doesntHave('methods');
+        }
+
+        $topics = $query
             ->with('user:id,name')
             ->withCount('methods')
             ->latest()
+            ->orderByDesc('id')
             ->paginate(12)
+            ->withQueryString()
             ->through(fn (Topic $topic): array => $this->serializeTopic($topic));
 
         return Inertia::render('topics/index', [
             'topics' => $topics,
+            'view' => $view,
         ]);
     }
 
