@@ -21,6 +21,36 @@ Latest product milestone merged to `main`:
 
 The CI run for the Topic + Method milestone passed successfully on `main`.
 
+## Feature work in review
+
+Branch: `feat/community-topic-discovery`
+
+Pull request: `#5` — Improve public topic discovery and community reading experience.
+
+This branch is not deployed. Do not confuse its changes with the current production milestone above. Check the PR's merge state and latest commit checks before continuing.
+
+Implemented on the branch:
+
+- database-backed `Needs a method` filter (`view=unanswered`) on both public listing routes
+- deterministic topic ordering and pagination that preserves the selected filter
+- public topic feed with real method counts, author names, dates and distinct empty states
+- responsive public navigation, teal visual identity, keyboard skip link and a small footer
+- more readable method cards, source attribution and `#method-{id}` links
+- long-text wrapping and dark-mode styling, without implying independent method verification
+- eight additional PHPUnit feature tests for filtering, pagination, private-author-data exclusion, method isolation, intended-login redirects and first contributions
+- formatter suggestions in failed CI logs; failures still fail the quality gate
+- an isolated Public UI preview workflow with synthetic data and desktop/mobile/light/dark screenshots
+
+No database migrations, new application dependencies, reputation system or admin panel are introduced by this work.
+
+Validation handoff:
+
+- use the latest CI run on the PR head as the source of truth for build, formatting, lint, TypeScript, PHPStan and PHPUnit results
+- review the `workbine-public-ui-preview` artifact from the Public UI preview workflow; screenshot capture alone is not a functional end-to-end browser test
+- preview data exists only in an ephemeral SQLite database on the CI runner, never in production
+- live production browser validation is not yet confirmed; the web fetcher rejecting the domain does not establish an outage
+- before release, review narrow-screen navigation, long author names, source links, filtered pagination, empty states and the authenticated Topic -> Method creation forms
+
 ## Product model
 
 Current direction:
@@ -68,14 +98,16 @@ ChatGPT web fetching may sometimes report a DNS/cache miss for `workbine.com` ev
 - pull requests targeting `main`
 - manual workflow dispatch
 
-It installs dependencies, generates Wayfinder routes, builds the frontend, and runs the repository quality/test checks.
+It installs dependencies, generates Wayfinder routes, builds the frontend, and runs the repository quality/test checks. Failed jobs print formatting suggestions without changing any repository files remotely or weakening the checks.
+
+`.github/workflows/ui-preview.yml` runs on pull requests targeting `main` and manual dispatch. It builds an isolated test application and uploads public-page screenshots for review, retained for seven days. It does not deploy the application or write production data.
 
 ## Next product work
 
 Priorities, in order:
 
-1. Validate the live Topic -> Method experience visually and functionally.
-2. Improve the public UI so Workbine feels distinctive, engaging and community-driven rather than like a starter template.
+1. Finish reviewing PR #5 and validate the Topic -> Method experience visually and functionally before release.
+2. Validate the live production flow after a reviewed, green merge; do not infer deployment success from CI alone.
 3. Add real Experience / validation actions around Methods (`I tried this`, context, evidence) without overcomplicating the model.
 4. Introduce reputation only after useful contribution/validation signals exist.
 5. Add moderation/admin UI only when recurring operational needs justify it; until then prefer safe Artisan commands or small operational tools.
