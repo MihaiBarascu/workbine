@@ -1,350 +1,144 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import {
-    ArrowRight,
-    Lightbulb,
-    MessageCircleMore,
-    Plus,
-    Search,
-} from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BookOpen, MessagesSquare, Search } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import type { PaginatedTopics } from '@/types';
 
 type Props = {
-    topics: PaginatedTopics;
+    topics: PaginatedTopics & { total: number };
     view: 'latest' | 'unanswered';
     search: string;
 };
 
+const starters = [
+    'How do you find the first customer for a small project?',
+    'What helped you learn a skill while working full-time?',
+    'Which part of your weekly work have you made simpler?',
+];
+
 function formatDate(value: string): string {
-    return new Intl.DateTimeFormat('en', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: 'UTC',
-    }).format(new Date(value));
+    return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(value));
 }
 
 export default function TopicsIndex({ topics, view, search }: Props) {
+    const [question, setQuestion] = useState('');
+    const questionInput = useRef<HTMLInputElement>(null);
     const unanswered = view === 'unanswered';
-    const filterUrl = (value: string) =>
-        `/topics?${new URLSearchParams({ view: value, q: search })}#topics`;
+    const filterUrl = (value: string) => `/topics?${new URLSearchParams({ view: value, q: search })}#topics`;
+
+    function useStarter(title: string) {
+        setQuestion(title);
+        questionInput.current?.focus();
+        questionInput.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+    }
 
     return (
         <PublicShell>
-            <Head title={search ? `Search: ${search}` : 'Find what works'} />
-            <main>
-                <section className="border-b bg-teal-50/60 dark:bg-teal-950/20">
-                    <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-center lg:px-8 lg:py-16">
-                        <div>
-                            <p className="mb-5 text-sm font-medium text-teal-800 dark:text-teal-300">
-                                Practical knowledge. Real people.
-                            </p>
-                            <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl lg:text-6xl">
-                                Find what works.
-                                <span className="block text-teal-700 dark:text-teal-300">
-                                    Pass it on.
-                                </span>
-                            </h1>
-                            <p className="text-muted-foreground mt-5 max-w-xl text-lg leading-8">
-                                Find out what someone actually did, how they did
-                                it, and what happened when others tried it.
-                            </p>
-                            <div className="mt-7 flex flex-wrap gap-3">
-                                <Button asChild size="lg">
-                                    <a href="#topics">
-                                        Explore topics
-                                        <ArrowRight aria-hidden="true" />
-                                    </a>
-                                </Button>
-                                <Button asChild variant="outline" size="lg">
-                                    <Link href="/topics/create">
-                                        <Plus aria-hidden="true" />
-                                        Start a topic
-                                    </Link>
-                                </Button>
+            <Head title={search ? `Search: ${search}` : 'The community notebook'} />
+            <main className="wb-notebook">
+                <header className="wb-notebook-masthead">
+                    <div>
+                        <p className="wb-kicker">Notes from people doing the work</p>
+                        <h1>The community notebook.</h1>
+                        <p>Good questions. Methods worth trying. The honest story afterwards.</p>
+                    </div>
+                    <div className="wb-masthead-mark" aria-hidden="true">
+                        <svg viewBox="0 0 48 48" fill="none"><path d="M24 3V45M3 24H45M9 9L39 39M9 39L39 9" stroke="currentColor" strokeWidth="2" /><circle cx="24" cy="24" r="9" fill="var(--wb-paper)" stroke="currentColor" strokeWidth="2" /></svg>
+                        <span>Many ways.<br />Real attempts.</span>
+                    </div>
+                </header>
+
+                <div className="wb-layout">
+                    <aside className="wb-sidebar">
+                        <p className="wb-kicker">Browse the notebook</p>
+                        <nav aria-label="Filter topics" className="wb-feed-nav">
+                            <Link href={filterUrl('latest')} aria-current={unanswered ? undefined : 'page'}><BookOpen aria-hidden="true" />Latest</Link>
+                            <Link href={filterUrl('unanswered')} aria-current={unanswered ? 'page' : undefined}><MessagesSquare aria-hidden="true" />Needs a method</Link>
+                        </nav>
+                        <div className="wb-side-note">
+                            <strong>Useful beats impressive.</strong>
+                            A small thing that worked in a real situation can be more useful than the perfect advice.
+                        </div>
+                    </aside>
+
+                    <section className="wb-feed" id="topics" aria-labelledby="topics-heading">
+                        <Form action="/topics/create" method="get" className="wb-compose">
+                            <label htmlFor="new-question">What are you figuring out?</label>
+                            <div className="wb-compose-row">
+                                <input ref={questionInput} id="new-question" name="title" value={question} onChange={(event) => setQuestion(event.target.value)} required maxLength={160} placeholder="Ask people who have actually tried it…" />
+                                <button type="submit">Start a topic<ArrowUpRight aria-hidden="true" /></button>
                             </div>
-                        </div>
-                        <aside className="bg-background hidden rounded-2xl border p-6 shadow-sm lg:block">
-                            <Lightbulb
-                                className="mb-4 size-6 text-teal-700 dark:text-teal-300"
-                                aria-hidden="true"
-                            />
-                            <h2 className="text-lg font-semibold tracking-tight">
-                                The useful part is in the details.
-                            </h2>
-                            <ol className="text-muted-foreground mt-4 list-decimal space-y-3 pl-5 text-sm leading-6">
-                                <li>Ask a practical question.</li>
-                                <li>Share a method with steps and context.</li>
-                                <li>
-                                    Try it. Share the result, including the
-                                    limits.
-                                </li>
-                            </ol>
-                        </aside>
-                    </div>
-                </section>
+                            <p>A practical question is enough to start. Add context on the next page.</p>
+                        </Form>
 
-                <section
-                    id="topics"
-                    aria-labelledby="topics-heading"
-                    className="mx-auto max-w-6xl scroll-mt-36 px-4 py-10 sm:px-6 lg:px-8"
-                >
-                    <Form
-                        key={`${view}:${search}`}
-                        action="/topics#topics"
-                        method="get"
-                        className="mb-8"
-                        role="search"
-                    >
-                        {({ processing }) => (
-                            <>
-                                <Label
-                                    htmlFor="topic-search"
-                                    className="mb-2 block"
-                                >
-                                    Search topics
-                                </Label>
-                                <div className="flex flex-col gap-3 sm:flex-row">
-                                    <Input
-                                        id="topic-search"
-                                        name="q"
-                                        type="search"
-                                        maxLength={120}
-                                        defaultValue={search}
-                                        placeholder="What are you figuring out?"
-                                        className="h-11 flex-1"
-                                    />
-                                    <input
-                                        type="hidden"
-                                        name="view"
-                                        value={view}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        disabled={processing}
-                                        className="h-11"
-                                    >
-                                        <Search aria-hidden="true" />
-                                        Search
-                                    </Button>
-                                </div>
-                            </>
-                        )}
-                    </Form>
-                    <div className="mb-6 flex flex-wrap items-end justify-between gap-5">
-                        <div className="min-w-0">
-                            <p className="text-muted-foreground text-sm">
-                                From the community
-                            </p>
-                            <h2
-                                id="topics-heading"
-                                className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl"
-                            >
-                                {search
-                                    ? 'Find a useful starting point'
-                                    : unanswered
-                                      ? 'A good question needs your experience'
-                                      : 'What are people figuring out?'}
-                            </h2>
-                            {search && (
-                                <p
-                                    role="status"
-                                    className="text-muted-foreground mt-2 text-sm [overflow-wrap:anywhere]"
-                                >
-                                    Matching “{search}” ·{' '}
-                                    <Link
-                                        className="underline underline-offset-4"
-                                        href={`/topics?view=${view}#topics`}
-                                    >
-                                        Clear search
-                                    </Link>
-                                </p>
-                            )}
-                        </div>
-                        <nav
-                            aria-label="Filter topics"
-                            className="bg-muted/50 flex flex-wrap gap-1 rounded-xl border p-1"
-                        >
-                            <Button
-                                asChild
-                                variant={unanswered ? 'ghost' : 'secondary'}
-                                size="sm"
-                            >
-                                <Link
-                                    href={filterUrl('latest')}
-                                    aria-current={
-                                        unanswered ? undefined : 'page'
-                                    }
-                                >
-                                    Latest
-                                </Link>
-                            </Button>
-                            <Button
-                                asChild
-                                variant={unanswered ? 'secondary' : 'ghost'}
-                                size="sm"
-                            >
-                                <Link
-                                    href={filterUrl('unanswered')}
-                                    aria-current={
-                                        unanswered ? 'page' : undefined
-                                    }
-                                >
-                                    Needs a method
-                                </Link>
-                            </Button>
-                        </nav>
-                    </div>
+                        <Form key={`${view}:${search}`} action="/topics#topics" method="get" role="search" className="wb-search">
+                            <Search aria-hidden="true" />
+                            <label htmlFor="topic-search" className="sr-only">Search topics</label>
+                            <input id="topic-search" name="q" type="search" defaultValue={search} maxLength={120} placeholder="Look through the notebook" />
+                            <input type="hidden" name="view" value={view} />
+                            <button type="submit">Search</button>
+                        </Form>
 
-                    {topics.data.length > 0 ? (
-                        <div className="overflow-hidden rounded-2xl border">
-                            {topics.data.map((topic) => (
-                                <article
-                                    key={topic.id}
-                                    className="bg-card border-b last:border-b-0"
-                                >
-                                    <Link
-                                        href={`/topics/${topic.slug}`}
-                                        className="hover:bg-muted/40 focus-visible:ring-ring group flex flex-col gap-4 p-5 transition-colors focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset sm:flex-row sm:items-center sm:gap-6 sm:p-6"
-                                    >
-                                        <div className="min-w-0 flex-1">
-                                            <div className="text-muted-foreground mb-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                                                <span
-                                                    aria-hidden="true"
-                                                    className="flex size-6 shrink-0 items-center justify-center rounded-full bg-teal-100 font-semibold text-teal-900 dark:bg-teal-900 dark:text-teal-100"
-                                                >
-                                                    {Array.from(
-                                                        topic.user.name.trim(),
-                                                    )[0] ?? '?'}
-                                                </span>
-                                                <span className="[overflow-wrap:anywhere]">
-                                                    {topic.user.name}
-                                                </span>
-                                                {topic.created_at && (
-                                                    <time
-                                                        dateTime={
-                                                            topic.created_at
-                                                        }
-                                                    >
-                                                        {formatDate(
-                                                            topic.created_at,
-                                                        )}
-                                                    </time>
-                                                )}
+                        <div className="wb-feed-title">
+                            <h2 id="topics-heading">{search ? 'From the notebook' : unanswered ? 'Questions waiting for experience' : 'Latest from the community'}</h2>
+                            <span>{topics.total} {topics.total === 1 ? 'topic' : 'topics'}</span>
+                        </div>
+                        {search && <p role="status" className="wb-search-state">Matching “{search}” · <Link href={`/topics?view=${view}#topics`}>Clear search</Link></p>}
+
+                        {topics.data.length ? (
+                            <div>
+                                {topics.data.map((topic) => (
+                                    <article key={topic.id} className="wb-entry">
+                                        <Link href={`/topics/${topic.slug}`}>
+                                            <div className="wb-entry-meta">
+                                                <span className="wb-initial" aria-hidden="true">{Array.from(topic.user.name.trim())[0] ?? '?'}</span>
+                                                <span>{topic.user.name}</span>
+                                                {topic.created_at && <time dateTime={topic.created_at}>{formatDate(topic.created_at)}</time>}
                                             </div>
-                                            <h3 className="text-lg leading-7 font-semibold tracking-tight [overflow-wrap:anywhere] group-hover:text-teal-700 sm:text-xl dark:group-hover:text-teal-300">
-                                                {topic.title}
-                                            </h3>
-                                            <p className="text-muted-foreground mt-2 line-clamp-2 text-sm leading-6 [overflow-wrap:anywhere]">
-                                                {topic.description ||
-                                                    'Have you done this? Share the approach that worked for you.'}
-                                            </p>
-                                        </div>
-                                        <div className="flex shrink-0 items-center justify-between gap-4 sm:w-36 sm:flex-col sm:items-end">
-                                            <span className="inline-flex items-center gap-2 text-sm font-medium">
-                                                <MessageCircleMore
-                                                    className="size-4 text-teal-700 dark:text-teal-300"
-                                                    aria-hidden="true"
-                                                />
-                                                {topic.methods_count}{' '}
-                                                {topic.methods_count === 1
-                                                    ? 'method'
-                                                    : 'methods'}
-                                            </span>
-                                            <span className="text-muted-foreground inline-flex items-center gap-1 text-xs">
-                                                {topic.methods_count === 0
-                                                    ? 'Be the first to share'
-                                                    : 'See what worked'}
-                                                <ArrowRight
-                                                    className="size-3.5"
-                                                    aria-hidden="true"
-                                                />
-                                            </span>
-                                        </div>
-                                    </Link>
-                                </article>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-muted/20 rounded-2xl border border-dashed px-6 py-14 text-center">
-                            <MessageCircleMore
-                                className="mx-auto size-9 text-teal-700 dark:text-teal-300"
-                                aria-hidden="true"
-                            />
-                            <h3 className="mt-4 text-xl font-semibold">
-                                {search
-                                    ? 'No matching topics yet'
-                                    : unanswered
-                                      ? 'No topics are waiting for a first method'
-                                      : 'Every useful method starts with a question'}
-                            </h3>
-                            <p className="text-muted-foreground mx-auto mt-2 max-w-md text-sm leading-6">
-                                {search
-                                    ? 'Try fewer words, change the filter, or bring your question to the community.'
-                                    : unanswered
-                                      ? 'Explore existing topics to add another approach, or start a question of your own.'
-                                      : 'Bring something you are figuring out. Give people enough context to share a useful answer.'}
-                            </p>
-                            <Button asChild className="mt-6">
-                                <Link
-                                    href={
-                                        unanswered && !search
-                                            ? '/topics#topics'
-                                            : '/topics/create'
-                                    }
-                                >
-                                    {unanswered && !search
-                                        ? 'Explore all topics'
-                                        : 'Start a topic'}
-                                </Link>
-                            </Button>
-                        </div>
-                    )}
+                                            <h3>{topic.title}</h3>
+                                            <p className="wb-entry-description">{topic.description || 'Have you done this? The details of your approach could help someone else.'}</p>
+                                            <div className="wb-entry-bottom">
+                                                <span><MessagesSquare aria-hidden="true" />{topic.methods_count} {topic.methods_count === 1 ? 'method' : 'methods'}</span>
+                                                <span className="wb-entry-invite">{topic.methods_count ? 'Read the approaches' : 'Bring the first method'}<ArrowRight aria-hidden="true" /></span>
+                                            </div>
+                                        </Link>
+                                    </article>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="wb-empty">
+                                <p className="wb-kicker">{search || unanswered ? 'Keep looking. Or start something.' : 'The first page is still blank'}</p>
+                                <h3>{search ? 'No matching topics yet' : unanswered ? 'No topics are waiting for a first method' : 'A good community starts with a real question.'}</h3>
+                                <p>{search ? 'Try a different phrase, change the filter, or ask the question yourself. Someone else may be figuring out the same thing.' : unanswered ? 'Explore the other topics and add another approach. There is rarely just one way to do something.' : 'What did you have to figure out the hard way? Bring a question, share a method, and make the next person’s attempt a little easier.'}</p>
+                                <Button asChild variant="outline"><Link href={unanswered && !search ? '/topics#topics' : '/topics/create'}>{unanswered && !search ? 'Explore all topics' : 'Write the first page'}<ArrowUpRight aria-hidden="true" /></Link></Button>
+                            </div>
+                        )}
 
-                    {topics.last_page > 1 && (
-                        <nav
-                            aria-label="Topic pagination"
-                            className="mt-8 flex items-center justify-between gap-3"
-                        >
-                            <Button
-                                asChild={Boolean(topics.prev_page_url)}
-                                variant="outline"
-                                disabled={!topics.prev_page_url}
-                            >
-                                {topics.prev_page_url ? (
-                                    <Link
-                                        href={`${topics.prev_page_url}#topics`}
-                                    >
-                                        Previous
-                                    </Link>
-                                ) : (
-                                    <span>Previous</span>
-                                )}
-                            </Button>
-                            <span className="text-muted-foreground text-center text-sm">
-                                Page {topics.current_page} of {topics.last_page}
-                            </span>
-                            <Button
-                                asChild={Boolean(topics.next_page_url)}
-                                variant="outline"
-                                disabled={!topics.next_page_url}
-                            >
-                                {topics.next_page_url ? (
-                                    <Link
-                                        href={`${topics.next_page_url}#topics`}
-                                    >
-                                        Next
-                                    </Link>
-                                ) : (
-                                    <span>Next</span>
-                                )}
-                            </Button>
-                        </nav>
-                    )}
-                </section>
+                        {topics.last_page > 1 && (
+                            <nav aria-label="Topic pagination" className="wb-pagination">
+                                <Button asChild={Boolean(topics.prev_page_url)} variant="outline" disabled={!topics.prev_page_url}>{topics.prev_page_url ? <Link href={`${topics.prev_page_url}#topics`}>Previous</Link> : <span>Previous</span>}</Button>
+                                <span>Page {topics.current_page} of {topics.last_page}</span>
+                                <Button asChild={Boolean(topics.next_page_url)} variant="outline" disabled={!topics.next_page_url}>{topics.next_page_url ? <Link href={`${topics.next_page_url}#topics`}>Next</Link> : <span>Next</span>}</Button>
+                            </nav>
+                        )}
+                    </section>
+
+                    <aside className="wb-margin" id="field-guide" aria-labelledby="guide-heading">
+                        <p className="wb-kicker">The Workbine field guide</p>
+                        <h2 id="guide-heading" className="wb-guide-heading">Leave the useful<br />part in.</h2>
+                        <ol className="wb-guide-list">
+                            <li><span>01</span><div><strong>The situation</strong><p>What were you trying to do? Time, tools and constraints change the answer.</p></div></li>
+                            <li><span>02</span><div><strong>The actual steps</strong><p>Share what you did, not just what someone could do. Credit your sources.</p></div></li>
+                            <li><span>03</span><div><strong>What happened next</strong><p>What worked? What fell short? An honest limit is useful knowledge too.</p></div></li>
+                        </ol>
+                        <div className="wb-starters">
+                            <p className="wb-kicker">A question to start with</p>
+                            <p>Prompts, not published topics. Pick one and make it your own.</p>
+                            {starters.map((title) => <button key={title} type="button" onClick={() => useStarter(title)}>{title}<ArrowUpRight aria-hidden="true" /></button>)}
+                        </div>
+                    </aside>
+                </div>
             </main>
         </PublicShell>
     );

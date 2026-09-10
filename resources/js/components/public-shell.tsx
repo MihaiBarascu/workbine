@@ -3,106 +3,52 @@ import { ArrowUpRight, UserRound } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import type { User } from '@/types';
+import '../../css/workbine.css';
 
-type PublicPageProps = {
-    auth: {
-        user: User | null;
-    };
-};
-
-type Props = {
-    children: ReactNode;
-};
+type Props = { children: ReactNode };
 
 export function PublicShell({ children }: Props) {
-    const { auth } = usePage<PublicPageProps>().props;
+    const { auth } = usePage<{ auth: { user: User | null } }>().props;
 
     return (
-        <div className="bg-background text-foreground flex min-h-screen flex-col">
-            <a
-                href="#main-content"
-                className="bg-background focus:ring-ring sr-only z-50 rounded-md px-4 py-3 focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:ring-2"
-            >
-                Skip to content
-            </a>
-
-            <header className="border-border/70 bg-background/95 sticky top-0 z-20 border-b backdrop-blur-xl">
-                <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 py-3 sm:px-6 lg:px-8">
-                    <Link
-                        href="/"
-                        aria-label="Workbine home"
-                        className="focus-visible:ring-ring flex shrink-0 items-center gap-2.5 rounded-md font-semibold tracking-tight focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                        <span className="flex size-9 -rotate-6 items-center justify-center rounded-xl bg-teal-700 text-lg font-bold text-white shadow-sm dark:bg-teal-400 dark:text-teal-950">
-                            W
-                        </span>
-                        <span className="text-lg">Workbine</span>
-                    </Link>
-
-                    <nav
-                        aria-label="Main navigation"
-                        className="flex flex-wrap items-center gap-1 sm:gap-2"
-                    >
-                        <Button asChild variant="ghost" size="sm">
-                            <Link href="/topics">Explore</Link>
-                        </Button>
-
+        <div className="wb-public flex min-h-screen flex-col">
+            <a href="#main-content" className="bg-background sr-only z-50 px-4 py-3 focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
+            <header className="wb-topbar">
+                <div className="wb-topbar-inner">
+                    <div className="wb-brand">
+                        <Link href="/" aria-label="Workbine home" className="wb-wordmark">
+                            <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                                <path d="M3 7L9 25L16 9L23 25L29 7M5 16H27" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" strokeLinejoin="miter" />
+                            </svg>
+                            <span>workbine<i>.</i></span>
+                        </Link>
+                        <span className="wb-tagline">Practical knowledge,<br />together.</span>
+                    </div>
+                    <nav aria-label="Main navigation" className="wb-main-nav">
+                        <Link href="/topics" className="wb-toplink">Community</Link>
+                        <Link href="/#field-guide" className="wb-toplink">Field guide</Link>
                         {auth.user ? (
                             <>
-                                <Button asChild variant="ghost" size="sm">
-                                    <Link
-                                        href="/settings/profile"
-                                        aria-label={`Account settings for ${auth.user.name}`}
-                                    >
-                                        <UserRound aria-hidden="true" />
-                                        <span className="hidden max-w-28 truncate sm:inline">
-                                            {auth.user.name}
-                                        </span>
-                                    </Link>
-                                </Button>
-                                <Button asChild size="sm">
-                                    <Link href="/topics/create">
-                                        Start a topic
-                                    </Link>
-                                </Button>
+                                <Link href="/settings/profile" aria-label={`Account settings for ${auth.user.name}`} className="inline-flex items-center gap-2">
+                                    <UserRound className="size-4" aria-hidden="true" />
+                                    <span className="hidden max-w-24 truncate sm:inline">{auth.user.name}</span>
+                                </Link>
+                                <Button asChild size="sm"><Link href="/topics/create">Start a topic<ArrowUpRight aria-hidden="true" /></Link></Button>
                             </>
                         ) : (
                             <>
-                                <Button asChild variant="ghost" size="sm">
-                                    <Link href="/login">Log in</Link>
-                                </Button>
-                                <Button asChild size="sm">
-                                    <Link href="/register">Join Workbine</Link>
-                                </Button>
+                                <Link href="/login">Log in</Link>
+                                <Button asChild size="sm"><Link href="/register">Join Workbine</Link></Button>
                             </>
                         )}
                     </nav>
                 </div>
             </header>
-
-            <div
-                id="main-content"
-                tabIndex={-1}
-                className="flex-1 outline-none"
-            >
-                {children}
-            </div>
-
-            <footer className="border-border/70 mt-8 border-t">
-                <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                    <p className="text-muted-foreground">
-                        <span className="text-foreground font-semibold">
-                            Workbine.
-                        </span>{' '}
-                        Practical knowledge, shared person to person.
-                    </p>
-                    <Link
-                        href="/topics/create"
-                        className="focus-visible:ring-ring inline-flex w-fit items-center gap-1 rounded-sm font-medium underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                        Bring a good question
-                        <ArrowUpRight className="size-4" aria-hidden="true" />
-                    </Link>
+            <div id="main-content" tabIndex={-1} className="flex-1 outline-none">{children}</div>
+            <footer className="wb-footer">
+                <div className="wb-footer-inner">
+                    <p><strong>workbine.</strong>A shared notebook, not a feed of promises.</p>
+                    <Link href="/topics/create">Leave something useful behind ↗</Link>
                 </div>
             </footer>
         </div>
