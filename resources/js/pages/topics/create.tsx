@@ -7,7 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 
-export default function TopicCreate() {
+type Props = { initialTitle: string };
+
+export default function TopicCreate({ initialTitle }: Props) {
     return (
         <PublicShell>
             <Head title="Start a topic" />
@@ -47,6 +49,7 @@ export default function TopicCreate() {
                                 <Input
                                     id="title"
                                     name="title"
+                                    defaultValue={initialTitle}
                                     required
                                     autoFocus
                                     maxLength={160}
