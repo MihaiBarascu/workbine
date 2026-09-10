@@ -31,6 +31,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read Collection<int, Topic> $topics
+ * @property-read Collection<int, Method> $methods
  */
 #[Fillable(['name', 'email', 'google_id', 'avatar', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
@@ -43,6 +44,12 @@ class User extends Authenticatable implements PasskeyUser
     public function topics(): HasMany
     {
         return $this->hasMany(Topic::class);
+    }
+
+    /** @return HasMany<Method, $this> */
+    public function methods(): HasMany
+    {
+        return $this->hasMany(Method::class);
     }
 
     /**
