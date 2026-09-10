@@ -4,6 +4,19 @@ export type TopicSummary = {
     slug: string;
     description: string | null;
     created_at: string | null;
+    methods_count: number;
+    user: {
+        id: number;
+        name: string;
+    };
+};
+
+export type MethodSummary = {
+    id: number;
+    title: string;
+    body: string;
+    source_url: string | null;
+    created_at: string | null;
     user: {
         id: number;
         name: string;
