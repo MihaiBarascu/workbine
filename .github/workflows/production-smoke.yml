@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/production-smoke.yml'
+      - 'tools/inertia_page.py'
   workflow_dispatch:
 
 permissions:
@@ -20,6 +25,10 @@ jobs:
     env:
       DEPLOY_COMMIT: ${{ github.sha }}
     steps:
+      - name: Checkout the tested public-response parser
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Wait for the public release without writing production data
         run: |
           python3 - <<'PY'
@@ -29,15 +38,13 @@ jobs:
           import urllib.error
           import urllib.parse
           import urllib.request
+          from tools.inertia_page import parse_page
 
           base = 'https://workbine.com'
           query = 'workbine-deploy-' + os.environ['DEPLOY_COMMIT']
-          client = 'Workbine-Deployment-Smoke/1.0'
           headers = {
-              'User-Agent': client,
-              'Accept': 'application/json',
-              'X-Inertia': 'true',
-              'X-Requested-With': 'XMLHttpRequest',
+              'User-Agent': 'Workbine-Deployment-Smoke/1.0',
+              'Accept': 'text/html, application/xhtml+xml',
               'Cache-Control': 'no-cache',
           }
           stage = 'health'
@@ -47,17 +54,14 @@ jobs:
               stage = path
               request = urllib.request.Request(base + path, headers=headers)
               with urllib.request.urlopen(request, timeout=15) as response:
-                  return json.load(response)
+                  assert response.status == 200, 'Public route did not return HTTP 200'
+                  return parse_page(response.read(4000000).decode('utf-8'))
 
           last_error = ''
           for attempt in range(1, 25):
               try:
                   stage = 'health'
-                  health_request = urllib.request.Request(base + '/up', headers={
-                      'User-Agent': client,
-                      'Accept': 'text/html',
-                      'Cache-Control': 'no-cache',
-                  })
+                  health_request = urllib.request.Request(base + '/up', headers=headers)
                   with urllib.request.urlopen(health_request, timeout=15) as response:
                       assert response.status == 200, 'Health endpoint did not return HTTP 200'
                   result = read_page('/topics?q=' + query)
@@ -68,13 +72,13 @@ jobs:
                   topic_pages_checked = 0
                   experience_pages_checked = 0
                   if topics:
-                      topic = read_page('/topics/' + urllib.parse.quote(topics[0]['slug']))
+                      topic = read_page('/topics/' + urllib.parse.quote(topics[0]['slug'], safe=''))
                       assert topic.get('component') == 'topics/show', 'Topic detail failed'
                       topic_pages_checked = 1
                       methods = topic.get('props', {}).get('methods', [])
                       for method in methods[:1]:
                           assert 'experiences_count' in method, 'Experience release is not visible yet'
-                          experience = read_page('/topics/' + urllib.parse.quote(topics[0]['slug']) + '/methods/' + str(method['id']) + '/experiences')
+                          experience = read_page('/topics/' + urllib.parse.quote(topics[0]['slug'], safe='') + '/methods/' + str(method['id']) + '/experiences')
                           assert experience.get('component') == 'experiences/index', 'Public experiences page failed'
                           experience_pages_checked += 1
                   coverage = {
@@ -85,11 +89,11 @@ jobs:
                       'experience_pages_checked': experience_pages_checked,
                       'public_topic_total': listing.get('props', {}).get('topics', {}).get('total'),
                   }
-                  message = 'PASS: live health, search release and public listing. No production content was created.'
+                  message = 'PASS: live health, initial-visit search payload and public listing. No production content was created.'
                   print(message)
                   print(json.dumps(coverage))
                   with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-                      summary.write('## Production read-only smoke\n' + message + '\n\n```json\n' + json.dumps(coverage, indent=2) + '\n```\n\nZero topic/experience pages checked means there was no existing content to sample, not that those flows were exercised. Authenticated Google login is not covered. This checks feature availability, not a deployed-commit fingerprint.\n')
+                      summary.write('## Production read-only smoke\n' + message + '\n\n```json\n' + json.dumps(coverage, indent=2) + '\n```\n\nZero sampled topic/experience pages is not coverage of those flows. No authenticated Google session is tested. This checks public feature availability, not an exact deployed commit fingerprint. A PR-triggered run tests the monitor against the current live deployment, not the proposed application code.\n')
                   break
               except urllib.error.HTTPError as error:
                   last_error = f'{stage}: HTTP {error.code}; cf-mitigated={error.headers.get("cf-mitigated", "not present")}'

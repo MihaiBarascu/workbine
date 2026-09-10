@@ -277,7 +277,9 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                         href={
                                             unanswered && !search
                                                 ? '/topics#topics'
-                                                : '/topics/create'
+                                                : search
+                                                  ? `/topics/create?title=${encodeURIComponent(search)}`
+                                                  : '/topics/create'
                                         }
                                     >
                                         {unanswered && !search
