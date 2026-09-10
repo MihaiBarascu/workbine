@@ -1,7 +1,7 @@
 {
-  "completed": [
-    "UI-001"
-  ],
-  "last_task": "UI-001",
-  "last_run": "34534646491"
+    "completed": {
+        "UI-001": true
+    },
+    "last_task": "UI-001",
+    "last_run": "34534646491"
 }
