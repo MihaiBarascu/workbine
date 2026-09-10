@@ -20,8 +20,8 @@ class TopicSearchTest extends TestCase
 
         $this->get(route('topics.index', ['q' => '  SAAS  ']))
             ->assertOk()->assertInertia(fn (Assert $page) => $page
-                ->where('search', 'SAAS')
-                ->has('topics.data', 2));
+            ->where('search', 'SAAS')
+            ->has('topics.data', 2));
     }
 
     public function test_search_and_needs_a_method_filter_are_combined(): void
@@ -69,13 +69,13 @@ class TopicSearchTest extends TestCase
         foreach (['   ', ['invalid']] as $input) {
             $this->get(route('topics.index', ['q' => $input]))
                 ->assertOk()->assertInertia(fn (Assert $page) => $page
-                    ->where('search', '')
-                    ->has('topics.data', 1));
+                ->where('search', '')
+                ->has('topics.data', 1));
         }
         $this->get(route('topics.index', ['q' => str_repeat('x', 500)]))
             ->assertOk()->assertInertia(fn (Assert $page) => $page
-                ->where('search', str_repeat('x', 120))
-                ->has('topics.data', 0));
+            ->where('search', str_repeat('x', 120))
+            ->has('topics.data', 0));
     }
 
     public function test_home_search_behaves_like_the_topics_route(): void
@@ -83,7 +83,7 @@ class TopicSearchTest extends TestCase
         Topic::factory()->create(['title' => 'Learn from real experience']);
         $this->get(route('home', ['q' => 'real experience']))
             ->assertOk()->assertInertia(fn (Assert $page) => $page
-                ->where('search', 'real experience')
-                ->has('topics.data', 1));
+            ->where('search', 'real experience')
+            ->has('topics.data', 1));
     }
 }

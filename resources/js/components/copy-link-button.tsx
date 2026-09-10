@@ -25,7 +25,12 @@ export function CopyLinkButton({ path }: Props) {
     return (
         <div className="max-w-full space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={copyLink}>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={copyLink}
+                >
                     <Copy aria-hidden="true" />
                     Copy link
                 </Button>

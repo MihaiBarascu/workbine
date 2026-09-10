@@ -23,7 +23,9 @@ export function ExperienceForm({ action, experience }: Props) {
                 {({ errors, processing }) => (
                     <>
                         <div className="grid gap-2">
-                            <Label htmlFor="outcome">What was your result?</Label>
+                            <Label htmlFor="outcome">
+                                What was your result?
+                            </Label>
                             <select
                                 id="outcome"
                                 name="outcome"
@@ -33,15 +35,24 @@ export function ExperienceForm({ action, experience }: Props) {
                                 aria-describedby="outcome-error"
                                 className="border-input bg-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2"
                             >
-                                <option value="" disabled>Choose a result</option>
+                                <option value="" disabled>
+                                    Choose a result
+                                </option>
                                 <option value="worked">Worked for me</option>
                                 <option value="partly">Partly worked</option>
-                                <option value="did_not_work">Did not work for me</option>
+                                <option value="did_not_work">
+                                    Did not work for me
+                                </option>
                             </select>
-                            <InputError id="outcome-error" message={errors.outcome} />
+                            <InputError
+                                id="outcome-error"
+                                message={errors.outcome}
+                            />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="experience-body">Your context and experience</Label>
+                            <Label htmlFor="experience-body">
+                                Your context and experience
+                            </Label>
                             <textarea
                                 id="experience-body"
                                 name="body"
@@ -55,13 +66,22 @@ export function ExperienceForm({ action, experience }: Props) {
                                 placeholder="What did you try, in what situation, and what happened? What would you change?"
                                 className="border-input bg-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm leading-6 focus-visible:ring-2"
                             />
-                            <p id="experience-body-help" className="text-muted-foreground text-xs leading-5">
-                                Specific details help more than a vote. Include limitations and things that did not work.
+                            <p
+                                id="experience-body-help"
+                                className="text-muted-foreground text-xs leading-5"
+                            >
+                                Specific details help more than a vote. Include
+                                limitations and things that did not work.
                             </p>
-                            <InputError id="experience-body-error" message={errors.body} />
+                            <InputError
+                                id="experience-body-error"
+                                message={errors.body}
+                            />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="tried-on">When did you try it? (optional)</Label>
+                            <Label htmlFor="tried-on">
+                                When did you try it? (optional)
+                            </Label>
                             <Input
                                 id="tried-on"
                                 name="tried_on"
@@ -71,10 +91,15 @@ export function ExperienceForm({ action, experience }: Props) {
                                 aria-invalid={Boolean(errors.tried_on)}
                                 aria-describedby="tried-on-error"
                             />
-                            <InputError id="tried-on-error" message={errors.tried_on} />
+                            <InputError
+                                id="tried-on-error"
+                                message={errors.tried_on}
+                            />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="evidence-url">Evidence link (optional)</Label>
+                            <Label htmlFor="evidence-url">
+                                Evidence link (optional)
+                            </Label>
                             <Input
                                 id="evidence-url"
                                 name="evidence_url"
@@ -85,13 +110,26 @@ export function ExperienceForm({ action, experience }: Props) {
                                 aria-invalid={Boolean(errors.evidence_url)}
                                 aria-describedby="evidence-url-error"
                             />
-                            <InputError id="evidence-url-error" message={errors.evidence_url} />
+                            <InputError
+                                id="evidence-url-error"
+                                message={errors.evidence_url}
+                            />
                         </div>
                         <p className="text-muted-foreground text-xs leading-5">
-                            This is public. Do not include passwords, customer data or private documents. Only share evidence you have permission to publish.
+                            This is public. Do not include passwords, customer
+                            data or private documents. Only share evidence you
+                            have permission to publish.
                         </p>
-                        <Button type="submit" disabled={processing} className="w-full">
-                            {processing ? 'Saving...' : experience ? 'Update my experience' : 'Publish my experience'}
+                        <Button
+                            type="submit"
+                            disabled={processing}
+                            className="w-full"
+                        >
+                            {processing
+                                ? 'Saving...'
+                                : experience
+                                  ? 'Update my experience'
+                                  : 'Publish my experience'}
                         </Button>
                     </>
                 )}
@@ -101,10 +139,19 @@ export function ExperienceForm({ action, experience }: Props) {
                     action={action}
                     method="delete"
                     disableWhileProcessing
-                    onBefore={() => window.confirm('Remove your public experience? This cannot be undone.')}
+                    onBefore={() =>
+                        window.confirm(
+                            'Remove your public experience? This cannot be undone.',
+                        )
+                    }
                 >
                     {({ processing }) => (
-                        <Button type="submit" variant="outline" className="w-full" disabled={processing}>
+                        <Button
+                            type="submit"
+                            variant="outline"
+                            className="w-full"
+                            disabled={processing}
+                        >
                             Remove my experience
                         </Button>
                     )}
