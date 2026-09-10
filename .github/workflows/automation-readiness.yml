@@ -1,4 +1,4 @@
-name: Coding agent readiness
+name: Automation publication readiness
 
 on:
   push:
@@ -6,19 +6,20 @@ on:
 
 permissions:
   contents: read
-  copilot-requests: write
+  pull-requests: write
 
 jobs:
-  check-agent:
+  open-identity-review:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 3
     steps:
-      - name: Install official coding-agent tooling in an isolated directory
-        run: |
-          npm install --prefix /tmp/workbine-agent --no-save --package-lock=false @github/copilot@1.0.83
-          /tmp/workbine-agent/node_modules/.bin/copilot --version
-      - name: Test one minimal response without repository access or tools
+      - name: Open or reuse the real identity pull request without merging
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          timeout 45s /tmp/workbine-agent/node_modules/.bin/copilot --no-custom-instructions --no-ask-user --no-auto-update --max-ai-credits=30 --model auto -s -p 'Reply with READY only. Do not access files, run tools, browse, or change anything.'
+          existing=$(gh pr list --repo MihaiBarascu/workbine --head feat/notebook-identity --state open --json number --jq 'length')
+          if [ "$existing" != "0" ]; then
+            echo 'The identity pull request already exists; no duplicate created.'
+            exit 0
+          fi
+          gh pr create --repo MihaiBarascu/workbine --base main --head feat/notebook-identity --draft --title 'Give Workbine a distinctive community-notebook identity' --body 'Implements the owner-requested move away from generic SaaS styling: a content-first notebook, original wordmark, paper/ink/terracotta palette, editorial navigation, question composer and clearly labeled starter prompts. Full CI, browser review and final cleanup are required before merge. This draft also verifies that the scheduled-development identity can publish a real review branch; it is not an automatic production deployment.'
