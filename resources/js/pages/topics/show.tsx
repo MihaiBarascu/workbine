@@ -87,7 +87,7 @@ export default function TopicShow({ topic, methods }: Props) {
                                             key={method.id}
                                             className="overflow-hidden"
                                         >
-                                            <CardHeader className="border-b bg-muted/20">
+                                            <CardHeader className="bg-muted/20 border-b">
                                                 <div className="flex items-start gap-3">
                                                     <div className="bg-foreground text-background mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl">
                                                         <Lightbulb className="size-4" />

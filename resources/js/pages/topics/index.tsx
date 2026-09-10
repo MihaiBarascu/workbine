@@ -109,7 +109,8 @@ export default function TopicsIndex({ topics }: Props) {
                                             </p>
                                             <div className="text-muted-foreground mt-5 flex items-center gap-2 text-xs font-medium">
                                                 <MessageCircleMore className="size-4" />
-                                                Methods and experiences live here
+                                                Methods and experiences live
+                                                here
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -158,7 +159,9 @@ export default function TopicsIndex({ topics }: Props) {
                                 disabled={!topics.next_page_url}
                             >
                                 {topics.next_page_url ? (
-                                    <Link href={topics.next_page_url}>Next</Link>
+                                    <Link href={topics.next_page_url}>
+                                        Next
+                                    </Link>
                                 ) : (
                                     <span>Next</span>
                                 )}

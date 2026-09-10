@@ -29,8 +29,8 @@ export default function TopicCreate() {
                         What should people share real methods about?
                     </h1>
                     <p className="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
-                        Make the topic specific enough that someone can say,
-                        “I actually did this — here is what worked for me.”
+                        Make the topic specific enough that someone can say, “I
+                        actually did this — here is what worked for me.”
                     </p>
                 </div>
 

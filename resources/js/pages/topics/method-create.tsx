@@ -37,7 +37,10 @@ export default function MethodCreate({ topic }: Props) {
                         How did you actually do it?
                     </h1>
                     <p className="text-muted-foreground mt-4 max-w-2xl text-base leading-7">
-                        Topic: <span className="text-foreground font-medium">{topic.title}</span>
+                        Topic:{' '}
+                        <span className="text-foreground font-medium">
+                            {topic.title}
+                        </span>
                     </p>
                     <p className="text-muted-foreground mt-2 max-w-2xl text-base leading-7">
                         Explain the method as you would to a friend who wants to
@@ -68,7 +71,9 @@ export default function MethodCreate({ topic }: Props) {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="body">What worked for you?</Label>
+                                <Label htmlFor="body">
+                                    What worked for you?
+                                </Label>
                                 <textarea
                                     id="body"
                                     name="body"
@@ -83,7 +88,10 @@ export default function MethodCreate({ topic }: Props) {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="source_url">
-                                    Source link <span className="text-muted-foreground font-normal">(optional)</span>
+                                    Source link{' '}
+                                    <span className="text-muted-foreground font-normal">
+                                        (optional)
+                                    </span>
                                 </Label>
                                 <Input
                                     id="source_url"
