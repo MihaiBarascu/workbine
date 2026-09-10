@@ -2,122 +2,89 @@
 
 Last updated: 2026-09-10
 
-## Current state
+## Production and release process
 
-Production branch: `main`
+Production branch: `main`. Domain: `https://workbine.com`.
 
-Latest product milestone merged to `main`:
+`push / reviewed merge to main -> Dokploy build -> migrations -> deployment`
 
-- renamed the product concept from Goal to Topic
-- added Topic listing, detail and creation flow
-- removed the generic Laravel Dashboard from the main product navigation
-- authenticated users are routed back into the Workbine experience
-- added Methods under Topics
-- authenticated users can share a Method with title, body and optional source URL
-- Topic pages display their Methods
-- Google authentication via Laravel Socialite is implemented
-- PostgreSQL migrations exist for Topics, Methods and Google identity fields
-- permanent CI workflow now runs on pushes to `main` and pull requests targeting `main`
+The user explicitly authorized feature development and merges to main after validation. Continue using feature branches and green checks; do not push unfinished work directly to production.
 
-The CI run for the Topic + Method milestone passed successfully on `main`.
+This document describes the code in this checkout. A feature is live only after its revision is on main and Dokploy finishes deployment. CI success alone does not prove deployment success.
 
-## Feature work in review
+## Current product capabilities
 
-Branch: `feat/community-topic-discovery`
-
-Pull request: `#5` — Improve public topic discovery and community reading experience.
-
-This branch is not deployed. Do not confuse its changes with the current production milestone above. Check the PR's merge state and latest commit checks before continuing.
-
-Implemented on the branch:
-
-- database-backed `Needs a method` filter (`view=unanswered`) on both public listing routes
-- deterministic topic ordering and pagination that preserves the selected filter
-- public topic feed with real method counts, author names, dates and distinct empty states
-- responsive public navigation, teal visual identity, keyboard skip link and a small footer
-- more readable method cards, source attribution and `#method-{id}` links
-- long-text wrapping and dark-mode styling, without implying independent method verification
-- eight additional PHPUnit feature tests for filtering, pagination, private-author-data exclusion, method isolation, intended-login redirects and first contributions
-- formatter suggestions in failed CI logs; failures still fail the quality gate
-- an isolated Public UI preview workflow with synthetic data and desktop/mobile/light/dark screenshots
-
-No database migrations, new application dependencies, reputation system or admin panel are introduced by this work.
-
-Validation handoff:
-
-- use the latest CI run on the PR head as the source of truth for build, formatting, lint, TypeScript, PHPStan and PHPUnit results
-- review the `workbine-public-ui-preview` artifact from the Public UI preview workflow; screenshot capture alone is not a functional end-to-end browser test
-- preview data exists only in an ephemeral SQLite database on the CI runner, never in production
-- live production browser validation is not yet confirmed; the web fetcher rejecting the domain does not establish an outage
-- before release, review narrow-screen navigation, long author names, source links, filtered pagination, empty states and the authenticated Topic -> Method creation forms
-
-## Product model
-
-Current direction:
+Core model:
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`
 
-A Topic is an independent practical question or subject. Topics do not have parent/child hierarchy.
+Topics are independent; there is no parent/child hierarchy. Methods describe a concrete approach someone tried or clearly attribute an external source.
 
-A Method is a concrete way someone says worked for them, or a method clearly attributed to an external source.
+Milestones:
 
-The product should feel like getting useful advice from a knowledgeable friend. Avoid generic SEO/article UX and avoid turning the product into an admin-style dashboard.
+- Initial Topic + Method creation, public listing/detail, Fortify authentication and Google login.
+- PR #5: community-oriented public UI, actual method counts, Needs a method filter, stable pagination, mobile/dark-mode styles and public UI previews. Merged to main on 2026-09-10.
+- PR #6: real experiences and topic search. Check the PR merge state and latest checks for its release status.
 
-## Authentication
+This revision adds:
 
-- email/password auth comes from the Laravel starter kit / Fortify
-- Google login uses Laravel Socialite
-- Google users are linked by verified email when appropriate
-- Google Client ID / Client Secret live only in production environment variables
-- do not commit OAuth secrets
+- bounded, literal substring search across topic titles and context, combined with Needs a method and pagination
+- public method experiences with worked / partly worked / did not work outcomes, required context, optional trial date and public evidence URL
+- one experience per user per method, enforced by a unique database key and atomic upsert; editing replaces the earlier entry
+- own-entry removal, scoped Topic -> Method access, no self-validation by a method's author
+- a shared limit of 20 contribution mutations per minute per authenticated user
+- real outcome totals and paginated experience lists, exposing only public author id/name
+- topic/experience link copying with a manual-copy fallback when clipboard access is denied
+- a shorter mobile introduction that brings search and community content closer to the top
 
-## Production infrastructure
+Outcomes are self-reported, not independently verified evidence or an objective success rate. Do not label them verified or add reputation rewards merely because an outcome is positive. No fake community contributions or seeded content are published to production.
 
-Domain: `https://workbine.com`
+## Architecture and data
 
-Deployment:
+Laravel 13 + React 19 + Inertia 3 + TypeScript, kept as one monolith. Production uses PostgreSQL. Local defaults remain SQLite.
+
+The community participation milestone adds only `experiences`; it does not rewrite existing production tables or rows. Foreign keys cascade when the associated user/method is deleted. The migration is additive and should run before the new application begins serving requests through the existing Dokploy entrypoint.
+
+No new application dependencies, recommendation engine, reputation system or admin panel are introduced.
+
+## Authentication and privacy
+
+- Fortify provides email/password authentication; Socialite provides Google login.
+- Existing email-verification behavior is unchanged; do not assume that the User model enforces verification merely because routes have the verified middleware.
+- Google users are linked by verified email where appropriate.
+- Google secrets, APP_KEY and production credentials stay in environment variables, never in the repository.
+- Experience evidence is a user-provided HTTP/HTTPS link, not an uploaded or automatically fetched document. Users are reminded not to share secrets, private documents or customer data.
+- Public serializers deliberately omit email, Google identity fields and authentication secrets.
+
+## CI and browser validation
+
+`.github/workflows/ci.yml` runs on PRs to main, pushes to main and manual dispatch. It generates Wayfinder files, builds the frontend and runs formatting, lint, TypeScript, PHP formatting, PHPStan and PHPUnit. The suite now runs against both SQLite and PostgreSQL 16. Failures stay failures; formatter suggestions and test diagnostics are uploaded separately for debugging.
+
+`.github/workflows/ui-preview.yml` builds a disposable local app with synthetic users/content, captures desktop/mobile/light/dark screenshots, and exercises search, filter composition, intended login, Topic -> Method creation, experience create/update/delete, author restrictions and link copying in Chromium. It checks horizontal overflow at 320px/375px and desktop widths and records browser runtime errors. Browser dependencies are installed in a temporary directory, not added to the application.
+
+`tests/browser/community-flow.cjs` is intentionally hard-coded to localhost. It must never be pointed at production because it creates and deletes test content. Screenshots remain in the `workbine-public-ui-preview` artifact for seven days.
+
+`.github/workflows/production-smoke.yml` runs after pushes to main and can also be dispatched manually. It retries read-only public HTTP checks while Dokploy deploys. It checks health/search and available topic/experience pages, never creates production data, and does not prove a particular deployed commit hash or complete an authenticated Google login.
+
+Use actual workflow conclusions on the latest commit as the source of truth. Review screenshot artifacts rather than treating screenshot generation as visual approval.
+
+## Infrastructure
 
 `Cloudflare -> Cloudflare Tunnel -> Dokploy Traefik -> Laravel container:80`
 
-Notes:
+Cloudflare terminates public HTTPS. PostgreSQL is provided by Dokploy. `/up` is the health check. The entrypoint runs migrations with `--force` and Laravel optimization commands.
 
-- Cloudflare terminates HTTPS for `workbine.com`
-- Workbine is routed through Cloudflare Tunnel so public inbound ports do not need to be exposed for the app
-- Dokploy deploys from `main`
-- Docker entrypoint runs `php artisan migrate --force` and Laravel optimize commands
-- PostgreSQL is provided natively through Dokploy
-- `/up` is the container health check endpoint
-
-ChatGPT web fetching may sometimes report a DNS/cache miss for `workbine.com` even when the site is reachable normally in a browser. Do not treat that alone as evidence that production is down. Use Dokploy logs, browser testing, or a GitHub-hosted smoke test when necessary.
-
-## CI
-
-`.github/workflows/ci.yml` runs on:
-
-- pushes to `main`
-- pull requests targeting `main`
-- manual workflow dispatch
-
-It installs dependencies, generates Wayfinder routes, builds the frontend, and runs the repository quality/test checks. Failed jobs print formatting suggestions without changing any repository files remotely or weakening the checks.
-
-`.github/workflows/ui-preview.yml` runs on pull requests targeting `main` and manual dispatch. It builds an isolated test application and uploads public-page screenshots for review, retained for seven days. It does not deploy the application or write production data.
+ChatGPT's web fetcher or local execution environment may fail to resolve/open workbine.com even when it works in the user's browser. This is not proof of an outage or a Cloudflare block. Prefer the GitHub-hosted read-only smoke result, the user's browser or actual Dokploy logs. Do not disable Cloudflare security based on a generic fetch error.
 
 ## Next product work
 
-Priorities, in order:
+1. Observe real onboarding and the first genuine Topic -> Method -> Experience contributions. Improve friction revealed by actual use.
+2. Add focused discovery/sharing improvements and a useful opt-in return path (for example following a topic) when the delivery and privacy requirements are clear.
+3. Add contribution editing/reporting and small operational moderation tools as recurring needs become visible; do not build a generic admin suite in advance.
+4. Introduce reputation only after useful, trustworthy contribution signals exist. Preserve negative/partial experiences rather than incentivizing positive reports.
 
-1. Finish reviewing PR #5 and validate the Topic -> Method experience visually and functionally before release.
-2. Validate the live production flow after a reviewed, green merge; do not infer deployment success from CI alone.
-3. Add real Experience / validation actions around Methods (`I tried this`, context, evidence) without overcomplicating the model.
-4. Introduce reputation only after useful contribution/validation signals exist.
-5. Add moderation/admin UI only when recurring operational needs justify it; until then prefer safe Artisan commands or small operational tools.
+Traffic acquisition and a large community require real distribution, contributors and retention. Shipping features is not evidence of audience growth. Keep claims tied to measured activity, not invented counts.
 
 ## Development rules
 
-Before changing the project, read:
-
-- `README.md`
-- `AGENTS.md`
-- this file
-
-Do not redesign the architecture without a concrete need. Prefer the existing Laravel + React + Inertia monolith and keep development/maintenance cost low.
+Read `README.md`, `AGENTS.md` and this file before changing the project. Work in feature branches, run all checks before merging, keep migrations safe for existing PostgreSQL data, never commit generated Wayfinder files or secrets, and prefer the existing stack over additional infrastructure.
