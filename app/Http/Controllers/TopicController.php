@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTopicRequest;
+use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ class TopicController extends Controller
     {
         $topics = Topic::query()
             ->with('user:id,name')
+            ->withCount('methods')
             ->latest()
             ->paginate(12)
             ->through(fn (Topic $topic): array => $this->serializeTopic($topic));
@@ -52,10 +54,17 @@ class TopicController extends Controller
 
     public function show(Topic $topic): Response
     {
-        $topic->load('user:id,name');
+        $topic->load('user:id,name')->loadCount('methods');
+
+        $methods = $topic->methods()
+            ->with('user:id,name')
+            ->latest()
+            ->get()
+            ->map(fn (Method $method): array => $this->serializeMethod($method));
 
         return Inertia::render('topics/show', [
             'topic' => $this->serializeTopic($topic),
+            'methods' => $methods,
         ]);
     }
 
@@ -68,9 +77,26 @@ class TopicController extends Controller
             'slug' => $topic->slug,
             'description' => $topic->description,
             'created_at' => $topic->created_at?->toIso8601String(),
+            'methods_count' => $topic->methods_count ?? 0,
             'user' => [
                 'id' => $topic->user->id,
                 'name' => $topic->user->name,
+            ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function serializeMethod(Method $method): array
+    {
+        return [
+            'id' => $method->id,
+            'title' => $method->title,
+            'body' => $method->body,
+            'source_url' => $method->source_url,
+            'created_at' => $method->created_at?->toIso8601String(),
+            'user' => [
+                'id' => $method->user->id,
+                'name' => $method->user->name,
             ],
         ];
     }
