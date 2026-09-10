@@ -18,9 +18,12 @@ export function PublicShell({ children }: Props) {
 
     return (
         <div className="bg-background text-foreground min-h-screen">
-            <header className="border-border/70 sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
+            <header className="border-border/70 bg-background/90 sticky top-0 z-20 border-b backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center gap-2 font-semibold">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 font-semibold"
+                    >
                         <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg text-sm font-bold">
                             W
                         </span>
@@ -38,7 +41,9 @@ export function PublicShell({ children }: Props) {
                                     <Link href="/dashboard">Dashboard</Link>
                                 </Button>
                                 <Button asChild size="sm">
-                                    <Link href="/goals/create">Share a goal</Link>
+                                    <Link href="/goals/create">
+                                        Share a goal
+                                    </Link>
                                 </Button>
                             </>
                         ) : (
