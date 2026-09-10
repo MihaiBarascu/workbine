@@ -67,6 +67,11 @@ const { chromium } = browserRequire('playwright');
             .fill('preview-only-password');
         await page.getByRole('button', { name: 'Log in', exact: true }).click();
         await page.waitForURL(/\/experiences#share$/);
+        assert.equal(
+            await page.locator('[data-slot="sidebar-trigger"]').count(),
+            0,
+            'Community pages must not use the starter layout',
+        );
         await page.locator('select[name="outcome"]').selectOption('partly');
         await page
             .locator('textarea[name="body"]')
@@ -130,6 +135,9 @@ const { chromium } = browserRequire('playwright');
         await page
             .getByRole('heading', { name: '1 experience', exact: true })
             .waitFor();
+        await page.waitForFunction(
+            () => document.querySelectorAll('[data-sonner-toast]').length === 0,
+        );
         await page.screenshot({
             path: `${output}/experience-mobile.png`,
             fullPage: true,

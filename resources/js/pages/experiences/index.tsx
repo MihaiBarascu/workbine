@@ -70,18 +70,18 @@ export default function ExperiencesIndex({
 
                 <section
                     aria-label="Reported outcomes"
-                    className="mt-8 grid gap-3 sm:grid-cols-3"
+                    className="mt-8 grid grid-cols-3 gap-2 sm:gap-3"
                 >
                     {(Object.keys(outcomes) as ExperienceOutcome[]).map(
                         (outcome) => (
                             <div
                                 key={outcome}
-                                className="bg-card rounded-xl border p-4"
+                                className="bg-card rounded-xl border p-3 sm:p-4"
                             >
                                 <p className="text-2xl font-semibold">
                                     {summary[outcome]}
                                 </p>
-                                <p className="text-muted-foreground mt-1 text-sm">
+                                <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
                                     {outcomes[outcome]}
                                 </p>
                             </div>
