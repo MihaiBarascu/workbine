@@ -21,4 +21,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          timeout 45s /tmp/workbine-agent/node_modules/.bin/copilot --no-custom-instructions --no-ask-user --no-auto-update --max-ai-credits=30 --model claude-haiku-4.5 -s -p 'Reply with READY only. Do not access files, run tools, browse, or change anything.'
+          timeout 45s /tmp/workbine-agent/node_modules/.bin/copilot --no-custom-instructions --no-ask-user --no-auto-update --max-ai-credits=30 --model auto -s -p 'Reply with READY only. Do not access files, run tools, browse, or change anything.'
