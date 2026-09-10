@@ -66,6 +66,19 @@ def git(*args: str) -> str:
     return subprocess.check_output(['git', *args], text=True).strip()
 
 
+def progress_document(state: dict, task: str, run_id: str) -> str:
+    # An object keeps formatting stable as the queue grows; legacy lists remain readable.
+    previous = state.get('completed', {})
+    if not isinstance(previous, (dict, list)):
+        raise ValueError('Invalid progress state')
+    completed = dict.fromkeys([*previous, task], True)
+    if any(not isinstance(key, str) or not re.fullmatch(r'UI-[0-9]{3}', key) for key in completed):
+        raise ValueError('Invalid progress task')
+    if not re.fullmatch(r'[0-9]{1,32}', str(run_id)):
+        raise ValueError('Invalid progress run')
+    return json.dumps({'completed': completed, 'last_task': task, 'last_run': str(run_id)}, indent=4) + '\n'
+
+
 def verify_files(files: dict[str, str], originals: dict[str, str]) -> None:
     if not files or len(files) > 5 or not set(files).issubset(ALLOWED):
         raise ValueError('Only one small change to at most five approved public UI files is allowed')
@@ -106,7 +119,7 @@ def generate() -> None:
             output('ready', 'true')
             return
     tasks = json.loads(Path('docs/AUTODEV_TASKS.json').read_text())
-    state = json.loads(Path(PROGRESS).read_text()) if Path(PROGRESS).exists() else {'completed': []}
+    state = json.loads(Path(PROGRESS).read_text()) if Path(PROGRESS).exists() else {'completed': {}}
     task = next((task for task in tasks if task['id'] not in state['completed']), None)
     if task is None:
         note('The approved unattended queue is complete. No invented work or repetitive redesign was created.')
@@ -193,15 +206,13 @@ def publish() -> None:
     originals = {name: subprocess.check_output(['git', 'show', f'{base}:{name}']).decode() for name in files}
     verify_files(files, originals)
     tasks = json.loads(Path('docs/AUTODEV_TASKS.json').read_text())
-    state = json.loads(Path(PROGRESS).read_text()) if Path(PROGRESS).exists() else {'completed': []}
+    state = json.loads(Path(PROGRESS).read_text()) if Path(PROGRESS).exists() else {'completed': {}}
     expected = next(task['id'] for task in tasks if task['id'] not in state['completed'])
     if proposal['task'] != expected:
         raise RuntimeError('Task ordering changed')
-    state['completed'].append(expected)
-    state['last_task'] = expected
-    state['last_run'] = os.environ['GITHUB_RUN_ID']
+    progress = progress_document(state, expected, os.environ['GITHUB_RUN_ID'])
     entries = [{'path': name, 'mode': '100644', 'type': 'blob', 'content': value} for name, value in files.items()]
-    entries.append({'path': PROGRESS, 'mode': '100644', 'type': 'blob', 'content': json.dumps(state, indent=2) + '\n'})
+    entries.append({'path': PROGRESS, 'mode': '100644', 'type': 'blob', 'content': progress})
     tree = api('git/trees', 'POST', {'base_tree': api('git/commits/' + base)['tree']['sha'], 'tree': entries})
     commit = api('git/commits', 'POST', {'message': 'feat: improve Workbine public experience (' + expected + ')', 'tree': tree['sha'], 'parents': [base]})
     if branch:
