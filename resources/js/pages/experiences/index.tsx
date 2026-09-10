@@ -55,7 +55,7 @@ export default function ExperiencesIndex({
                         Back to the method
                     </Link>
                 </Button>
-                <p className="text-sm font-medium text-teal-700 dark:text-teal-300">
+                <p className="text-primary dark:text-primary text-sm font-medium">
                     After trying the method
                 </p>
                 <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-4xl">
@@ -130,7 +130,7 @@ export default function ExperiencesIndex({
                         {experiences.data.length === 0 ? (
                             <div className="bg-muted/20 rounded-2xl border border-dashed p-8 text-center">
                                 <MessageCircleMore
-                                    className="mx-auto size-8 text-teal-700 dark:text-teal-300"
+                                    className="text-primary dark:text-primary mx-auto size-8"
                                     aria-hidden="true"
                                 />
                                 <h3 className="mt-4 text-lg font-semibold">
@@ -154,7 +154,7 @@ export default function ExperiencesIndex({
                                             <h3 className="text-sm font-semibold [overflow-wrap:anywhere]">
                                                 {experience.user.name}
                                             </h3>
-                                            <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-medium text-teal-900 dark:bg-teal-950 dark:text-teal-100">
+                                            <span className="bg-secondary text-secondary-foreground dark:bg-secondary dark:text-secondary-foreground rounded-full px-3 py-1 text-xs font-medium">
                                                 {outcomes[experience.outcome]}
                                             </span>
                                         </div>
@@ -194,7 +194,7 @@ export default function ExperiencesIndex({
                                                 href={experience.evidence_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer nofollow ugc"
-                                                className="mt-4 inline-flex items-center gap-2 text-sm text-teal-700 underline underline-offset-4 dark:text-teal-300"
+                                                className="text-primary dark:text-primary mt-4 inline-flex items-center gap-2 text-sm underline underline-offset-4"
                                             >
                                                 View shared evidence{' '}
                                                 <ExternalLink

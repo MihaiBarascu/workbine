@@ -1,90 +1,67 @@
 # Workbine Status
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
-## Production and release process
+## Production and development rules
 
-Production branch: `main`. Domain: `https://workbine.com`.
+Production: `main` -> Dokploy build -> migrations -> `https://workbine.com`.
 
-`push / reviewed merge to main -> Dokploy build -> migrations -> deployment`
+The owner explicitly authorizes tested feature development and merges to main. Work in feature branches; run build, formatting/lint, TypeScript, Pint, PHPStan, PHPUnit and browser checks before merging. A green CI run is not proof of deployment. Never commit secrets, generated Wayfinder files or production test content.
 
-The user explicitly authorized feature development and merges to main after validation. Continue using feature branches and green checks; do not push unfinished work directly to production.
+Read `README.md`, `AGENTS.md`, this file, `docs/DESIGN.md` and `docs/BACKLOG.md` before continuing.
 
-This document describes the code in this checkout. A feature is live only after its revision is on main and Dokploy finishes deployment. CI success alone does not prove deployment success.
+## Owner's current direction
 
-## Current product capabilities
+The owner rejected the generic SaaS landing-page appearance and requested a distinctive real community platform, continued development every three hours, and no ZIP deliverables. Do not report a cron as an active development agent unless model access, code generation, publication and validation have actually been tested. Do not promise that a chat session will wake itself up.
 
-Core model:
+The visual identity is now a shared community notebook: warm paper, carbon-green ink, terracotta details, a custom lowercase wordmark, editorial rules/margins, serif display type and a row-based feed. Keep the established identity. Do not return to an oversized marketing hero, generic feature cards, a rounded initial badge or fake community counters.
+
+## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`
 
-Topics are independent; there is no parent/child hierarchy. Methods describe a concrete approach someone tried or clearly attribute an external source.
+Topics are independent, not hierarchical. Users can create a topic, share concrete methods and report their real experience of another person's method. Public serializers expose author id/name, not private identity fields.
 
-Milestones:
+- Literal bounded search across topic title/context combines with Needs a method and stable pagination.
+- Experiences record worked / partly worked / did not work, context, optional trial date and a public HTTP/HTTPS evidence link.
+- A unique user/method key plus atomic upsert prevents duplicate entries. People can update or remove their own experience, but cannot validate their own method.
+- Scoped topic/method routes and contribution throttling remain enforced.
+- Outcome totals are self-reported, not independent verification or objective success rates.
+- Public topic/experience link copying has a manual-copy fallback.
+- The notebook adds an inline question composer and clearly labelled starter prompts. A draft travels through the protected creation URL and login; visiting a draft URL never publishes a topic.
 
-- Initial Topic + Method creation, public listing/detail, Fortify authentication and Google login.
-- PR #5: community-oriented public UI, actual method counts, Needs a method filter, stable pagination, mobile/dark-mode styles and public UI previews. Merged to main on 2026-09-10.
-- PR #6: real experiences and topic search. Check the PR merge state and latest checks for its release status.
+No fake members, seeded production contributions, reputation scores or administration suite are introduced.
 
-This revision adds:
+## Releases and checks
 
-- bounded, literal substring search across topic titles and context, combined with Needs a method and pagination
-- public method experiences with worked / partly worked / did not work outcomes, required context, optional trial date and public evidence URL
-- one experience per user per method, enforced by a unique database key and atomic upsert; editing replaces the earlier entry
-- own-entry removal, scoped Topic -> Method access, no self-validation by a method's author
-- a shared limit of 20 contribution mutations per minute per authenticated user
-- real outcome totals and paginated experience lists, exposing only public author id/name
-- topic/experience link copying with a manual-copy fallback when clipboard access is denied
-- a shorter mobile introduction that brings search and community content closer to the top
+PR #5 added public discovery. PR #6 added real experiences and search. PR #7 made the live smoke client consistent and reports the actual coverage when production has no content. These are merged.
 
-Outcomes are self-reported, not independently verified evidence or an objective success rate. Do not label them verified or add reputation rewards merely because an outcome is positive. No fake community contributions or seeded content are published to production.
+PR #8 implements the notebook identity. Its source and draft-flow tests passed the full SQLite/PostgreSQL CI and Chromium contribution workflow. Populated desktop/mobile and narrow dark-mode captures were inspected. Check the PR's latest head and merge state; this file describes the checkout, not an assumed deployment.
 
-## Architecture and data
+Current backend coverage after the identity increment: 85 tests, including three new cases for draft validation, authenticated prefilling and guest login preservation. Browser tests cover search/filter recovery, intended login, Topic -> Method creation, Experience create/update/delete, copy links, own-method restrictions and public persistence. Browser assertions check horizontal overflow at 320px/375px and desktop widths, and collect runtime errors.
 
-Laravel 13 + React 19 + Inertia 3 + TypeScript, kept as one monolith. Production uses PostgreSQL. Local defaults remain SQLite.
+## Recurring-development readiness
 
-The community participation milestone adds only `experiences`; it does not rewrite existing production tables or rows. Foreign keys cascade when the associated user/method is deleted. The migration is additive and should run before the new application begins serving requests through the existing Dokploy entrypoint.
+A real GitHub-hosted probe successfully ran pinned GitHub Copilot CLI 1.0.83 with the built-in GITHUB_TOKEN, `copilot-requests: write`, and `--model auto`; the agent returned READY. No additional API key was needed for that probe. It does use the account's applicable Copilot entitlement/usage, not an unlimited free service.
 
-No new application dependencies, recommendation engine, reputation system or admin panel are introduced.
+A separate publication probe failed with: `GitHub Actions is not permitted to create or approve pull requests`. The repository owner must enable **Settings -> Actions -> General -> Allow GitHub Actions to create and approve pull requests** before unattended PR creation can succeed. Do not bypass this restriction with direct production pushes or false success reporting.
 
-## Authentication and privacy
+A three-hour development workflow is being implemented separately. Until it is merged and a real end-to-end cycle has been verified, do not claim autonomous development/deployment is fully active. Initial unattended scope should be small public-UI improvements from a reviewed queue, not authentication, billing, infrastructure or destructive migrations. Failures must remain visible and must never be fixed by disabling tests.
 
-- Fortify provides email/password authentication; Socialite provides Google login.
-- Existing email-verification behavior is unchanged; do not assume that the User model enforces verification merely because routes have the verified middleware.
-- Google users are linked by verified email where appropriate.
-- Google secrets, APP_KEY and production credentials stay in environment variables, never in the repository.
-- Experience evidence is a user-provided HTTP/HTTPS link, not an uploaded or automatically fetched document. Users are reminded not to share secrets, private documents or customer data.
-- Public serializers deliberately omit email, Google identity fields and authentication secrets.
+## Stack and infrastructure
 
-## CI and browser validation
+Laravel 13, React 19, Inertia 3, TypeScript and the existing Tailwind/shadcn components remain one monolith. Production uses Dokploy PostgreSQL; local defaults are SQLite. CI also tests PostgreSQL 16. No new application dependencies are required by the identity.
 
-`.github/workflows/ci.yml` runs on PRs to main, pushes to main and manual dispatch. It generates Wayfinder files, builds the frontend and runs formatting, lint, TypeScript, PHP formatting, PHPStan and PHPUnit. The suite now runs against both SQLite and PostgreSQL 16. Failures stay failures; formatter suggestions and test diagnostics are uploaded separately for debugging.
+`Cloudflare -> Cloudflare Tunnel -> Dokploy Traefik -> Laravel container:80`.
 
-`.github/workflows/ui-preview.yml` builds a disposable local app with synthetic users/content, captures desktop/mobile/light/dark screenshots, and exercises search, filter composition, intended login, Topic -> Method creation, experience create/update/delete, author restrictions and link copying in Chromium. It checks horizontal overflow at 320px/375px and desktop widths and records browser runtime errors. Browser dependencies are installed in a temporary directory, not added to the application.
+Cloudflare terminates HTTPS. The entrypoint runs migrations and optimization. `/up` is the health check. The Experiences milestone adds only an additive experiences table with cascading foreign keys.
 
-`tests/browser/community-flow.cjs` is intentionally hard-coded to localhost. It must never be pointed at production because it creates and deletes test content. Screenshots remain in the `workbine-public-ui-preview` artifact for seven days.
+Fortify and Socialite provide authentication. Existing verification behavior is unchanged; the User model does not enforce verification merely because routes mention verified middleware. Real Google OAuth with an actual account is not covered by the synthetic browser tests; existing backend Google tests remain in place. Secrets stay in deployment environment variables.
 
-`.github/workflows/production-smoke.yml` runs after pushes to main and can also be dispatched manually. It retries read-only public HTTP checks while Dokploy deploys. It checks health/search and available topic/experience pages, never creates production data, and does not prove a particular deployed commit hash or complete an authenticated Google login.
+## Validation boundaries
 
-Use actual workflow conclusions on the latest commit as the source of truth. Review screenshot artifacts rather than treating screenshot generation as visual approval.
+CI previews use synthetic data on a disposable localhost app. `tests/browser/community-flow.cjs` is intentionally hard-coded to localhost and must never be pointed at production because it writes test content. Screenshots are internal review artifacts, not deliverables requested from the user.
 
-## Infrastructure
+Live checks are read-only. Chromium and service-identified requests have successfully opened workbine.com with HTTP 200 and the deployed search input. A prior bare Python request returned HTTP 403; this does not identify a particular Cloudflare rule or prove the app was unavailable. No Cloudflare security settings were changed.
 
-`Cloudflare -> Cloudflare Tunnel -> Dokploy Traefik -> Laravel container:80`
-
-Cloudflare terminates public HTTPS. PostgreSQL is provided by Dokploy. `/up` is the health check. The entrypoint runs migrations with `--force` and Laravel optimization commands.
-
-ChatGPT's web fetcher or local execution environment may fail to resolve/open workbine.com even when it works in the user's browser. This is not proof of an outage or a Cloudflare block. Prefer the GitHub-hosted read-only smoke result, the user's browser or actual Dokploy logs. Do not disable Cloudflare security based on a generic fetch error.
-
-## Next product work
-
-1. Observe real onboarding and the first genuine Topic -> Method -> Experience contributions. Improve friction revealed by actual use.
-2. Add focused discovery/sharing improvements and a useful opt-in return path (for example following a topic) when the delivery and privacy requirements are clear.
-3. Add contribution editing/reporting and small operational moderation tools as recurring needs become visible; do not build a generic admin suite in advance.
-4. Introduce reputation only after useful, trustworthy contribution signals exist. Preserve negative/partial experiences rather than incentivizing positive reports.
-
-Traffic acquisition and a large community require real distribution, contributors and retention. Shipping features is not evidence of audience growth. Keep claims tied to measured activity, not invented counts.
-
-## Development rules
-
-Read `README.md`, `AGENTS.md` and this file before changing the project. Work in feature branches, run all checks before merging, keep migrations safe for existing PostgreSQL data, never commit generated Wayfinder files or secrets, and prefer the existing stack over additional infrastructure.
+The production smoke checks health/search/listing and only samples topic/experience pages if real content exists. A zero sampled count is not coverage of those flows. Keep live availability, synthetic functional tests, and actual growth metrics distinct.

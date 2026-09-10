@@ -39,7 +39,7 @@ export default function TopicShow({ topic, methods }: Props) {
                 </Button>
                 <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
                     <div className="min-w-0">
-                        <p className="text-sm font-medium text-teal-700 dark:text-teal-300">
+                        <p className="text-primary dark:text-primary text-sm font-medium">
                             A question for the community
                         </p>
                         <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-[-0.03em] text-balance [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
@@ -147,7 +147,7 @@ export default function TopicShow({ topic, methods }: Props) {
                                                         href={method.source_url}
                                                         target="_blank"
                                                         rel="noopener noreferrer nofollow ugc"
-                                                        className="focus-visible:ring-ring inline-flex items-center gap-2 rounded-sm text-sm font-medium text-teal-700 underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none dark:text-teal-300"
+                                                        className="focus-visible:ring-ring text-primary dark:text-primary inline-flex items-center gap-2 rounded-sm text-sm font-medium underline underline-offset-4 focus-visible:ring-2 focus-visible:outline-none"
                                                     >
                                                         Original source
                                                         <ExternalLink
@@ -166,7 +166,7 @@ export default function TopicShow({ topic, methods }: Props) {
                                             <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
                                                 <Link
                                                     href={`/topics/${topic.slug}/methods/${method.id}/experiences`}
-                                                    className="text-sm font-medium text-teal-700 underline underline-offset-4 dark:text-teal-300"
+                                                    className="text-primary dark:text-primary text-sm font-medium underline underline-offset-4"
                                                 >
                                                     {method.experiences_count}{' '}
                                                     {method.experiences_count ===
@@ -193,9 +193,9 @@ export default function TopicShow({ topic, methods }: Props) {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="rounded-2xl border border-dashed bg-teal-50/50 px-6 py-12 text-center dark:bg-teal-950/20">
+                                <div className="bg-muted/50 dark:bg-muted/50 rounded-2xl border border-dashed px-6 py-12 text-center">
                                     <MessageSquareText
-                                        className="mx-auto size-9 text-teal-700 dark:text-teal-300"
+                                        className="text-primary dark:text-primary mx-auto size-9"
                                         aria-hidden="true"
                                     />
                                     <h3 className="mt-4 text-xl font-semibold">
@@ -218,9 +218,9 @@ export default function TopicShow({ topic, methods }: Props) {
                         </section>
                     </div>
                     <aside aria-label="Contribution guidance">
-                        <div className="rounded-2xl border bg-teal-50/50 p-6 lg:sticky lg:top-24 dark:bg-teal-950/20">
+                        <div className="bg-muted/50 dark:bg-muted/50 rounded-2xl border p-6 lg:sticky lg:top-24">
                             <Lightbulb
-                                className="mb-4 size-6 text-teal-700 dark:text-teal-300"
+                                className="text-primary dark:text-primary mb-4 size-6"
                                 aria-hidden="true"
                             />
                             <h2 className="text-lg font-semibold">

@@ -49,9 +49,13 @@ class TopicController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
-        return Inertia::render('topics/create');
+        $title = $request->query('title', '');
+
+        return Inertia::render('topics/create', [
+            'initialTitle' => is_string($title) ? Str::limit(Str::squish($title), 160, '') : '',
+        ]);
     }
 
     public function store(StoreTopicRequest $request): RedirectResponse
