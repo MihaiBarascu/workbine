@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - feature/workbine-experience
+      - main
   pull_request:
     branches:
       - main
