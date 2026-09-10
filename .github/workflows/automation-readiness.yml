@@ -15,10 +15,10 @@ jobs:
     steps:
       - name: Install official coding-agent tooling in an isolated directory
         run: |
-          npm install --prefix /tmp/workbine-agent --no-save --package-lock=false @github/copilot
+          npm install --prefix /tmp/workbine-agent --no-save --package-lock=false @github/copilot@1.0.83
           /tmp/workbine-agent/node_modules/.bin/copilot --version
-      - name: Test a single bounded request without repository access or changes
+      - name: Test one minimal response without repository access or tools
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          timeout 90s /tmp/workbine-agent/node_modules/.bin/copilot --no-custom-instructions --no-ask-user --no-auto-update --max-ai-credits=1 --model claude-haiku-4.5 -s -p 'Reply with READY only. Do not access files, run tools, browse, or change anything.'
+          timeout 45s /tmp/workbine-agent/node_modules/.bin/copilot --no-custom-instructions --no-ask-user --no-auto-update --max-ai-credits=30 --model claude-haiku-4.5 -s -p 'Reply with READY only. Do not access files, run tools, browse, or change anything.'
