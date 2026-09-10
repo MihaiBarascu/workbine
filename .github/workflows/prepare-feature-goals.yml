@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       - name: Add Laravel Socialite
-        run: composer require laravel/socialite:^5.29 --no-interaction --no-progress
+        run: composer require laravel/socialite:^5.29 --with-all-dependencies --no-interaction --no-progress
 
       - name: Prepare application
         run: |
