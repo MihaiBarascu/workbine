@@ -12,7 +12,7 @@ export type User = {
 };
 
 export type Auth = {
-    user: User | null;
+    user: User;
 };
 
 export type Passkey = {
