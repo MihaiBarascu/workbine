@@ -57,6 +57,14 @@ jobs:
       - name: Check development-controller scope guards
         run: python3 -m unittest discover -s tools -p 'test_autodev.py' -v
 
+      - name: Prepare PHP image support
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, exif, intl, pdo_pgsql, zip
+          coverage: none
+          ini-values: memory_limit=256M, upload_max_filesize=5M, post_max_size=8M, max_file_uploads=2
+
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 

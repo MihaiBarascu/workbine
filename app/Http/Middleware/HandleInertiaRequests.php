@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\ImageUploads;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,12 +36,15 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $user = $request->user();
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user === null ? null : [...$user->toArray(), 'avatar_url' => $user->avatarUrl()],
             ],
+            'media' => ['enabled' => ImageUploads::enabled(), 'maxUploadMb' => (int) config('media.max_upload_kb') / 1024],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

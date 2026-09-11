@@ -25,3 +25,6 @@ The application is intentionally kept as a single deployable monolith for fast p
 ## Testing
 
 Use `bash tools/test-local.sh` for local checks, including PostgreSQL and browser flows. GitHub checks are explicitly dispatched only when working without a local runtime. See [testing instructions](docs/TESTING.md).
+
+Image uploads and production R2 setup: [docs/MEDIA.md](docs/MEDIA.md). Uploads are
+disabled until the bucket, public domain and application environment are ready.

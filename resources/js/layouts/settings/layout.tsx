@@ -35,7 +35,11 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
             <main className="wb-page wb-account-page">
                 <header className="wb-account-heading">
                     <div className="flex min-w-0 items-center gap-4">
-                        <MemberAvatar name={auth.user.name} large />
+                        <MemberAvatar
+                            name={auth.user.name}
+                            src={auth.user.avatar_url}
+                            large
+                        />
                         <div className="min-w-0">
                             <p className="wb-kicker">Your space on Workbine</p>
                             <h1>Your account</h1>

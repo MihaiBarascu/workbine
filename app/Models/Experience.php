@@ -14,6 +14,8 @@ use Illuminate\Support\Carbon;
  * @property string $outcome
  * @property string $body
  * @property string|null $evidence_url
+ * @property int|null $evidence_image_id
+ * @property-read MediaImage|null $evidenceImage
  * @property Carbon|null $tried_on
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -33,6 +35,12 @@ class Experience extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return BelongsTo<MediaImage, $this> */
+    public function evidenceImage(): BelongsTo
+    {
+        return $this->belongsTo(MediaImage::class, 'evidence_image_id');
     }
 
     /** @return array<string, string> */

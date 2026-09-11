@@ -5,6 +5,7 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MethodController;
 use App\Http\Controllers\TopicController;
+use App\Http\Middleware\ThrottleImageUploads;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [TopicController::class, 'index'])->name('home');
@@ -30,7 +31,7 @@ Route::scopeBindings()->group(function () {
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('topics/{topic}/methods/{method}/experiences/create', [ExperienceController::class, 'create'])->name('experiences.create');
-        Route::put('topics/{topic}/methods/{method}/experience', [ExperienceController::class, 'store'])->middleware('throttle:20,1')->name('experiences.store');
+        Route::put('topics/{topic}/methods/{method}/experience', [ExperienceController::class, 'store'])->middleware(['throttle:20,1', ThrottleImageUploads::class])->name('experiences.store');
         Route::delete('topics/{topic}/methods/{method}/experience', [ExperienceController::class, 'destroy'])->middleware('throttle:20,1')->name('experiences.destroy');
     });
 });

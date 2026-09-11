@@ -92,6 +92,27 @@ reviewed. The following documentation-only commit records these results and is
 formatted separately. Merge and deployment must still be observed; no GitHub
 Actions were dispatched and no infrastructure changes are included.
 
+## Image uploads and R2 — 2026-09-11
+
+Branch `feat/r2-image-storage` adds custom profile photos and one optional image
+per experience. Uploads go through authenticated Laravel validation, bounded
+GD/EXIF processing and WebP compression. A durable PostgreSQL media ledger tracks
+storage usage, replacement cleanup and failed deletions. Account deletion covers
+cascaded evidence; `media:prune` retries cleanup without requiring a queue worker.
+Public URLs are generated locally, with no per-page R2 metadata requests.
+
+The owner chose R2 and created `workbine-media` in Eastern Europe (`EEUR`),
+Standard class. The integration defaults to `MEDIA_ENABLED=false`; no provider
+credentials are present in the repository. The current setup task is connecting
+`media.workbine.com`, adding bucket-scoped credentials in Dokploy, configuring
+cache/security and an account budget alert, and arranging periodic cleanup.
+See [docs/MEDIA.md](MEDIA.md). Account alerts do not cap charges. Local tests do
+not verify live R2, Cloudflare rules, billing alerts or backups.
+
+Production uploads remain disabled until configuration and provider validation
+are completed. Release verification for this branch is being run locally and
+must be recorded before merge. No GitHub Actions have been dispatched.
+
 ## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.

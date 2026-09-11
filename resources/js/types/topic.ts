@@ -1,3 +1,21 @@
+export type PublicMember = {
+    id: number;
+    name: string;
+    username: string;
+    avatar_url: string | null;
+};
+
+export type SharedImage = {
+    url: string;
+    width: number;
+    height: number;
+};
+
+export type MediaSettings = {
+    enabled: boolean;
+    maxUploadMb: number;
+};
+
 export type TopicSummary = {
     id: number;
     title: string;
@@ -5,11 +23,7 @@ export type TopicSummary = {
     description: string | null;
     created_at: string | null;
     methods_count: number;
-    user: {
-        id: number;
-        name: string;
-        username: string;
-    };
+    user: PublicMember;
 };
 
 export type MethodSummary = {
@@ -19,11 +33,7 @@ export type MethodSummary = {
     source_url: string | null;
     created_at: string | null;
     experiences_count: number;
-    user: {
-        id: number;
-        name: string;
-        username: string;
-    };
+    user: PublicMember;
 };
 
 export type PaginatedTopics = {
@@ -41,10 +51,11 @@ export type ExperienceSummary = {
     outcome: ExperienceOutcome;
     body: string;
     evidence_url: string | null;
+    evidence_image: SharedImage | null;
     tried_on: string | null;
     created_at: string | null;
     updated_at: string | null;
-    user: { id: number; name: string; username: string };
+    user: PublicMember;
 };
 
 export type PaginatedExperiences = {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
+import { ProfilePhoto } from '@/components/profile-photo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,7 @@ export default function Profile({
     return (
         <>
             <Head title="Profile settings" />
+            <ProfilePhoto />
             <Form
                 {...ProfileController.update.form()}
                 options={{ preserveScroll: true }}

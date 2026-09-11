@@ -44,7 +44,10 @@ export default function TopicShow({ topic, methods }: Props) {
                             <p className="wb-detail-label">Topic</p>
                             <h1>{topic.title}</h1>
                             <div className="wb-detail-author">
-                                <MemberAvatar name={topic.user.name} />
+                                <MemberAvatar
+                                    name={topic.user.name}
+                                    src={topic.user.avatar_url}
+                                />
                                 <div className="min-w-0">
                                     <p>
                                         Started by{' '}
@@ -111,6 +114,10 @@ export default function TopicShow({ topic, methods }: Props) {
                                                 <div className="wb-detail-author">
                                                     <MemberAvatar
                                                         name={method.user.name}
+                                                        src={
+                                                            method.user
+                                                                .avatar_url
+                                                        }
                                                     />
                                                     <div className="min-w-0">
                                                         <p>

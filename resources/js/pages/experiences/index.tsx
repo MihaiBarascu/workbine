@@ -9,6 +9,7 @@ import type {
     ExperienceOutcome,
     ExperienceSummary,
     PaginatedExperiences,
+    PublicMember,
     User,
 } from '@/types';
 import '../../../css/topic-detail.css';
@@ -18,7 +19,7 @@ type Props = {
     method: {
         id: number;
         title: string;
-        user: { id: number; name: string; username: string };
+        user: PublicMember;
     };
     experiences: PaginatedExperiences;
     ownExperience: ExperienceSummary | null;
@@ -73,7 +74,10 @@ export default function ExperiencesIndex({
                     </p>
                     <div className="wb-experience-heading-footer">
                         <div className="wb-detail-author">
-                            <MemberAvatar name={method.user.name} />
+                            <MemberAvatar
+                                name={method.user.name}
+                                src={method.user.avatar_url}
+                            />
                             <p>
                                 Method shared by{' '}
                                 <MemberLink user={method.user} />
@@ -159,6 +163,10 @@ export default function ExperiencesIndex({
                                                         name={
                                                             experience.user.name
                                                         }
+                                                        src={
+                                                            experience.user
+                                                                .avatar_url
+                                                        }
                                                     />
                                                     <div className="min-w-0">
                                                         <h3>
@@ -195,6 +203,42 @@ export default function ExperiencesIndex({
                                             <p className="wb-detail-body">
                                                 {experience.body}
                                             </p>
+                                            {experience.evidence_image && (
+                                                <a
+                                                    href={
+                                                        experience
+                                                            .evidence_image.url
+                                                    }
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="focus-visible:ring-ring mt-5 block w-fit max-w-full overflow-hidden rounded-lg border focus-visible:ring-2"
+                                                >
+                                                    <img
+                                                        src={
+                                                            experience
+                                                                .evidence_image
+                                                                .url
+                                                        }
+                                                        alt={`Evidence shared by ${experience.user.name}`}
+                                                        width={
+                                                            experience
+                                                                .evidence_image
+                                                                .width
+                                                        }
+                                                        height={
+                                                            experience
+                                                                .evidence_image
+                                                                .height
+                                                        }
+                                                        loading="lazy"
+                                                        decoding="async"
+                                                        className="bg-muted max-h-96 max-w-full object-contain"
+                                                    />
+                                                    <span className="sr-only">
+                                                        Open image in a new tab
+                                                    </span>
+                                                </a>
+                                            )}
                                             {experience.tried_on && (
                                                 <p className="wb-experience-tried">
                                                     Tried on{' '}

@@ -29,6 +29,8 @@ jobs:
       SESSION_DRIVER: file
       CACHE_STORE: array
       MAIL_MAILER: array
+      MEDIA_ENABLED: true
+      MEDIA_DISK: public
 
     steps:
       - name: Checkout
@@ -36,6 +38,14 @@ jobs:
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false
+
+      - name: Prepare PHP image support
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: gd, exif, intl, pdo_pgsql, zip
+          coverage: none
+          ini-values: memory_limit=256M, upload_max_filesize=5M, post_max_size=8M, max_file_uploads=2
 
       - name: Prepare isolated application
         run: |
@@ -51,6 +61,7 @@ jobs:
       - name: Add preview-only community content
         run: |
           php tools/seed-preview.php
+          php artisan storage:link --no-interaction
 
       - name: Start preview server
         run: |
@@ -77,6 +88,7 @@ jobs:
         run: |
           node tests/browser/community-flow.cjs
           node tests/browser/profile-flow.cjs
+          node tests/browser/media-flow.cjs
 
       - name: Print isolated application diagnostics on failure
         if: failure()

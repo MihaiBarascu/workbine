@@ -29,7 +29,7 @@ class MemberController extends Controller
 
         $view = $request->query('view');
         $view = in_array($view, ['topics', 'methods', 'experiences'], true) ? $view : 'methods';
-        $user->loadCount(['topics', 'methods', 'experiences']);
+        $user->load('avatarImage')->loadCount(['topics', 'methods', 'experiences']);
 
         $query = match ($view) {
             'topics' => $user->topics(),
@@ -70,6 +70,7 @@ class MemberController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'username' => $user->username,
+                'avatar_url' => $user->avatarUrl(),
                 'bio' => $user->bio,
                 'location' => $user->location,
                 'website' => $user->website,

@@ -8,6 +8,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -30,6 +31,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property int|null $experiences_count
  * @property string|null $google_id
  * @property string|null $avatar
+ * @property int|null $avatar_image_id
+ * @property-read MediaImage|null $avatarImage
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -42,7 +45,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Method> $methods
  */
 #[Fillable(['name', 'username', 'email', 'google_id', 'avatar', 'password', 'bio', 'location', 'website'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'avatarImage', 'avatar_image_id'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
@@ -86,6 +89,17 @@ class User extends Authenticatable implements PasskeyUser
     public function experiences(): HasMany
     {
         return $this->hasMany(Experience::class);
+    }
+
+    /** @return BelongsTo<MediaImage, $this> */
+    public function avatarImage(): BelongsTo
+    {
+        return $this->belongsTo(MediaImage::class, 'avatar_image_id');
+    }
+
+    public function avatarUrl(): ?string
+    {
+        return $this->avatarImage?->url();
     }
 
     /**

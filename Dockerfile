@@ -4,11 +4,12 @@ FROM php:8.3-apache-bookworm
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        libicu-dev \
+        libjpeg62-turbo-dev libpng-dev libwebp-dev libicu-dev \
         libpq-dev \
         libzip-dev \
         unzip \
-    && docker-php-ext-install -j"$(nproc)" bcmath intl opcache pdo_pgsql zip \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" bcmath exif gd intl opcache pdo_pgsql zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,6 +30,7 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
     && rm -rf node_modules /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx \
     && chown -R www-data:www-data storage bootstrap/cache
 
+COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/entrypoint.sh /usr/local/bin/workbine-entrypoint
 RUN chmod +x /usr/local/bin/workbine-entrypoint
