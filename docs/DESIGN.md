@@ -38,7 +38,7 @@ conformance or measured audience growth.
 
 ## Screens and behavior
 
-The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public text is rendered as text, not injected HTML; website links accept only HTTP/HTTPS. No uploads or external avatar service are required.
+The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public text is rendered as text, not injected HTML; website links accept only HTTP/HTTPS. Profile photos and one evidence image per experience are optional. Custom avatars use the shared image component with initials as a fallback; the Google avatar remains separate. See [MEDIA.md](MEDIA.md) for the deployed upload behavior.
 
 Each member has one unique lowercase username, separate from their display name. Profile settings show the current public URL and explain that changing the username makes the previous one available to others. Numeric profile links redirect to the current username; previous usernames are not retained as aliases.
 

@@ -12,7 +12,7 @@ Pushes do not identify the authoring client. No commit-message keyword, author n
 
 ## On this machine
 
-Run `bash tools/test-local.sh` from `/data/srv/workbine`. Docker with Compose is the only host runtime prerequisite. The first run builds the PHP 8.3 / Node 24 / Playwright image; later runs reuse image layers and dependency download caches.
+Run `bash tools/test-local.sh` from the repository root. Docker with Compose is the only host runtime prerequisite. The first run builds the PHP 8.3 / Node 24 / Playwright image; later runs reuse image layers and dependency download caches.
 
 The runner snapshots tracked and non-ignored untracked files, including uncommitted changes, into a temporary directory. Ignored `.env`, vendor, node_modules and generated assets are excluded. It installs locked dependencies, builds the frontend, checks formatting/lint, TypeScript, Pint and PHPStan, runs the Python checks and application tests against SQLite and PostgreSQL 16, then runs the public screenshot and contribution/account browser flows.
 

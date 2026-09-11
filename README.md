@@ -2,7 +2,7 @@
 
 Workbine is a community-driven platform for discovering how people actually do things in practice.
 
-A topic is a subject such as `Automating product imports for an online store`, not necessarily a question. A person can publish it together with their own method, explaining the steps, context and result, or start with just the topic to invite approaches. Both options use the same creation form. Other people can publish alternative methods, validate what they tried, show evidence, thank creators, and build reputation by helping others.
+A topic is a subject such as `Automating product imports for an online store`, not necessarily a question. A person can publish it together with their own method, explaining the steps, context and result, or start with just the topic to invite approaches. Both options use the same creation form. Other people can publish alternative methods, report their own outcomes and share evidence. Reputation remains part of the product direction; thanks, voting and reputation scoring are not implemented.
 
 ## Core idea
 
@@ -22,9 +22,23 @@ Production uses PostgreSQL through environment variables. Local setup and CI kee
 
 The application is intentionally kept as a single deployable monolith for fast product iteration. A Dockerfile and `/up` health check are included for Dokploy deployment.
 
+## Current production handoff
+
+Start with [docs/STATUS.md](docs/STATUS.md) for the dated production state, owner
+decisions, completed releases and validation evidence.
+The wider design, member usernames and image uploads are deployed. Production
+runs through Docker/Dokploy; images use Cloudflare R2 and the public media domain.
+
+The profile-photo upload/delete/upload flow, R2 cleanup and public cache
+delivery were verified on 2026-09-11. Production uploads are enabled; the disabled
+default in `.env.example` is for installations awaiting configuration.
+See [docs/MEDIA.md](docs/MEDIA.md) for the media runbook. This repository is public;
+deployment account details, internal audit results and operational follow-up are
+maintained privately outside the checkout as described in [AGENTS.md](AGENTS.md).
+
 ## Testing
 
 Use `bash tools/test-local.sh` for local checks, including PostgreSQL and browser flows. GitHub checks are explicitly dispatched only when working without a local runtime. See [testing instructions](docs/TESTING.md).
 
-Image uploads and production R2 setup: [docs/MEDIA.md](docs/MEDIA.md). Uploads are
-disabled until the bucket, public domain and application environment are ready.
+The unattended coding agent remains cancelled. The owner-authorized daily media
+cleanup job is application maintenance and does not enable unattended development.
