@@ -57,14 +57,14 @@ class HttpsProxyTest extends TestCase
             ->where('topics.path', 'https://workbine.test/topics'));
     }
 
-    public function test_production_http_redirects_to_configured_https_host_with_path_and_query(): void
+    public function test_production_origin_does_not_duplicate_the_edge_redirect(): void
     {
         $this->app['env'] = 'production';
         config(['app.url' => 'https://workbine.test']);
 
-        $this->get('http://untrusted.test/topics?q=hello%20world&page=2')
-            ->assertStatus(308)
-            ->assertRedirect('https://workbine.test/topics?q=hello%20world&page=2');
+        $this->get('http://workbine.test/topics?q=hello%20world')
+            ->assertOk()
+            ->assertHeaderMissing('Location');
     }
 
     public function test_production_https_does_not_loop_and_http_health_check_remains_available(): void

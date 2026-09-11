@@ -10,6 +10,19 @@ On 2026-09-11 the owner stopped the GitHub coding agent and requested removal of
 
 The latest visual direction is white, very light neutral grey, graphite text and restrained blue actions. The owner rejected the previous green/olive/teal and terracotta treatment. The current docs/DESIGN.md supersedes historical palette instructions.
 
+## HTTPS simplification handoff
+
+PR #13 fixed HTTPS recognition through the proxy chain and added an application
+redirect. The follow-up removes that custom redirect in favor of Cloudflare
+Always Use HTTPS. Do not merge the follow-up until the edge redirect is enabled
+and verified. See docs/HTTPS.md for research, the migration gate and remaining
+infrastructure assumptions.
+
+Work locally in `/data/srv/workbine`. A merge/push to `main` automatically triggers
+Dokploy; observe the deployment instead of invoking another deploy or restarting
+containers. Infrastructure changes require a separate concrete explanation and
+explicit authorization, preferably through Dokploy's UI/API.
+
 ## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.
