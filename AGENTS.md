@@ -17,7 +17,7 @@ The product should feel like getting useful advice from a practical friend, not 
 - Keep the product simple and useful before adding complexity.
 - Prefer real human experience, context, evidence and freshness over popularity.
 - Do not create parent/child topic hierarchies.
-- A Topic is independent and represents something people want practical answers to.
+- A Topic is an independent subject, not necessarily a question. People can publish it with their own first method or without one to invite approaches. Treat both starting points equally.
 - A Method is a concrete approach that worked for someone or is clearly attributed to another source.
 - Avoid building admin panels until repeated operational needs justify one.
 - Do not overbuild voting, reputation, moderation or recommendation systems before the core Topic -> Method flow is solid.

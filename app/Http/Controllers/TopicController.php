@@ -8,6 +8,7 @@ use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -64,15 +65,30 @@ class TopicController extends Controller
         $user = $request->user();
         $data = $request->validated();
 
-        $topic = $user->topics()->create([
-            'title' => $data['title'],
-            'description' => $data['description'] ?? null,
-            'slug' => $this->uniqueSlug($data['title']),
-        ]);
+        $topic = DB::transaction(function () use ($user, $data, $request): Topic {
+            $topic = $user->topics()->create([
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+                'slug' => $this->uniqueSlug($data['title']),
+            ]);
+
+            if ($request->boolean('include_method')) {
+                $topic->methods()->create([
+                    'user_id' => $user->id,
+                    'title' => $data['method_title'],
+                    'body' => $data['method_body'],
+                    'source_url' => $data['method_source_url'] ?? null,
+                ]);
+            }
+
+            return $topic;
+        });
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Topic published.'),
+            'message' => $request->boolean('include_method')
+                ? __('Topic and method published.')
+                : __('Topic published.'),
         ]);
 
         return to_route('topics.show', $topic);

@@ -154,7 +154,7 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                                         {entry.outcome
                                             ? outcomes[entry.outcome]
                                             : view === 'topics'
-                                              ? 'A question for the community'
+                                              ? 'A topic to explore'
                                               : 'A practical approach'}
                                     </p>
                                     <h2>
@@ -184,7 +184,7 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                                 </h2>
                                 <p>
                                     {own
-                                        ? 'Bring a practical question or add your experience to an existing discussion.'
+                                        ? 'Start a topic with your method, open a subject to explore, or add your experience to an existing discussion.'
                                         : 'When this member shares something, it will appear in this space.'}
                                 </p>
                                 <Button asChild variant="outline">

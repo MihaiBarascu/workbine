@@ -13,9 +13,9 @@ The latest visual direction is white, very light neutral grey, graphite text and
 ## HTTPS simplification handoff
 
 PR #13 fixed HTTPS recognition through the proxy chain and added an application
-redirect. The follow-up removes that custom redirect in favor of Cloudflare
-Always Use HTTPS. Do not merge the follow-up until the edge redirect is enabled
-and verified. See docs/HTTPS.md for research, the migration gate and remaining
+redirect. PR #14 removed that custom redirect after Cloudflare Always Use HTTPS
+was enabled and verified. The follow-up is merged and deployed; HTTP redirects
+at Cloudflare, while Laravel continues to recognize HTTPS through trusted proxies. See docs/HTTPS.md for research, the migration gate and remaining
 infrastructure assumptions.
 
 Work locally in `/data/srv/workbine`. A merge/push to `main` automatically triggers
@@ -27,9 +27,9 @@ explicit authorization, preferably through Dokploy's UI/API.
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.
 
-Topics are independent. Bounded literal search across title/context combines with Needs a method and stable pagination. Users share concrete methods and report positive, partial or negative experiences with context, optional trial date and public evidence URL. A unique user/method key, atomic updates, own-entry removal, scoped routes, no author self-validation and contribution throttling are in place. Outcomes are self-reported, not independent verification or measured success rates.
+Topics are independent subjects, not necessarily questions. The creation form offers an optional first method (title, steps/context/result, source link). Topic and method are validated together and saved in one transaction; topic-only creation remains available. Homepage, authentication and contribution copy present sharing and exploration as equal starting points. Bounded literal search across title/context combines with Needs a method and stable pagination. Users share concrete methods and report positive, partial or negative experiences with context, optional trial date and public evidence URL. A unique user/method key, atomic updates, own-entry removal, scoped routes, no author self-validation and contribution throttling are in place. Outcomes are self-reported, not independent verification or measured success rates.
 
-PRs #5-#7 added public discovery, experiences/search and production smoke checks. PR #8 introduced the previous notebook UI; its protected question draft flow remains. Prompts are labelled as prompts, not fake community content. Link copying includes a manual fallback.
+PRs #5-#7 added public discovery, experiences/search and production smoke checks. PR #8 introduced the previous notebook UI; its protected topic draft flow remains. Prompts are labelled as prompts, not fake community content. Link copying includes a manual fallback.
 
 ## Community design and member profiles
 
