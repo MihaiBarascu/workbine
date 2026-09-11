@@ -23,8 +23,8 @@ The cancelled coding agent and cron remain removed. Only explicitly requested de
 
 ## Portfolio references, not copied assets
 
-- Mohammad Ebn Ali, *Forum Community Feed*: https://dribbble.com/shots/25457462-Forum-Community-Feed - feed hierarchy, light canvas and compact community navigation.
-- Dan Edwards / No Divide, *Forum UI Design*: https://dribbble.com/shots/4729767-Forum-UI-Design - clear discussion rows, restrained chrome and white surfaces.
-- Creliq UX/UI Design Agency, *Community Feed Dashboard UI for Learning Platform*: https://dribbble.com/shots/27266379-Community-Feed-Dashboard-UI-for-Learning-Platform - supporting reference for content/navigation organization, not its color palette.
+- Mohammad Ebn Ali, Forum Community Feed: https://dribbble.com/shots/25457462-Forum-Community-Feed - feed hierarchy, light canvas and compact community navigation.
+- Dan Edwards / No Divide, Forum UI Design: https://dribbble.com/shots/4729767-Forum-UI-Design - clear discussion rows, restrained chrome and white surfaces.
+- Creliq UX/UI Design Agency, Community Feed Dashboard UI for Learning Platform: https://dribbble.com/shots/27266379-Community-Feed-Dashboard-UI-for-Learning-Platform - supporting reference for content/navigation organization, not its color palette.
 
 These are attributed design portfolios, not evidence that those interfaces passed usability research. No illustrations, personal photos or assets are copied. Validation here means the repository's own functional/privacy tests plus actual browser and visual review; it does not claim audience growth or independent human usability testing.
