@@ -22,19 +22,20 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title="Log in" />
 
-            <PasskeyVerify />
-
             <div className="flex flex-col gap-6">
-                <Button asChild variant="outline" className="w-full">
-                    <a href="/auth/google">Continue with Google</a>
-                </Button>
+                <div className="grid gap-3">
+                    <Button asChild variant="outline" className="w-full">
+                        <a href="/auth/google">Continue with Google</a>
+                    </Button>
+                    <PasskeyVerify showSeparator={false} />
+                </div>
 
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <span className="border-border w-full border-t" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background text-muted-foreground px-2">
+                        <span className="bg-card text-muted-foreground px-2">
                             or use email
                         </span>
                     </div>
@@ -56,7 +57,6 @@ export default function Login({ status, canResetPassword }: Props) {
                                         name="email"
                                         required
                                         autoFocus
-                                        tabIndex={1}
                                         autoComplete="email"
                                         placeholder="email@example.com"
                                     />
@@ -72,7 +72,6 @@ export default function Login({ status, canResetPassword }: Props) {
                                             <TextLink
                                                 href={request()}
                                                 className="ml-auto text-sm"
-                                                tabIndex={5}
                                             >
                                                 Forgot your password?
                                             </TextLink>
@@ -82,7 +81,6 @@ export default function Login({ status, canResetPassword }: Props) {
                                         id="password"
                                         name="password"
                                         required
-                                        tabIndex={2}
                                         autoComplete="current-password"
                                         placeholder="Password"
                                     />
@@ -90,11 +88,7 @@ export default function Login({ status, canResetPassword }: Props) {
                                 </div>
 
                                 <div className="flex items-center space-x-3">
-                                    <Checkbox
-                                        id="remember"
-                                        name="remember"
-                                        tabIndex={3}
-                                    />
+                                    <Checkbox id="remember" name="remember" />
                                     <Label htmlFor="remember">
                                         Remember me
                                     </Label>
@@ -103,7 +97,6 @@ export default function Login({ status, canResetPassword }: Props) {
                                 <Button
                                     type="submit"
                                     className="mt-4 w-full"
-                                    tabIndex={4}
                                     disabled={processing}
                                     data-test="login-button"
                                 >
@@ -114,9 +107,7 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <div className="text-muted-foreground text-center text-sm">
                                 Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
-                                </TextLink>
+                                <TextLink href={register()}>Sign up</TextLink>
                             </div>
                         </>
                     )}
@@ -124,7 +115,10 @@ export default function Login({ status, canResetPassword }: Props) {
             </div>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div
+                    role="status"
+                    className="text-primary mb-4 text-center text-sm font-medium"
+                >
                     {status}
                 </div>
             )}

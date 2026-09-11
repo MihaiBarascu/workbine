@@ -26,9 +26,11 @@ export default function Security(props: Props) {
         <>
             <Head title="Security settings" />
 
-            <h1 className="sr-only">Security settings</h1>
+            <p className="wb-settings-intro">
+                Keep your account and your contributions in your hands.
+            </p>
 
-            <div className="space-y-6">
+            <div className="wb-panel space-y-6">
                 <Heading
                     variant="small"
                     title="Update password"
@@ -124,16 +126,24 @@ export default function Security(props: Props) {
                 </Form>
             </div>
 
-            <ManageTwoFactor
-                canManageTwoFactor={props.canManageTwoFactor}
-                requiresConfirmation={props.requiresConfirmation}
-                twoFactorEnabled={props.twoFactorEnabled}
-            />
+            {props.canManageTwoFactor && (
+                <div className="wb-panel">
+                    <ManageTwoFactor
+                        canManageTwoFactor={props.canManageTwoFactor}
+                        requiresConfirmation={props.requiresConfirmation}
+                        twoFactorEnabled={props.twoFactorEnabled}
+                    />
+                </div>
+            )}
 
-            <ManagePasskeys
-                canManagePasskeys={props.canManagePasskeys}
-                passkeys={props.passkeys}
-            />
+            {props.canManagePasskeys && (
+                <div className="wb-panel">
+                    <ManagePasskeys
+                        canManagePasskeys={props.canManagePasskeys}
+                        passkeys={props.passkeys}
+                    />
+                </div>
+            )}
         </>
     );
 }

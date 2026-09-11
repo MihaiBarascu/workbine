@@ -1,16 +1,16 @@
-import AppLayoutTemplate from '@/layouts/app/app-sidebar-layout';
+import type { ReactNode } from 'react';
+import { PublicShell } from '@/components/public-shell';
 import type { BreadcrumbItem } from '@/types';
 
 export default function AppLayout({
-    breadcrumbs = [],
     children,
 }: {
     breadcrumbs?: BreadcrumbItem[];
-    children: React.ReactNode;
+    children: ReactNode;
 }) {
     return (
-        <AppLayoutTemplate breadcrumbs={breadcrumbs}>
-            {children}
-        </AppLayoutTemplate>
+        <PublicShell>
+            <main className="wb-page">{children}</main>
+        </PublicShell>
     );
 }

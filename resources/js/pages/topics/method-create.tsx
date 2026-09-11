@@ -20,7 +20,7 @@ export default function MethodCreate({ topic }: Props) {
         <PublicShell>
             <Head title={`Share what worked - ${topic.title}`} />
 
-            <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+            <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
                 <Button asChild variant="ghost" className="mb-6 -ml-3">
                     <Link href={`/topics/${topic.slug}`}>
                         <ArrowLeft />
@@ -53,7 +53,7 @@ export default function MethodCreate({ topic }: Props) {
                     action={`/topics/${topic.slug}/methods`}
                     method="post"
                     disableWhileProcessing
-                    className="space-y-6"
+                    className="wb-panel space-y-6"
                 >
                     {({ processing, errors }) => (
                         <>
