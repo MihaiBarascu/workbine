@@ -41,6 +41,8 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'reportsEnabled' => (bool) config('community.reports_enabled'),
+            'emailVerificationAvailable' => (bool) config('community.email_verification_enabled'),
             'auth' => [
                 'user' => $user === null ? null : [...$user->toArray(), 'avatar_url' => $user->avatarUrl()],
             ],

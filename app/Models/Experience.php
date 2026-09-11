@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property string|null $hidden_at
  * @property int $id
  * @property int $method_id
  * @property int $user_id
@@ -25,6 +27,14 @@ use Illuminate\Support\Carbon;
 #[Fillable(['method_id', 'user_id', 'outcome', 'body', 'evidence_url', 'tried_on'])]
 class Experience extends Model
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope('visible', function (Builder $query): void {
+            $query->whereNull($query->getModel()->qualifyColumn('hidden_at'));
+            $query->whereHas('method');
+        });
+    }
+
     /** @return BelongsTo<Method, $this> */
     public function method(): BelongsTo
     {

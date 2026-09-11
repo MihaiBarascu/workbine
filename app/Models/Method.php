@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\MethodFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property string|null $hidden_at
  * @property int $id
  * @property int $topic_id
  * @property int $user_id
@@ -28,6 +30,14 @@ class Method extends Model
 {
     /** @use HasFactory<MethodFactory> */
     use HasFactory;
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('visible', function (Builder $query): void {
+            $query->whereNull($query->getModel()->qualifyColumn('hidden_at'));
+            $query->whereHas('topic');
+        });
+    }
 
     /** @return BelongsTo<Topic, $this> */
     public function topic(): BelongsTo

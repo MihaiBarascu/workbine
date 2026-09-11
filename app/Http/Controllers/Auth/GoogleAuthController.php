@@ -24,8 +24,16 @@ class GoogleAuthController extends Controller
         $googleUser = Socialite::driver('google')->user();
 
         $email = $googleUser->getEmail();
+        // Treat the provider payload as untrusted even though its SDK documents a string.
+        /** @var mixed $googleId */
         $googleId = $googleUser->getId();
         $raw = $googleUser->getRaw();
+
+        abort_unless(
+            is_string($googleId) && trim($googleId) !== '',
+            403,
+            'Google did not provide a valid account identifier.'
+        );
 
         abort_unless(
             is_string($email) && $email !== '' && ($raw['email_verified'] ?? false) === true,
@@ -43,23 +51,31 @@ class GoogleAuthController extends Controller
                 409,
                 'This email address is already linked to another Google account.'
             );
+
+            if ($user !== null && ! $user->hasVerifiedEmail()) {
+                // An unverified local account may have been created by someone else.
+                return to_route('login')->withErrors([
+                    'email' => __('An account already uses this email. Sign in and confirm its email in account settings before using Google sign-in. You can reset the password if needed.'),
+                ]);
+            }
         }
 
         if ($user) {
             $user->forceFill([
                 'google_id' => $googleId,
                 'avatar' => $googleUser->getAvatar(),
-                'email_verified_at' => $user->email_verified_at ?? now(),
+                'email_verified_at' => $user->email_verified_at
+                    ?? (strcasecmp($user->email, $email) === 0 ? now() : null),
             ])->save();
         } else {
-            $user = User::query()->create([
+            $user = new User([
                 'name' => $googleUser->getName() ?: 'Member',
                 'email' => $email,
                 'google_id' => $googleId,
                 'avatar' => $googleUser->getAvatar(),
-                'email_verified_at' => now(),
                 'password' => Str::random(64),
             ]);
+            $user->forceFill(['email_verified_at' => now()])->save();
         }
 
         Auth::login($user, remember: true);

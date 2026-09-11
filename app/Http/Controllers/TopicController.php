@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTopicRequest;
+use App\Http\Requests\UpdateTopicRequest;
 use App\Models\Method;
+use App\Models\SavedTopic;
 use App\Models\Topic;
 use App\Models\User;
+use App\Support\ContributionRevision;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -36,7 +40,7 @@ class TopicController extends Controller
 
         $topics = $query
             ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage'])
-            ->withCount('methods')
+            ->withCount(['methods', 'communitySaves as saves_count'])
             ->latest()
             ->orderByDesc('id')
             ->paginate(12)
@@ -94,9 +98,44 @@ class TopicController extends Controller
         return to_route('topics.show', $topic);
     }
 
-    public function show(Topic $topic): Response
+    public function edit(Request $request, Topic $topic): Response
     {
-        $topic->load(['user:id,name,username,avatar_image_id', 'user.avatarImage'])->loadCount('methods');
+        abort_unless($request->user()?->getAuthIdentifier() === $topic->user_id, 403);
+
+        return Inertia::render('topics/edit', [
+            'topic' => $topic->only(['id', 'title', 'slug', 'description']),
+            'revision' => ContributionRevision::token($topic),
+        ]);
+    }
+
+    public function update(UpdateTopicRequest $request, Topic $topic): RedirectResponse
+    {
+        $data = $request->validated();
+
+        DB::transaction(function () use ($topic, $data): void {
+            $current = Topic::query()->whereKey($topic->id)->lockForUpdate()->firstOrFail();
+
+            if (! hash_equals(ContributionRevision::token($current), $data['revision'])) {
+                throw ValidationException::withMessages([
+                    'revision' => __('This topic changed after you opened the editor. Copy your changes, then reload the latest version before saving.'),
+                ]);
+            }
+
+            $current->update([
+                'title' => $data['title'],
+                'description' => $data['description'] ?? null,
+            ]);
+        });
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Topic updated.')]);
+
+        return to_route('topics.show', $topic);
+    }
+
+    public function show(Request $request, Topic $topic): Response
+    {
+        $topic->load(['user:id,name,username,avatar_image_id', 'user.avatarImage'])
+            ->loadCount(['methods', 'communitySaves as saves_count']);
 
         $methods = $topic->methods()
             ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage'])
@@ -109,6 +148,10 @@ class TopicController extends Controller
         return Inertia::render('topics/show', [
             'topic' => $this->serializeTopic($topic),
             'methods' => $methods,
+            'saved' => $request->user() !== null && SavedTopic::query()
+                ->where('user_id', $request->user()->getAuthIdentifier())
+                ->where('topic_id', $topic->id)
+                ->exists(),
         ]);
     }
 
@@ -121,7 +164,9 @@ class TopicController extends Controller
             'slug' => $topic->slug,
             'description' => $topic->description,
             'created_at' => $topic->created_at?->toIso8601String(),
+            'updated_at' => $topic->updated_at?->toIso8601String(),
             'methods_count' => $topic->methods_count ?? 0,
+            'saves_count' => $topic->saves_count ?? 0,
             'user' => [
                 'id' => $topic->user->id,
                 'name' => $topic->user->name,
@@ -140,6 +185,7 @@ class TopicController extends Controller
             'body' => $method->body,
             'source_url' => $method->source_url,
             'created_at' => $method->created_at?->toIso8601String(),
+            'updated_at' => $method->updated_at?->toIso8601String(),
             'experiences_count' => $method->experiences_count ?? 0,
             'user' => [
                 'id' => $method->user->id,
@@ -156,7 +202,7 @@ class TopicController extends Controller
         $slug = $base;
         $suffix = 2;
 
-        while (Topic::query()->where('slug', $slug)->exists()) {
+        while (Topic::withoutGlobalScopes()->where('slug', $slug)->exists()) {
             $slug = $base.'-'.$suffix;
             $suffix++;
         }

@@ -1,8 +1,9 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { CopyLinkButton } from '@/components/copy-link-button';
 import { ExperienceForm } from '@/components/experience-form';
+import { ReportLink } from '@/components/report-link';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type {
@@ -22,7 +23,9 @@ type Props = {
         user: PublicMember;
     };
     experiences: PaginatedExperiences;
+    outcome: ExperienceOutcome | 'all';
     ownExperience: ExperienceSummary | null;
+    ownExperienceHidden: boolean;
     summary: Record<ExperienceOutcome, number>;
 };
 
@@ -45,11 +48,14 @@ export default function ExperiencesIndex({
     topic,
     method,
     experiences,
+    outcome,
     ownExperience,
+    ownExperienceHidden,
     summary,
 }: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
     const base = `/topics/${topic.slug}/methods/${method.id}`;
+    const experiencesUrl = `${base}/experiences`;
     const isAuthor = auth.user?.id === method.user.id;
 
     return (
@@ -83,27 +89,45 @@ export default function ExperiencesIndex({
                                 <MemberLink user={method.user} />
                             </p>
                         </div>
-                        <CopyLinkButton path={`${base}/experiences`} />
+                        <div className="flex flex-wrap items-center gap-2">
+                            <CopyLinkButton
+                                path={
+                                    outcome === 'all'
+                                        ? experiencesUrl
+                                        : `${experiencesUrl}?outcome=${outcome}`
+                                }
+                            />
+                            <ReportLink type="method" id={method.id} />
+                        </div>
                     </div>
                 </header>
 
                 <div className="wb-experiences-layout">
                     <div className="min-w-0">
-                        <section
-                            aria-label="Reported outcomes"
+                        <nav
+                            aria-label="Filter experiences by outcome"
                             className="wb-outcome-summary"
                         >
                             {(Object.keys(outcomes) as ExperienceOutcome[]).map(
-                                (outcome) => (
-                                    <div key={outcome}>
+                                (value) => (
+                                    <Link
+                                        key={value}
+                                        href={`${experiencesUrl}?outcome=${value}`}
+                                        aria-current={
+                                            outcome === value
+                                                ? 'page'
+                                                : undefined
+                                        }
+                                        aria-label={`${outcomes[value]}: ${summary[value]} ${summary[value] === 1 ? 'experience' : 'experiences'}`}
+                                    >
                                         <p className="wb-outcome-count">
-                                            {summary[outcome]}
+                                            {summary[value]}
                                         </p>
-                                        <p>{outcomes[outcome]}</p>
-                                    </div>
+                                        <p>{outcomes[value]}</p>
+                                    </Link>
                                 ),
                             )}
-                        </section>
+                        </nav>
                         <p className="wb-detail-note wb-outcome-note">
                             Self-reported experiences, not independent
                             verification. Results depend on context. One
@@ -112,6 +136,15 @@ export default function ExperiencesIndex({
                         </p>
 
                         <section aria-labelledby="experiences-heading">
+                            <Link
+                                href={experiencesUrl}
+                                aria-current={
+                                    outcome === 'all' ? 'page' : undefined
+                                }
+                                className="text-primary mb-3 inline-flex min-h-10 items-center rounded-md text-sm font-medium underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4"
+                            >
+                                All experiences
+                            </Link>
                             <div className="wb-detail-section-heading">
                                 <div>
                                     <h2 id="experiences-heading">
@@ -120,7 +153,11 @@ export default function ExperiencesIndex({
                                             ? 'experience'
                                             : 'experiences'}
                                     </h2>
-                                    <p>What happened when people tried it.</p>
+                                    <p role="status">
+                                        {outcome === 'all'
+                                            ? 'What happened when people tried it.'
+                                            : `Showing: ${outcomes[outcome]}.`}
+                                    </p>
                                 </div>
                                 {!isAuthor && (
                                     <Button asChild size="sm" variant="outline">
@@ -142,7 +179,11 @@ export default function ExperiencesIndex({
                             </div>
                             {experiences.data.length === 0 ? (
                                 <div className="wb-detail-empty">
-                                    <h3>Tried it? Your context matters.</h3>
+                                    <h3>
+                                        {outcome === 'all'
+                                            ? 'Tried it? Your context matters.'
+                                            : 'No experiences with this outcome yet.'}
+                                    </h3>
                                     <p>
                                         Share what happened, even when it only
                                         partly worked or did not help. An honest
@@ -269,6 +310,12 @@ export default function ExperiencesIndex({
                                                     </span>
                                                 </a>
                                             )}
+                                            <div className="mt-4">
+                                                <ReportLink
+                                                    type="experience"
+                                                    id={experience.id}
+                                                />
+                                            </div>
                                         </article>
                                     ))}
                                 </div>
@@ -347,6 +394,29 @@ export default function ExperiencesIndex({
                                 other people who tried it, so you cannot
                                 validate your own method.
                             </p>
+                        ) : ownExperienceHidden ? (
+                            <div className="space-y-4">
+                                <p className="text-muted-foreground text-sm leading-6">
+                                    Your experience is hidden following
+                                    moderation. You can still remove it.
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        if (
+                                            window.confirm(
+                                                'Remove your experience? This cannot be undone.',
+                                            )
+                                        )
+                                            router.delete(
+                                                `${base}/experience`,
+                                                { preserveScroll: true },
+                                            );
+                                    }}
+                                >
+                                    Remove my experience
+                                </Button>
+                            </div>
                         ) : (
                             <ExperienceForm
                                 action={`${base}/experience`}

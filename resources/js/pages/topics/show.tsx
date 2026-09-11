@@ -5,16 +5,19 @@ import {
     ArrowUpRight,
     ExternalLink,
     Link2,
+    Pencil,
     Plus,
 } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { CopyLinkButton } from '@/components/copy-link-button';
 import { PublicShell } from '@/components/public-shell';
+import { ReportLink } from '@/components/report-link';
+import { SaveTopicButton } from '@/components/save-topic-button';
 import { Button } from '@/components/ui/button';
 import type { MethodSummary, TopicSummary, User } from '@/types';
 import '../../../css/topic-detail.css';
 
-type Props = { topic: TopicSummary; methods: MethodSummary[] };
+type Props = { topic: TopicSummary; methods: MethodSummary[]; saved: boolean };
 
 function formatDate(value: string): string {
     return new Intl.DateTimeFormat('en', {
@@ -25,7 +28,7 @@ function formatDate(value: string): string {
     }).format(new Date(value));
 }
 
-export default function TopicShow({ topic, methods }: Props) {
+export default function TopicShow({ topic, methods, saved }: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
     const contributionUrl = `/topics/${topic.slug}/methods/create`;
 
@@ -58,6 +61,14 @@ export default function TopicShow({ topic, methods }: Props) {
                                             {formatDate(topic.created_at)}
                                         </time>
                                     )}
+                                    {topic.updated_at &&
+                                        topic.updated_at !==
+                                            topic.created_at && (
+                                            <time dateTime={topic.updated_at}>
+                                                Updated{' '}
+                                                {formatDate(topic.updated_at)}
+                                            </time>
+                                        )}
                                 </div>
                             </div>
                             {topic.description && (
@@ -76,7 +87,27 @@ export default function TopicShow({ topic, methods }: Props) {
                                 <CopyLinkButton
                                     path={`/topics/${topic.slug}`}
                                 />
+                                <ReportLink type="topic" id={topic.id} />
+                                <SaveTopicButton
+                                    topicSlug={topic.slug}
+                                    saved={saved}
+                                    authenticated={Boolean(auth.user)}
+                                />
+                                {auth.user?.id === topic.user.id && (
+                                    <Link href={`/topics/${topic.slug}/edit`}>
+                                        <Pencil aria-hidden="true" />
+                                        Edit topic
+                                    </Link>
+                                )}
                             </div>
+                            <p className="text-muted-foreground mt-3 text-sm leading-6">
+                                {topic.saves_count}{' '}
+                                {topic.saves_count === 1 ? 'person' : 'people'}{' '}
+                                saved this topic{' '}
+                                <span className="text-xs">
+                                    (excluding the author)
+                                </span>
+                            </p>
                         </header>
 
                         <section
@@ -139,6 +170,20 @@ export default function TopicShow({ topic, methods }: Props) {
                                                                 )}
                                                             </time>
                                                         )}
+                                                        {method.updated_at &&
+                                                            method.updated_at !==
+                                                                method.created_at && (
+                                                                <time
+                                                                    dateTime={
+                                                                        method.updated_at
+                                                                    }
+                                                                >
+                                                                    Updated{' '}
+                                                                    {formatDate(
+                                                                        method.updated_at,
+                                                                    )}
+                                                                </time>
+                                                            )}
                                                     </div>
                                                 </div>
                                                 <a
@@ -174,6 +219,15 @@ export default function TopicShow({ topic, methods }: Props) {
                                                 </div>
                                             )}
                                             <footer className="wb-method-footer">
+                                                {auth.user?.id ===
+                                                    method.user.id && (
+                                                    <Link
+                                                        href={`/topics/${topic.slug}/methods/${method.id}/edit`}
+                                                    >
+                                                        <Pencil aria-hidden="true" />
+                                                        Edit method
+                                                    </Link>
+                                                )}
                                                 <Link
                                                     href={`/topics/${topic.slug}/methods/${method.id}/experiences`}
                                                 >
@@ -198,6 +252,10 @@ export default function TopicShow({ topic, methods }: Props) {
                                                         </Link>
                                                     </Button>
                                                 )}
+                                                <ReportLink
+                                                    type="method"
+                                                    id={method.id}
+                                                />
                                             </footer>
                                         </article>
                                     ))}
@@ -279,6 +337,8 @@ export default function TopicShow({ topic, methods }: Props) {
                             </Button>
                         </section>
                         <p className="wb-detail-note">
+                            Saves help members return to a topic. Experiences
+                            describe what happened when they tried a method.{' '}
                             Methods and experiences are self-reported, not
                             independently verified results.
                         </p>

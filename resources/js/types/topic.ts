@@ -22,7 +22,9 @@ export type TopicSummary = {
     slug: string;
     description: string | null;
     created_at: string | null;
+    updated_at: string | null;
     methods_count: number;
+    saves_count: number;
     user: PublicMember;
 };
 
@@ -32,6 +34,7 @@ export type MethodSummary = {
     body: string;
     source_url: string | null;
     created_at: string | null;
+    updated_at: string | null;
     experiences_count: number;
     user: PublicMember;
 };

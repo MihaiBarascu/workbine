@@ -9,11 +9,11 @@ handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
 ## Current application state
 
-Workbine is deployed at https://workbine.com. The latest application release is
-[PR #18](https://github.com/MihaiBarascu/workbine/pull/18), merged as
-`cfedca202431a9ae310362cb86dcdb97716d15f2`. The wider layout (#16), member usernames
-(#17) and R2 image integration (#18) are merged and deployed. Documentation-only
-commits may advance `main` beyond this application baseline.
+Workbine is deployed at https://workbine.com. The wider layout (#16), member usernames (#17) and R2 image integration (#18)
+form the previously deployed baseline. This release adds launch support and
+contribution feedback described below. Repository changes and deployment
+observations must be verified separately; a feature being present does not
+establish that the product is ready to invite users.
 
 | Area            | Current behavior                                                                                                                                              |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,6 +30,36 @@ The disabled media default in `.env.example` is for installations awaiting
 configuration; it does not describe the existing deployment. Do not recreate a
 bucket, disable working uploads or repeat completed feature work from old branch
 notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
+
+## Launch support in this release
+
+- Members can edit their own topics/methods with stable URLs and stale-editor
+  protection. Updates retain experience/evidence history.
+- Topic saves have private lists and identities, public aggregate counts excluding
+  the author, and removal controls. Private saved history is encrypted and cleared
+  on logout/account deletion. Saves send no notifications.
+- Profile impact links filter contributions, and outcome links lead to the
+  underlying experiences. Filtered lists keep full summary counts and the
+  member's own experience available independently of pagination.
+- Reports can be enabled after a reviewer adopts the private console queue.
+  Manual hiding/restoration preserves history and hides descendants from public
+  pages. Existing public image URLs require separate removal when necessary.
+  See [MODERATION.md](MODERATION.md).
+- Branded HTTP errors cover normal and Inertia visits while preserving status,
+  retry headers, JSON responses and local debug behavior.
+- Optional email confirmation is controlled by
+  `COMMUNITY_EMAIL_VERIFICATION_ENABLED` (default false). It exposes manual resend
+  once delivery is configured; ordinary contribution access remains unchanged.
+  Google cannot verify an unrelated local email or silently link an unverified
+  password account. Password changes revoke database sessions and invalidate authenticated sessions
+  that carry the password-hash marker. Recovery of an unverified account also
+  removes previously enrolled login credentials; verified accounts retain their
+  additional authentication factors.
+
+[LAUNCH.md](LAUNCH.md) records the remaining product decisions and release gates.
+Reporting and email-verification defaults describe fresh installations, not a
+claim about any deployment's configuration. Contact/policy approval, a review
+owner and external-service/recovery checks remain separate from code validation.
 
 ## Working rules for agents
 
@@ -63,8 +93,10 @@ publish/promote the product externally without authorization.
 The core model remains `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.
 Keep one monolith and independent topics, without parent/child topic hierarchies.
 The interface should feel like useful advice from people with real experience.
-Reputation is product direction; thanks, voting and reputation scoring are not
-implemented. User outcomes are self-reported, not independently verified claims.
+Profiles foreground clickable impact: methods tried, worked/partial outcomes
+and topic saves. A secondary, collapsed reputation breakdown uses explicit
+weights and support limits; see [REPUTATION.md](REPUTATION.md). Thanks, voting,
+leaderboards and ranking changes are not implemented. User outcomes are self-reported, not independently verified claims.
 
 - A topic and its optional first method are saved together in a transaction.
   Topic-only creation receives equal prominence. Draft recovery and a copy-link

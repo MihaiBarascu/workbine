@@ -184,8 +184,8 @@ class ImageUploads
             $images = MediaImage::query()
                 ->whereHas('avatars', fn ($query) => $query->whereKey($user->id))
                 ->orWhereHas('experiences', fn ($query) => $query->where('user_id', $user->id)
-                    ->orWhereHas('method', fn ($query) => $query->where('user_id', $user->id)
-                        ->orWhereHas('topic', fn ($query) => $query->where('user_id', $user->id))))
+                    ->orWhereHas('method', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)
+                        ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id))))
                 ->get();
             $locked->delete();
             MediaImage::query()->whereKey($images->modelKeys())->unreferenced()->update(['pending_deletion' => true]);

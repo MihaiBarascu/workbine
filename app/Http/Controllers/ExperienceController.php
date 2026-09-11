@@ -20,12 +20,16 @@ class ExperienceController extends Controller
 {
     public function index(Request $request, Topic $topic, Method $method): Response
     {
+        $input = $request->query('outcome');
+        $outcome = is_string($input) && in_array($input, ['worked', 'partly', 'did_not_work'], true) ? $input : 'all';
         $method->load('user:id,name,username,avatar_image_id', 'user.avatarImage');
         $experiences = $method->experiences()
+            ->when($outcome !== 'all', fn ($query) => $query->where('outcome', $outcome))
             ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
             ->latest('updated_at')
             ->orderByDesc('id')
             ->paginate(10)
+            ->appends($outcome === 'all' ? [] : ['outcome' => $outcome])
             ->through(fn (Experience $experience): array => $this->serialize($experience));
 
         $counts = $method->experiences()
@@ -47,7 +51,11 @@ class ExperienceController extends Controller
                 'user' => ['id' => $method->user->id, 'name' => $method->user->name, 'username' => $method->user->username, 'avatar_url' => $method->user->avatarUrl()],
             ],
             'experiences' => $experiences,
+            'outcome' => $outcome,
             'ownExperience' => $own ? $this->serialize($own) : null,
+            'ownExperienceHidden' => $request->user() !== null && Experience::withoutGlobalScopes()
+                ->where('method_id', $method->id)->where('user_id', $request->user()->getAuthIdentifier())
+                ->whereNotNull('hidden_at')->exists(),
             'summary' => [
                 'worked' => (int) $counts->get('worked', 0),
                 'partly' => (int) $counts->get('partly', 0),
@@ -66,6 +74,8 @@ class ExperienceController extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
+        abort_if(Experience::withoutGlobalScopes()->where('method_id', $method->id)
+            ->where('user_id', $user->id)->whereNotNull('hidden_at')->exists(), 403);
 
         $image = $request->hasFile('evidence_image') ? $uploads->store($user, $request->file('evidence_image'), 'evidence_image') : null;
 
@@ -73,7 +83,8 @@ class ExperienceController extends Controller
             $previous = DB::transaction(function () use ($user, $method, $request, $data, $image): ?MediaImage {
                 // Serializes creation, replacement and quota reservations for one member.
                 User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
-                $experience = Experience::query()->firstOrNew(['method_id' => $method->id, 'user_id' => $user->id]);
+                $experience = Experience::withoutGlobalScopes()->lockForUpdate()->firstOrNew(['method_id' => $method->id, 'user_id' => $user->id]);
+                abort_if($experience->hidden_at !== null, 403);
                 $previous = null;
 
                 if ($image !== null || $request->boolean('remove_evidence_image')) {
@@ -109,7 +120,7 @@ class ExperienceController extends Controller
         $user = $request->user();
         $previous = DB::transaction(function () use ($user, $method): ?MediaImage {
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
-            $experience = $method->experiences()->where('user_id', $user->id)->first();
+            $experience = $method->experiences()->withoutGlobalScopes()->where('user_id', $user->id)->first();
             $previous = $experience?->evidenceImage;
             $experience?->delete();
             $previous?->update(['pending_deletion' => true]);

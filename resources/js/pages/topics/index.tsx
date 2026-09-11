@@ -3,6 +3,7 @@ import {
     ArrowRight,
     ArrowUpRight,
     BookOpen,
+    Bookmark,
     MessagesSquare,
     Search,
     PenLine,
@@ -223,6 +224,18 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                                     ? 'method'
                                                     : 'methods'}
                                             </span>
+                                            {topic.saves_count > 0 && (
+                                                <span
+                                                    className="text-muted-foreground"
+                                                    title="Saves by members other than the topic author"
+                                                >
+                                                    <Bookmark aria-hidden="true" />
+                                                    {topic.saves_count}{' '}
+                                                    {topic.saves_count === 1
+                                                        ? 'save'
+                                                        : 'saves'}
+                                                </span>
+                                            )}
                                             <Link
                                                 className="wb-entry-invite"
                                                 href={`/topics/${topic.slug}`}
