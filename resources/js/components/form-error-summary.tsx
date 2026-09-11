@@ -37,7 +37,8 @@ export function FormErrorSummary({ errors, fields, focusKey }: Props) {
                             <a
                                 href={`#${field}`}
                                 onClick={(event) => {
-                                    const input = document.getElementById(field);
+                                    const input =
+                                        document.getElementById(field);
                                     if (input) {
                                         event.preventDefault();
                                         input.focus();
