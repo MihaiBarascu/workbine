@@ -42,6 +42,10 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             `${name}: no horizontal overflow`,
         );
         assert.equal(await targetPage.locator('main h1').count(), 1);
+        assert.ok(
+            (await targetPage.locator('.wb-topbar').count()) <= 1,
+            'Only one community header is rendered',
+        );
         await targetPage.waitForFunction(
             () => document.querySelectorAll('[data-sonner-toast]').length === 0,
         );
@@ -575,6 +579,9 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         console.log(
             'PASS intended-login save and encrypted saved history cleared at logout',
         );
+
+        await page.goto(`${root}/community/reputation`);
+        await capture('reputation-guide-mobile', 375);
 
         const missingResponse = await page.goto(
             `${root}/launch-preview-missing-page`,

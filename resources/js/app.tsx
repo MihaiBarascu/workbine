@@ -16,7 +16,10 @@ void createInertiaApp({
                 name.startsWith('topics/') ||
                 name.startsWith('experiences/') ||
                 name.startsWith('errors/') ||
-                name.startsWith('members/'):
+                name.startsWith('members/') ||
+                name.startsWith('saved/') ||
+                name.startsWith('reports/') ||
+                name.startsWith('community/'):
                 return null;
             case name.startsWith('auth/'):
                 return AuthLayout;
