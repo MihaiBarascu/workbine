@@ -402,7 +402,11 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await publicProfile
             .getByRole('link', { name: 'Topic saves: 1', exact: true })
             .click();
-        await publicProfile.waitForURL(/view=topics&impact=saved/);
+        await publicProfile.waitForURL(
+            (url) =>
+                url.searchParams.get('view') === 'topics' &&
+                url.searchParams.get('impact') === 'saved',
+        );
         await publicProfile
             .getByRole('heading', {
                 name: 'Keeping a practical weekly launch checklist',
@@ -412,7 +416,11 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await publicProfile
             .getByRole('link', { name: 'Worked for others: 1', exact: true })
             .click();
-        await publicProfile.waitForURL(/view=methods&impact=worked/);
+        await publicProfile.waitForURL(
+            (url) =>
+                url.searchParams.get('view') === 'methods' &&
+                url.searchParams.get('impact') === 'worked',
+        );
         assert.equal(
             await publicProfile.locator('#contributions article').count(),
             1,
