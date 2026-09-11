@@ -76,6 +76,7 @@ export function PublicShell({ children }: Props) {
                                         >
                                             <MemberAvatar
                                                 name={auth.user.name}
+                                                src={auth.user.avatar_url}
                                             />
                                             <ChevronDown
                                                 className="size-3.5"

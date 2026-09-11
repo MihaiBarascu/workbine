@@ -1,4 +1,8 @@
-import { Form } from '@inertiajs/react';
+import { Form, usePage } from '@inertiajs/react';
+import {
+    ImageUploadField,
+    UploadProgress,
+} from '@/components/image-upload-field';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,17 +15,19 @@ type Props = {
 };
 
 export function ExperienceForm({ action, experience }: Props) {
+    const { media } = usePage().props;
     return (
         <div className="space-y-5">
             <Form
-                key={experience?.updated_at ?? 'new'}
+                key={`${experience?.updated_at ?? 'new'}:${experience?.evidence_image?.url ?? 'no-image'}`}
                 action={action}
-                method="put"
+                method="post"
                 disableWhileProcessing
                 className="space-y-5"
             >
-                {({ errors, processing }) => (
+                {({ errors, processing, progress }) => (
                     <>
+                        <input type="hidden" name="_method" value="put" />
                         <div className="grid gap-2">
                             <Label htmlFor="outcome">
                                 What was your result?
@@ -115,11 +121,29 @@ export function ExperienceForm({ action, experience }: Props) {
                                 message={errors.evidence_url}
                             />
                         </div>
+                        {(media?.enabled || experience?.evidence_image) && (
+                            <ImageUploadField
+                                key={String(media?.enabled)}
+                                name="evidence_image"
+                                label="Evidence photo (optional)"
+                                currentImage={experience?.evidence_image?.url}
+                                maxUploadMb={media.maxUploadMb}
+                                error={
+                                    errors.evidence_image ??
+                                    errors.remove_evidence_image
+                                }
+                                allowRemove
+                                uploadEnabled={Boolean(media?.enabled)}
+                            />
+                        )}
                         <p className="text-muted-foreground text-xs leading-5">
                             This is public. Do not include passwords, customer
                             data or private documents. Only share evidence you
                             have permission to publish.
                         </p>
+                        {processing && (
+                            <UploadProgress percentage={progress?.percentage} />
+                        )}
                         <Button
                             type="submit"
                             disabled={processing}

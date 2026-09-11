@@ -1,4 +1,5 @@
 import type { Auth } from '@/types/auth';
+import type { MediaSettings } from '@/types/topic';
 
 declare module 'react' {
     interface InputHTMLAttributes<T> {
@@ -11,6 +12,7 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            media: MediaSettings;
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

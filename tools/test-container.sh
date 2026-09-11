@@ -26,9 +26,11 @@ python3 -m unittest discover -s tools -p test_autodev.py -v
 composer ci:check
 DB_CONNECTION=pgsql DB_DATABASE=workbine_test php artisan test --compact
 export DB_CONNECTION=sqlite DB_DATABASE=/tmp/workbine-preview.sqlite
+export MEDIA_ENABLED=true MEDIA_DISK=public
 touch "$DB_DATABASE"
 php artisan migrate --force --no-interaction
 php tools/seed-preview.php
+php artisan storage:link --no-interaction
 php artisan serve --no-reload --host=127.0.0.1 --port=8000 > /artifacts/server.log 2>&1 &
 for attempt in {1..30}; do
     if curl --fail --silent http://127.0.0.1:8000/up > /dev/null; then
@@ -41,4 +43,5 @@ mkdir -p /tmp/workbine-ui-preview
 node tests/browser/capture-public.cjs
 node tests/browser/community-flow.cjs
 node tests/browser/profile-flow.cjs
+node tests/browser/media-flow.cjs
 printf '\nPASS: local build, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'

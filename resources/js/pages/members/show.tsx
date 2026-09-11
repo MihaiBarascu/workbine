@@ -27,6 +27,7 @@ type Props = {
         id: number;
         name: string;
         username: string;
+        avatar_url: string | null;
         bio: string | null;
         location: string | null;
         website: string | null;
@@ -72,7 +73,11 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                         <span>Ideas are better with experience.</span>
                     </div>
                     <div className="wb-profile-intro">
-                        <MemberAvatar name={member.name} large />
+                        <MemberAvatar
+                            name={member.name}
+                            src={member.avatar_url}
+                            large
+                        />
                         <div className="wb-profile-actions">
                             {own && (
                                 <Button asChild variant="outline">

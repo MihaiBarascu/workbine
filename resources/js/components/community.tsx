@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
-
-type Person = { id: number; name: string; username: string };
+import type { PublicMember } from '@/types';
 
 export function WorkbineBrand() {
     return (
@@ -24,11 +24,14 @@ export function WorkbineBrand() {
 
 export function MemberAvatar({
     name,
+    src,
     large = false,
 }: {
     name: string;
+    src?: string | null;
     large?: boolean;
 }) {
+    const [failedSource, setFailedSource] = useState<string | null>(null);
     const initials = name
         .trim()
         .split(/\s+/u)
@@ -39,9 +42,25 @@ export function MemberAvatar({
     return (
         <span
             aria-hidden="true"
-            className={cn('wb-avatar', large && 'wb-avatar-large')}
+            className={cn(
+                'wb-avatar overflow-hidden',
+                large && 'wb-avatar-large',
+            )}
         >
-            {initials || '?'}
+            {src && src !== failedSource ? (
+                <img
+                    src={src}
+                    alt=""
+                    width={large ? 88 : 32}
+                    height={large ? 88 : 32}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => setFailedSource(src)}
+                    className="size-full object-cover"
+                />
+            ) : (
+                initials || '?'
+            )}
         </span>
     );
 }
@@ -50,12 +69,12 @@ export function MemberLink({
     user,
     avatar = false,
 }: {
-    user: Person;
+    user: PublicMember;
     avatar?: boolean;
 }) {
     return (
         <Link href={`/members/${user.username}`} className="wb-member-link">
-            {avatar && <MemberAvatar name={user.name} />}
+            {avatar && <MemberAvatar name={user.name} src={user.avatar_url} />}
             <span>{user.name}</span>
         </Link>
     );

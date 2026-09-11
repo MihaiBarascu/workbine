@@ -15,7 +15,8 @@ services:
 
     checks:
         build:
-            context: .
+            context: ../..
+            dockerfile: docker/testing/Dockerfile
         image: workbine-local-testing:latest
         depends_on:
             postgres:

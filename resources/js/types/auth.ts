@@ -7,6 +7,7 @@ export type User = {
     location?: string | null;
     website?: string | null;
     avatar?: string | null;
+    avatar_url?: string | null;
     google_id?: string | null;
     email_verified_at: string | null;
     two_factor_enabled?: boolean;

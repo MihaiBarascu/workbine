@@ -92,6 +92,36 @@ reviewed. The following documentation-only commit records these results and is
 formatted separately. Merge and deployment must still be observed; no GitHub
 Actions were dispatched and no infrastructure changes are included.
 
+## Image uploads and R2 — 2026-09-11
+
+Branch `feat/r2-image-storage` adds custom profile photos and one optional image
+per experience. Uploads go through authenticated Laravel validation, bounded
+GD/EXIF processing and WebP compression. A durable PostgreSQL media ledger tracks
+storage usage, replacement cleanup and failed deletions. Account deletion covers
+cascaded evidence; `media:prune` retries cleanup without requiring a queue worker.
+Public URLs are generated locally, with no per-page R2 metadata requests.
+
+The owner chose R2 and created `workbine-media` in Eastern Europe (`EEUR`),
+Standard class. The integration defaults to `MEDIA_ENABLED=false`; no provider
+credentials are present in the repository. The owner connected `media.workbine.com`; its root responds over HTTPS with
+HTTP 404, as expected without an index object. Image delivery and cache hits
+remain unverified. The remaining setup is bucket-scoped credentials in Dokploy,
+cache/security rules, an account budget alert and periodic cleanup.
+See [docs/MEDIA.md](MEDIA.md). Account alerts do not cap charges. Local tests do
+not verify live R2, Cloudflare rules, billing alerts or backups.
+
+Production uploads remain disabled until configuration and provider validation
+are completed. Application revision `a564866c7c35036830b4b0b01b657a049bcd2cb9`
+passed `bash tools/test-local.sh` with a clean source snapshot: production frontend
+build, formatting/lint, TypeScript, Pint, PHPStan, 166 tests (1315 assertions) on
+each of SQLite and PostgreSQL, 13 Python tests, all existing browser flows and
+the new image upload/replacement/removal flow. Logs and 71 screenshots are in
+`/tmp/workbine-local-tests.CAKRji/`. Profile, member and evidence layouts were
+visually reviewed at desktop/320px and in dark appearance. The production
+Dockerfile also built locally; its log is `/tmp/workbine-r2-production-build-final.log`.
+No GitHub Actions were dispatched. The next documentation-only commit records
+these results and is formatted separately. Merge/deployment are observed separately.
+
 ## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.
