@@ -3,14 +3,11 @@
     --wb-ink: var(--foreground);
     --wb-muted: var(--muted-foreground);
     --wb-line: var(--border);
-    --wb-rust: #a04a32;
+    --wb-link: var(--primary);
     --wb-highlight: var(--accent);
     background: var(--background);
     color: var(--foreground);
     font-size: 15px;
-}
-.dark .wb-public {
-    --wb-rust: #edb294;
 }
 .wb-public :focus-visible {
     outline: 2px solid var(--ring);
@@ -89,10 +86,10 @@
 .wb-wordmark > svg {
     width: 29px;
     height: 29px;
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-brand-dot {
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-main-nav {
     display: flex;
@@ -199,7 +196,7 @@
 .wb-masthead-mark svg {
     width: 38px;
     height: 38px;
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-layout {
     display: grid;
@@ -389,7 +386,7 @@
     overflow-wrap: anywhere;
 }
 .wb-entry h3 a:hover {
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-entry-description {
     margin-top: 8px;
@@ -422,7 +419,7 @@
     height: 14px;
 }
 .wb-entry-invite {
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-empty {
     padding: 34px 25px;
@@ -468,7 +465,7 @@
     border-top: 1px solid var(--border);
 }
 .wb-guide-list li > span {
-    color: var(--wb-rust);
+    color: var(--wb-link);
     font-size: 11px;
     padding-top: 4px;
 }
@@ -505,7 +502,7 @@
     cursor: pointer;
 }
 .wb-starters button:hover {
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-starters button svg {
     width: 14px;
@@ -565,7 +562,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    color: var(--wb-rust);
+    color: var(--wb-link);
     font-size: 12px;
     font-weight: 500;
 }
@@ -708,9 +705,9 @@
 }
 .wb-theme-preview {
     height: 94px;
-    border: 1px solid #d5ddd4;
+    border: 1px solid #dce1e9;
     border-radius: 5px;
-    background: #f5f7f3;
+    background: #f8f9fb;
     display: grid;
     gap: 7px;
     padding: 12px;
@@ -718,28 +715,29 @@
 .wb-theme-preview i {
     display: block;
     border-radius: 2px;
-    background: #d6dfd2;
+    background: #d8dfe9;
     height: 8px;
 }
 .wb-theme-preview i:first-child {
     width: 45%;
-    background: #657e62;
+    background: #7890c9;
 }
 .wb-theme-preview i:last-child {
     width: 70%;
 }
 .wb-theme-dark {
-    background: #1e2821;
-    border-color: #455848;
+    background: #20242d;
+    border-color: #424a5b;
 }
 .wb-theme-dark i {
-    background: #445546;
+    background: #434d61;
 }
 .wb-theme-dark i:first-child {
-    background: #aec5a6;
+    background: #aebfe7;
 }
 .wb-theme-system {
-    background: linear-gradient(90deg, #f5f7f3 50%, #1e2821 50%);
+    background: #f8f9fb;
+    box-shadow: inset -70px 0 #20242d;
 }
 .wb-auth-grid {
     display: grid;
@@ -762,7 +760,7 @@
     line-height: 1.18;
 }
 .wb-auth-story h2 span {
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-auth-story > p:not(.wb-kicker) {
     margin-top: 23px;
@@ -785,7 +783,7 @@
 .wb-auth-steps svg {
     width: 18px;
     height: 18px;
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-auth-signature {
     display: block;
@@ -827,7 +825,7 @@
     background: var(--card);
 }
 .wb-profile-cover {
-    height: 128px;
+    height: 100px;
     background: var(--secondary);
     padding: 24px 30px;
     display: flex;
@@ -902,7 +900,7 @@
     flex-shrink: 0;
 }
 .wb-profile-meta > a {
-    color: var(--wb-rust);
+    color: var(--wb-link);
 }
 .wb-member-grid {
     margin-top: 26px;
@@ -930,8 +928,8 @@
     gap: 7px;
 }
 .wb-profile-tabs > a[aria-current='page'] {
-    color: var(--wb-rust);
-    border-color: var(--wb-rust);
+    color: var(--wb-link);
+    border-color: var(--wb-link);
     font-weight: 600;
 }
 .wb-profile-tabs span {
@@ -1007,7 +1005,7 @@
 .wb-profile-empty > svg {
     width: 28px;
     height: 28px;
-    color: var(--wb-rust);
+    color: var(--wb-link);
     margin: auto auto 15px;
 }
 .wb-profile-empty h2 {
@@ -1261,4 +1259,17 @@
         transition-duration: 0s !important;
         animation-duration: 0s !important;
     }
+}
+
+.wb-public form[inert] {
+    opacity: 0.65;
+}
+.wb-public input::placeholder,
+.wb-public textarea::placeholder {
+    color: var(--muted-foreground);
+    opacity: 1;
+}
+.wb-public .wb-compose-row input,
+.wb-public .wb-search input {
+    font-size: 14px;
 }

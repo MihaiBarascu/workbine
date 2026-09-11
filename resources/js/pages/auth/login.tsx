@@ -34,7 +34,7 @@ export default function Login({ status, canResetPassword }: Props) {
                         <span className="border-border w-full border-t" />
                     </div>
                     <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background text-muted-foreground px-2">
+                        <span className="bg-card text-muted-foreground px-2">
                             or use email
                         </span>
                     </div>
@@ -116,7 +116,10 @@ export default function Login({ status, canResetPassword }: Props) {
             </div>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div
+                    role="status"
+                    className="text-primary mb-4 text-center text-sm font-medium"
+                >
                     {status}
                 </div>
             )}

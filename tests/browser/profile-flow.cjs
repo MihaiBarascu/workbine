@@ -42,6 +42,27 @@ const { chromium } = requireBrowser('playwright');
             true,
             name + ' horizontal overflow',
         );
+        const tokens = await page.evaluate(() => {
+            const style = getComputedStyle(document.documentElement);
+            return {
+                dark: document.documentElement.classList.contains('dark'),
+                background: style.getPropertyValue('--background').trim(),
+                primary: style.getPropertyValue('--primary').trim(),
+            };
+        });
+        assert.equal(
+            tokens.background,
+            tokens.dark ? '#16181d' : '#f8f9fb',
+            name + ' neutral canvas',
+        );
+        assert.equal(
+            tokens.primary,
+            tokens.dark ? '#adc3ff' : '#315ed7',
+            name + ' consistent blue accent',
+        );
+        await page.waitForFunction(
+            () => document.querySelectorAll('[data-sonner-toast]').length === 0,
+        );
         await page.screenshot({
             path: `${output}/${name}.png`,
             fullPage: true,

@@ -2,12 +2,14 @@
 
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ExperienceController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MethodController;
 use App\Http\Controllers\TopicController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [TopicController::class, 'index'])->name('home');
 Route::get('topics', [TopicController::class, 'index'])->name('topics.index');
+Route::get('members/{user}', [MemberController::class, 'show'])->whereNumber('user')->name('members.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
