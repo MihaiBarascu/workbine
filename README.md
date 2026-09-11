@@ -38,7 +38,13 @@ maintained privately outside the checkout as described in [AGENTS.md](AGENTS.md)
 
 ## Testing
 
-Use `bash tools/test-local.sh` for local checks, including PostgreSQL and browser flows. GitHub checks are explicitly dispatched only when working without a local runtime. See [testing instructions](docs/TESTING.md).
+Use `bash tools/test-local.sh` when a usable local Docker runner is available.
+Without one, explicitly request CI and UI preview by workflow dispatch or by
+adding `run-remote-checks` to a same-repository PR. Ordinary pushes do not start
+tests. Remove and re-add the label after changes, then verify both runs against
+the current PR head and review the screenshots before merging. See
+[testing instructions](docs/TESTING.md) for the full release gate.
 
-The unattended coding agent remains cancelled. The owner-authorized daily media
-cleanup job is application maintenance and does not enable unattended development.
+`main` deploys automatically. The unattended coding agent remains cancelled.
+The owner-authorized daily media cleanup is application maintenance and does not
+enable unattended development.

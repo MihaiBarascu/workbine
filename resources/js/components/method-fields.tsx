@@ -19,6 +19,14 @@ export function MethodFields({
     autoFocus = false,
     initialValues,
 }: Props) {
+    const describedBy = (field: string) =>
+        [
+            `${prefix}${field}-hint`,
+            errors[`${prefix}${field}`] ? `${prefix}${field}-error` : '',
+        ]
+            .filter(Boolean)
+            .join(' ');
+
     return (
         <>
             <div className="grid gap-2">
@@ -28,16 +36,19 @@ export function MethodFields({
                     name={`${prefix}title`}
                     defaultValue={initialValues?.title}
                     aria-invalid={Boolean(errors[`${prefix}title`])}
-                    aria-describedby={
-                        errors[`${prefix}title`]
-                            ? `${prefix}title-error`
-                            : undefined
-                    }
+                    aria-describedby={describedBy('title')}
                     required
                     autoFocus={autoFocus}
                     maxLength={160}
-                    placeholder="Validate a small batch before importing everything"
+                    placeholder="Start with one small, repeatable step"
                 />
+                <p
+                    id={`${prefix}title-hint`}
+                    className="text-muted-foreground text-sm"
+                >
+                    Give your approach a short name so people know what to
+                    expect.
+                </p>
                 <InputError
                     id={`${prefix}title-error`}
                     message={errors[`${prefix}title`]}
@@ -45,29 +56,40 @@ export function MethodFields({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor={`${prefix}body`}>
-                    Steps, context and result
-                </Label>
+                <Label htmlFor={`${prefix}body`}>How you do it</Label>
+                <p
+                    id={`${prefix}body-hint`}
+                    className="text-muted-foreground text-sm leading-6"
+                >
+                    Share the steps you took and what happened. Write as if you
+                    were explaining it to a friend.
+                </p>
                 <textarea
                     id={`${prefix}body`}
                     name={`${prefix}body`}
                     defaultValue={initialValues?.body}
                     aria-invalid={Boolean(errors[`${prefix}body`])}
-                    aria-describedby={
-                        errors[`${prefix}body`]
-                            ? `${prefix}body-error`
-                            : undefined
-                    }
+                    aria-describedby={describedBy('body')}
                     required
-                    rows={12}
+                    rows={8}
                     maxLength={10000}
-                    placeholder="Explain what you did, why you chose it, the important steps, what went wrong, and what you would repeat..."
-                    className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-56 w-full rounded-md border px-3 py-2 text-sm leading-6 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                    placeholder="Here’s what I do…"
+                    className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-48 w-full rounded-md border px-3 py-2 text-sm leading-6 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
                 />
                 <InputError
                     id={`${prefix}body-error`}
                     message={errors[`${prefix}body`]}
                 />
+                <details className="wb-writing-help">
+                    <summary>Need a little guidance?</summary>
+                    <ul>
+                        <li>When is this useful, and what do you need?</li>
+                        <li>What should someone do first, then next?</li>
+                        <li>
+                            What worked, what didn’t, and what would you change?
+                        </li>
+                    </ul>
+                </details>
             </div>
 
             <div className="grid gap-2">
@@ -82,18 +104,17 @@ export function MethodFields({
                     name={`${prefix}source_url`}
                     defaultValue={initialValues?.source_url ?? ''}
                     aria-invalid={Boolean(errors[`${prefix}source_url`])}
-                    aria-describedby={
-                        errors[`${prefix}source_url`]
-                            ? `${prefix}source_url-error`
-                            : undefined
-                    }
+                    aria-describedby={describedBy('source_url')}
                     type="url"
                     maxLength={2048}
-                    placeholder="https://..."
+                    placeholder="https://…"
                 />
-                <p className="text-muted-foreground text-sm">
-                    Add the original source when you are sharing or adapting a
-                    method you found elsewhere.
+                <p
+                    id={`${prefix}source_url-hint`}
+                    className="text-muted-foreground text-sm leading-6"
+                >
+                    Learned this from someone else? Credit the original source
+                    with an http:// or https:// link.
                 </p>
                 <InputError
                     id={`${prefix}source_url-error`}

@@ -1,8 +1,11 @@
 name: CI
 
-# Local development runs tools/test-local.sh. Dispatch only when no local runner is available.
+# Local development uses tools/test-local.sh. Remote sessions explicitly dispatch
+# or add run-remote-checks to a same-repository PR. Ordinary pushes never run CI.
 on:
   workflow_dispatch:
+  pull_request:
+    types: [labeled]
   workflow_call:
     inputs:
       ref:
@@ -14,11 +17,15 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ inputs.ref || github.event.pull_request.number || github.ref }}
+  group: ci-${{ inputs.ref || github.event.pull_request.number || github.ref }}-${{ github.event.label.name || 'manual' }}
   cancel-in-progress: true
 
 jobs:
   validate:
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.label.name == 'run-remote-checks' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -48,11 +55,16 @@ jobs:
       DB_PASSWORD: ci-only-password
 
     steps:
-      - name: Checkout
+      - name: Checkout requested source revision
         uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
+
+      - name: Record tested revision
+        run: |
+          git rev-parse HEAD
+          printf 'Tested source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check development-controller scope guards
         run: python3 -m unittest discover -s tools -p 'test_autodev.py' -v
