@@ -4,9 +4,26 @@ Read README.md, AGENTS.md, docs/STATUS.md and docs/DESIGN.md before choosing wor
 
 Only explicitly requested development sessions are authorized. The owner cancelled the coding agent and three-hour cron; do not recreate them or resume the inactive automatic branch. No ZIP deliverables, fake content, automatic external promotion or fabricated growth metrics.
 
-## Current release
+## Released baseline
 
-Review `feat/community-design-and-profiles`: unified white/grey/blue community UI, separate public member profile and private account, all existing authentication/account screens, matching brand icons, profile privacy/validation tests and extended browser coverage. Confirm current local checks and visual review before marking work released; use explicitly dispatched GitHub checks only without a local runtime (docs/TESTING.md).
+As of 2026-09-11, PRs #12–#18 are merged. The current application baseline is
+`cfedca2` (#18): the wider white/grey/blue community UI, topic creation with or
+without a first method, public username profiles, branded account/authentication
+screens and optional profile/evidence image uploads are deployed. R2 and the
+live profile-photo flow have been verified. Read [STATUS.md](STATUS.md)
+and [MEDIA.md](MEDIA.md) before repeating any setup or choosing new work.
+
+## Operational work
+
+Deployment-specific account details, recovery status, service checks and capacity
+decisions are maintained in the private handoff described in [AGENTS.md](../AGENTS.md).
+Read it when available before planning infrastructure work. Public configuration
+examples and local tests do not establish provider setup, scheduled-job execution,
+notification delivery or recoverability for a particular deployment.
+
+Keep PostgreSQL/media recovery, cleanup scheduling, cost/availability monitoring
+and external-service delivery checks in the operational process. Do not publish
+private findings or convert this checklist into unattended work.
 
 ## Next useful increments for requested sessions
 

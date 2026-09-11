@@ -13,8 +13,18 @@
 /vendor
 .DS_Store
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
+# Local operational material and exports must not enter this public repository.
+/artifacts/
+/screenshots/
+/backups/
+/private/
+/*.sql
+/*.sql.gz
+/*.dump
+/*.pem
+/*.key
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
