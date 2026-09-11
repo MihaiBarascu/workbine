@@ -22,11 +22,9 @@ export default function AuthLayout({
                         Less guesswork. More shared experience.
                     </p>
                     <h2>
-                        Someone has
+                        Share your way.
                         <br />
-                        been there.
-                        <br />
-                        <span>Start with them.</span>
+                        <span>Discover another.</span>
                     </h2>
                     <p>
                         A place for the useful details: the steps people took,
@@ -36,11 +34,11 @@ export default function AuthLayout({
                     <div className="wb-auth-steps">
                         <div>
                             <MessageSquare aria-hidden="true" />
-                            <span>Bring a real question.</span>
+                            <span>Share your method or start a topic.</span>
                         </div>
                         <div>
                             <Route aria-hidden="true" />
-                            <span>Find an approach worth trying.</span>
+                            <span>Explore other ways to do it.</span>
                         </div>
                         <div>
                             <BookOpen aria-hidden="true" />

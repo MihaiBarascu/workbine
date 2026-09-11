@@ -1,0 +1,61 @@
+services:
+    postgres:
+        image: postgres:16
+        environment:
+            POSTGRES_DB: workbine_test
+            POSTGRES_USER: workbine_test
+            POSTGRES_PASSWORD: local-test-only
+        tmpfs:
+            - /var/lib/postgresql/data
+        healthcheck:
+            test: [CMD-SHELL, pg_isready -U workbine_test -d workbine_test]
+            interval: 2s
+            timeout: 3s
+            retries: 20
+
+    checks:
+        build:
+            context: .
+        image: workbine-local-testing:latest
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            APP_ENV: testing
+            APP_URL: http://127.0.0.1:8000
+            DB_CONNECTION: sqlite
+            DB_DATABASE: ':memory:'
+            DB_URL: ''
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_USERNAME: workbine_test
+            DB_PASSWORD: local-test-only
+            SESSION_DRIVER: file
+            CACHE_STORE: array
+            MAIL_MAILER: array
+            QUEUE_CONNECTION: sync
+            COMPOSER_ALLOW_SUPERUSER: '1'
+            COMPOSER_CACHE_DIR: /cache/composer
+            npm_config_cache: /cache/npm
+            PYTHONDONTWRITEBYTECODE: '1'
+            LOCAL_UID: '${LOCAL_UID:?}'
+            LOCAL_GID: '${LOCAL_GID:?}'
+        volumes:
+            - '${WORKBINE_TEST_SOURCE:?}:/source.tar:ro'
+            - '${WORKBINE_TEST_ARTIFACTS:?}:/artifacts'
+            - composer-cache:/cache/composer
+            - npm-cache:/cache/npm
+        command:
+            [
+                sh,
+                -c,
+                'tar -xf /source.tar -C /app && bash tools/test-container.sh',
+            ]
+
+volumes:
+    composer-cache:
+        name: workbine-testing-composer-cache
+        external: true
+    npm-cache:
+        name: workbine-testing-npm-cache
+        external: true

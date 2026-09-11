@@ -1,10 +1,8 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft, Lightbulb } from 'lucide-react';
-import InputError from '@/components/input-error';
+import { MethodFields } from '@/components/method-fields';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 
 type Props = {
@@ -57,55 +55,7 @@ export default function MethodCreate({ topic }: Props) {
                 >
                     {({ processing, errors }) => (
                         <>
-                            <div className="grid gap-2">
-                                <Label htmlFor="title">Method title</Label>
-                                <Input
-                                    id="title"
-                                    name="title"
-                                    required
-                                    autoFocus
-                                    maxLength={160}
-                                    placeholder="Build the smallest paid version first"
-                                />
-                                <InputError message={errors.title} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="body">
-                                    What worked for you?
-                                </Label>
-                                <textarea
-                                    id="body"
-                                    name="body"
-                                    required
-                                    rows={12}
-                                    maxLength={10000}
-                                    placeholder="Explain what you did, why you chose it, the important steps, what went wrong, and what you would repeat..."
-                                    className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-56 w-full rounded-md border px-3 py-2 text-sm leading-6 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
-                                />
-                                <InputError message={errors.body} />
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="source_url">
-                                    Source link{' '}
-                                    <span className="text-muted-foreground font-normal">
-                                        (optional)
-                                    </span>
-                                </Label>
-                                <Input
-                                    id="source_url"
-                                    name="source_url"
-                                    type="url"
-                                    maxLength={2048}
-                                    placeholder="https://..."
-                                />
-                                <p className="text-muted-foreground text-sm">
-                                    Add the original source when you are sharing
-                                    or adapting a method you found elsewhere.
-                                </p>
-                                <InputError message={errors.source_url} />
-                            </div>
+                            <MethodFields errors={errors} autoFocus />
 
                             <div className="flex flex-wrap items-center gap-3 pt-2">
                                 <Button

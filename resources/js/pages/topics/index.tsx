@@ -19,9 +19,9 @@ type Props = {
 };
 
 const starters = [
-    'How do you find the first customer for a small project?',
-    'What helped you learn a skill while working full-time?',
-    'Which part of your weekly work have you made simpler?',
+    'Automating product imports for an online store',
+    'Learning a new skill while working full-time',
+    'Finding the first customer for a small project',
 ];
 
 function formatDate(value: string): string {
@@ -34,16 +34,16 @@ function formatDate(value: string): string {
 }
 
 export default function TopicsIndex({ topics, view, search }: Props) {
-    const [question, setQuestion] = useState('');
-    const questionInput = useRef<HTMLInputElement>(null);
+    const [topicTitle, setTopicTitle] = useState('');
+    const topicInput = useRef<HTMLInputElement>(null);
     const unanswered = view === 'unanswered';
     const filterUrl = (value: string) =>
         `/topics?${new URLSearchParams({ view: value, q: search })}#topics`;
 
     function chooseStarter(title: string) {
-        setQuestion(title);
-        questionInput.current?.focus();
-        questionInput.current?.scrollIntoView({
+        setTopicTitle(title);
+        topicInput.current?.focus();
+        topicInput.current?.scrollIntoView({
             block: 'center',
             behavior: 'instant',
         });
@@ -58,10 +58,11 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                 <header className="wb-notebook-masthead">
                     <div>
                         <p className="wb-kicker">The Workbine community</p>
-                        <h1>Learn from the people who tried it.</h1>
+                        <h1>Share how you do it. Discover how others do.</h1>
                         <p>
-                            Good questions. Methods worth trying. The honest
-                            story afterwards.
+                            Start a topic with your own method, or open a
+                            subject you want to explore. Share approaches and
+                            learn from what happens in practice.
                         </p>
                     </div>
                     <div className="wb-masthead-mark" aria-hidden="true">
@@ -125,21 +126,21 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             disableWhileProcessing
                             className="wb-compose"
                         >
-                            <label htmlFor="new-question">
-                                What are you figuring out?
+                            <label htmlFor="new-topic">
+                                What would you like to share or explore?
                             </label>
                             <div className="wb-compose-row">
                                 <input
-                                    ref={questionInput}
-                                    id="new-question"
+                                    ref={topicInput}
+                                    id="new-topic"
                                     name="title"
-                                    value={question}
+                                    value={topicTitle}
                                     onChange={(event) =>
-                                        setQuestion(event.target.value)
+                                        setTopicTitle(event.target.value)
                                     }
                                     required
                                     maxLength={160}
-                                    placeholder="Ask people who have actually tried it…"
+                                    placeholder="A subject, a goal or a practical question…"
                                 />
                                 <button type="submit">
                                     Start a topic
@@ -147,8 +148,8 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 </button>
                             </div>
                             <p>
-                                A practical question is enough to start. Add
-                                context on the next page.
+                                Add context and, optionally, your own method on
+                                the next page.
                             </p>
                         </Form>
 
@@ -170,7 +171,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 type="search"
                                 defaultValue={search}
                                 maxLength={120}
-                                placeholder="Search questions and ideas"
+                                placeholder="Search topics and ideas"
                             />
                             <input type="hidden" name="view" value={view} />
                             <button type="submit">Search</button>
@@ -181,7 +182,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 {search
                                     ? 'From the notebook'
                                     : unanswered
-                                      ? 'Questions waiting for experience'
+                                      ? 'Topics waiting for a first method'
                                       : 'Latest from the community'}
                             </h2>
                             <span>
@@ -264,14 +265,14 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                         ? 'No matching topics yet'
                                         : unanswered
                                           ? 'No topics are waiting for a first method'
-                                          : 'A good community starts with a real question.'}
+                                          : 'Share a useful approach. Open a subject to explore.'}
                                 </h3>
                                 <p>
                                     {search
-                                        ? 'Try a different phrase, change the filter, or ask the question yourself. Someone else may be figuring out the same thing.'
+                                        ? 'Try a different phrase, change the filter, or start this topic with your own method or context.'
                                         : unanswered
                                           ? 'Explore the other topics and add another approach. There is rarely just one way to do something.'
-                                          : 'What did you have to figure out the hard way? Bring a question, share a method, and make the next person’s attempt a little easier.'}
+                                          : 'Start with something you know how to do, or something you want to explore. You can publish a topic with your method or invite others to share theirs.'}
                                 </p>
                                 <Button asChild variant="outline">
                                     <Link
@@ -353,7 +354,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     <strong>The situation</strong>
                                     <p>
                                         What were you trying to do? Time, tools
-                                        and constraints change the answer.
+                                        and constraints shape the approach.
                                     </p>
                                 </div>
                             </li>
@@ -379,9 +380,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             </li>
                         </ol>
                         <div className="wb-starters">
-                            <p className="wb-kicker">
-                                A question to start with
-                            </p>
+                            <p className="wb-kicker">A topic to start with</p>
                             <p>
                                 Prompts, not published topics. Pick one and make
                                 it your own.

@@ -41,7 +41,7 @@ export default function TopicShow({ topic, methods }: Props) {
                 <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_260px]">
                     <div className="min-w-0">
                         <p className="text-primary dark:text-primary text-sm font-medium">
-                            A question for the community
+                            A topic to explore
                         </p>
                         <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-[-0.03em] text-balance [overflow-wrap:anywhere] sm:text-4xl lg:text-5xl">
                             {topic.title}
@@ -206,10 +206,9 @@ export default function TopicShow({ topic, methods }: Props) {
                                         point
                                     </h3>
                                     <p className="text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-6">
-                                        You do not need the perfect answer.
-                                        Share what you tried, the steps you
-                                        took, and what you would do differently
-                                        next time.
+                                        Describe the approach you tried, the
+                                        steps you took, the result, and what you
+                                        would do differently next time.
                                     </p>
                                     <Button asChild className="mt-6">
                                         <Link href={contributionUrl}>

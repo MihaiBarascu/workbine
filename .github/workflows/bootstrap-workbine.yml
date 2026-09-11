@@ -1,11 +1,8 @@
 name: bootstrap-workbine
 
+# Explicit invocation only; never consume Actions minutes for ordinary pushes/PRs.
 on:
-  push:
-    branches:
-      - chore/bootstrap-laravel
-    paths:
-      - .github/workflows/bootstrap-workbine.yml
+  workflow_dispatch:
 
 permissions:
   contents: write

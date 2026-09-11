@@ -226,6 +226,108 @@ const { chromium } = browserRequire('playwright');
             'PASS authenticated Topic -> Method creation, copy link and no self-validation form',
         );
 
+        await page.goto(`${root}/topics`);
+        await page
+            .locator('#new-topic')
+            .fill('Automating product imports for an online store');
+        await page
+            .getByRole('button', { name: 'Start a topic', exact: true })
+            .click();
+        await page.waitForURL(/\/topics\/create\?/);
+        assert.equal(
+            await page.locator('input[name="title"]').inputValue(),
+            'Automating product imports for an online store',
+        );
+        const includeMethod = page.getByRole('checkbox', {
+            name: 'Add my method too',
+        });
+        assert.equal(await includeMethod.isChecked(), false);
+        assert.equal(
+            await page.locator('input[name="method_title"]').isVisible(),
+            false,
+        );
+        await includeMethod.check();
+        await page
+            .locator('input[name="method_title"]')
+            .fill('Check a small batch before importing everything');
+        const methodBody =
+            'I mapped supplier columns, tested ten products, then imported the remaining files. The weekly import was quicker, but new supplier formats still needed review.';
+        await page.locator('textarea[name="method_body"]').fill(methodBody);
+        await includeMethod.uncheck();
+        await includeMethod.check();
+        assert.equal(
+            await page.locator('textarea[name="method_body"]').inputValue(),
+            methodBody,
+            'Toggling the optional method preserves the draft',
+        );
+        await page
+            .locator('input[name="method_source_url"]')
+            .fill('ftp://example.com/import');
+        await page
+            .getByRole('button', {
+                name: 'Publish topic & method',
+                exact: true,
+            })
+            .click();
+        await page
+            .getByText('The method source url field must be a valid URL.', {
+                exact: true,
+            })
+            .waitFor();
+        assert.equal(await includeMethod.isChecked(), true);
+        assert.equal(
+            await page.locator('textarea[name="method_body"]').inputValue(),
+            methodBody,
+            'Validation errors preserve the method draft',
+        );
+        assert.equal(
+            await page.locator('input[name="title"]').inputValue(),
+            'Automating product imports for an online store',
+        );
+        await page
+            .locator('input[name="method_source_url"]')
+            .fill('https://example.com/import');
+        await page.setViewportSize({ width: 375, height: 812 });
+        await checkLayout();
+        await page.screenshot({
+            path: `${output}/topic-with-method-form-mobile.png`,
+            fullPage: true,
+            animations: 'disabled',
+        });
+        await page.setViewportSize({ width: 1440, height: 1080 });
+        await checkLayout();
+        await page.screenshot({
+            path: `${output}/topic-with-method-form-desktop.png`,
+            fullPage: true,
+            animations: 'disabled',
+        });
+        await page
+            .getByRole('button', {
+                name: 'Publish topic & method',
+                exact: true,
+            })
+            .click();
+        await page.waitForURL(
+            /\/topics\/automating-product-imports-for-an-online-store$/,
+        );
+        await page
+            .getByRole('heading', {
+                name: 'Check a small batch before importing everything',
+                exact: true,
+            })
+            .waitFor();
+        assert.equal(await page.locator('main article').count(), 1);
+        await page.setViewportSize({ width: 320, height: 812 });
+        await checkLayout();
+        await page.screenshot({
+            path: `${output}/topic-with-first-method-mobile.png`,
+            fullPage: true,
+            animations: 'disabled',
+        });
+        console.log(
+            'PASS topic with first method, subject title, draft toggle, validation recovery and mobile layout',
+        );
+
         await context.clearCookies();
         await page.goto(experienceUrl);
         await page

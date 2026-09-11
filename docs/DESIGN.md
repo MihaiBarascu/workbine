@@ -11,7 +11,7 @@ The owner explicitly rejected the green/olive/teal palette and requested a much 
 - Existing Instrument Sans for all interface headings and body copy; consistent 8px controls and 12px surfaces. No new font, icon, image or animation dependency.
 - Workbine's own line-based W wordmark and matching favicons, not a Laravel starter logo. Use content hierarchy and spacing, not decoration, to create character.
 - Root-level semantic tokens also style menus, dialogs and toasts rendered outside the public shell.
-- A short community heading, working question composer/search, real contributions and compact secondary navigation. No fake members, follower counts, activity, notifications or unavailable controls.
+- A short community heading, working topic composer/search, real contributions and compact secondary navigation. No fake members, follower counts, activity, notifications or unavailable controls.
 
 ## Screens and behavior
 

@@ -1,14 +1,7 @@
 name: Production read-only smoke
 
+# Explicit invocation only; never consume Actions minutes for ordinary pushes/PRs.
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches: [main]
-    paths:
-      - '.github/workflows/production-smoke.yml'
-      - 'tools/inertia_page.py'
   workflow_dispatch:
 
 permissions:

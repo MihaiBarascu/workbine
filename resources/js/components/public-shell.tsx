@@ -127,7 +127,7 @@ export function PublicShell({ children }: Props) {
                     </p>
                     <div className="flex flex-wrap gap-5">
                         <Link href="/#field-guide">Community guide</Link>
-                        <Link href="/topics/create">Ask a good question ↗</Link>
+                        <Link href="/topics/create">Start a topic ↗</Link>
                     </div>
                 </div>
             </footer>
