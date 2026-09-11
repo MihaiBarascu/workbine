@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\HandleInertiaRequests;
 use App\Models\SavedTopic;
 use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -14,6 +16,15 @@ use Tests\TestCase;
 class SavedTopicsTest extends TestCase
 {
     use RefreshDatabase;
+
+    /** @return array<string, string> */
+    private function inertiaHeaders(): array
+    {
+        return [
+            'X-Inertia' => 'true',
+            'X-Inertia-Version' => app(HandleInertiaRequests::class)->version(Request::create('/')) ?? '',
+        ];
+    }
 
     public function test_guests_cannot_read_or_change_saved_topics(): void
     {
@@ -164,14 +175,14 @@ class SavedTopicsTest extends TestCase
     public function test_saved_list_encrypts_browser_history_and_logout_clears_its_key(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get(route('saved.index'), ['X-Inertia' => 'true'])
+            ->get(route('saved.index'), $this->inertiaHeaders())
             ->assertOk()
             ->assertJsonPath('encryptHistory', true);
 
         $this->post(route('logout'))->assertRedirect(route('home'));
         $this->assertGuest();
 
-        $this->get(route('home'), ['X-Inertia' => 'true'])
+        $this->get(route('home'), $this->inertiaHeaders())
             ->assertOk()
             ->assertJsonPath('clearHistory', true);
         $this->get(route('saved.index'))->assertRedirect(route('login'));
@@ -179,7 +190,7 @@ class SavedTopicsTest extends TestCase
 
     public function test_public_topics_do_not_require_encrypted_browser_history(): void
     {
-        $this->get(route('topics.index'), ['X-Inertia' => 'true'])
+        $this->get(route('topics.index'), $this->inertiaHeaders())
             ->assertOk()
             ->assertJsonMissingPath('encryptHistory');
     }
@@ -191,7 +202,7 @@ class SavedTopicsTest extends TestCase
             ->assertRedirect('/');
         $this->assertGuest();
 
-        $this->get(route('home'), ['X-Inertia' => 'true'])
+        $this->get(route('home'), $this->inertiaHeaders())
             ->assertOk()
             ->assertJsonPath('clearHistory', true);
     }
