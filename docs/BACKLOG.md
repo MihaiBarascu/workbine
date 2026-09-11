@@ -1,25 +1,18 @@
 # Workbine development queue
 
-Read README.md, AGENTS.md, docs/STATUS.md and docs/DESIGN.md before choosing work.
+Read README.md, AGENTS.md, docs/STATUS.md and docs/DESIGN.md before choosing work. Current owner direction: a clean, very light community interface without the green palette or Laravel starter account screens.
 
-Owner direction: a distinctive real community, not a generic SaaS template. Continue in small tested increments during explicitly requested development sessions. No ZIP deliverables, fake content, automatic external promotion or fabricated growth metrics.
+Only explicitly requested development sessions are authorized. The owner cancelled the coding agent and three-hour cron; do not recreate them or resume the inactive automatic branch. No ZIP deliverables, fake content, automatic external promotion or fabricated growth metrics.
 
-## Current release status
+## Current release
 
-The community-notebook identity and question composer were released through PR #8.
-
-The owner cancelled unattended development on 2026-09-11 and requested removal of the three-hour cron. The coding workflow is removed. Do not recreate the agent, rerun its historical jobs or resume its pending branch unless newly and explicitly requested. The former automatic task queue is historical, not permission to continue autonomously.
+Review `feat/community-design-and-profiles`: unified white/grey/blue community UI, separate public member profile and private account, all existing authentication/account screens, matching brand icons, profile privacy/validation tests and extended browser coverage. Confirm current PR checks and visual review before marking the work released.
 
 ## Next useful increments for requested sessions
 
-- [ ] Preserve the new identity across public reading, creation and authentication entry points without changing authentication security.
-- [ ] Add accessible copy-link fallback coverage and keyboard navigation coverage to the browser tests.
-- [ ] Implement safe ownership-based editing of a user's own topic/method, with tests and without erasing experience history unexpectedly.
-- [ ] Design an opt-in follow/save mechanism that gives members a reason to return. Do not send email or add tracking without an explicit delivery/privacy design.
-- [ ] Introduce a small content-reporting workflow when a safe operational review route exists; do not build a generic administration suite.
+- Ownership-based editing of topics/methods, with tests and without unexpectedly erasing experience history.
+- An opt-in follow/save mechanism with clear privacy and delivery behavior; no unsolicited email or hidden tracking.
+- Small content-reporting tools when a safe operational review path exists, not a speculative admin suite.
+- Branded error pages as a separate tested improvement to the framework error responses.
 
-## Development rules
-
-Read the latest main and any existing development PR first. Keep a short handoff in STATUS, with actual tests and unresolved limitations. Do not mark an item done merely because code was generated. Never weaken tests to obtain a green build. Do not publish generated content or claim user growth.
-
-The existing application, CI and Dokploy deployment are not being stopped. Only the unattended coding-agent workflow and its schedule are removed.
+Read the latest main and existing PRs before changing files. Keep STATUS truthful about actual validation and limitations. Do not claim measured growth or independent usability validation based on UI screenshots.

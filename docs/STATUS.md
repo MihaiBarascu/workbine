@@ -2,54 +2,49 @@
 
 Last updated: 2026-09-11
 
-## Production and owner direction
+## Owner direction and release process
 
-Production is `main` -> Dokploy build/migrations -> `https://workbine.com`. The owner authorizes tested feature work and merges and does not want ZIP deliverables. On 2026-09-11 the owner explicitly requested stopping the GitHub coding agent and removing its cron. This revokes the earlier request for unattended development every three hours. Do not recreate or restart a scheduled coding agent without a new explicit request. Do not claim audience growth without real metrics or claim a chat will automatically reopen.
+Production is `main` -> Dokploy build/migrations -> `https://workbine.com`. The owner authorizes tested feature work and merges and does not want ZIP deliverables. Read README.md, AGENTS.md, this file, docs/DESIGN.md and docs/BACKLOG.md before changing anything.
 
-Read README.md, AGENTS.md, this file, docs/DESIGN.md and docs/BACKLOG.md before changing anything. Keep the Laravel 13 + React 19 + Inertia 3 + TypeScript monolith. Production uses PostgreSQL; local defaults are SQLite.
+On 2026-09-11 the owner stopped the GitHub coding agent and requested removal of its cron. PR #11 removed the scheduled workflow. This revokes the earlier request for unattended development. Do not restore the workflow, rerun old agent jobs, activate publication permissions or continue its pending branch without a new explicit request. The retained controller/task files are inactive history. Ordinary CI, browser tests and Dokploy remain in place.
 
-## Current product
+The latest visual direction is white, very light neutral grey, graphite text and restrained blue actions. The owner rejected the previous green/olive/teal and terracotta treatment. The current docs/DESIGN.md supersedes historical palette instructions.
+
+## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.
 
-Topics are independent. Public search across title/context combines with Needs a method and stable pagination. People can share concrete methods and report positive, partial or negative experiences with context, an optional trial date and public evidence URL. Unique user/method entries, atomic updates, own-entry removal, scoped topic/method access, no author self-validation and contribution throttling are in place. Public author serializers omit private identity data. Outcomes are self-reported, not independently verified success rates.
+Topics are independent. Bounded literal search across title/context combines with Needs a method and stable pagination. Users share concrete methods and report positive, partial or negative experiences with context, optional trial date and public evidence URL. A unique user/method key, atomic updates, own-entry removal, scoped routes, no author self-validation and contribution throttling are in place. Outcomes are self-reported, not independent verification or measured success rates.
 
-PRs #5, #6 and #7 added public discovery, real experiences/search, and clearer production smoke checks. PR #8 is merged and establishes the distinct community-notebook identity: warm paper, carbon-green ink, terracotta details, custom lowercase wordmark, serif display type, editorial margins/rules and a readable row-based feed. Keep this identity rather than returning to generic SaaS heroes or repeated floating cards.
+PRs #5-#7 added public discovery, experiences/search and production smoke checks. PR #8 introduced the previous notebook UI; its protected question draft flow remains. Prompts are labelled as prompts, not fake community content. Link copying includes a manual fallback.
 
-The notebook composer carries a draft through the protected creation URL and login without publishing it. Starter prompts are explicitly labelled prompts, never fabricated community activity. Copy-link controls include a manual fallback.
+## Community design and member profiles in this revision
 
-The identity passed all 85 application tests on SQLite and PostgreSQL, frontend build, formatting/lint, TypeScript, Pint, PHPStan and the real Chromium contribution flow. Desktop/mobile and narrow dark-mode captures were reviewed. Deployment must still be checked separately for every release.
+Branch: `feat/community-design-and-profiles`. Check its PR and latest head checks for release status. A checkout is not proof of production deployment.
 
-## Automated development stopped
+- Unified neutral light/blue theme and neutral dark appearance, shared by public pages, authentication, account settings, dropdowns and dialogs.
+- Public `/members/{id}` profile with introduction, location, personal website, join month, real counts and paginated Methods / Topics / Experiences. Author links lead to member profiles.
+- Private Profile settings distinguish public introduction fields from private email. Security and Appearance no longer use the Laravel starter sidebar.
+- Branded login, registration, forgot/reset password, email verification, password confirmation, two-factor and recovery-code screens preserve existing authentication behavior.
+- Own profile action, account dropdown, POST logout and existing confirmation dialogs remain functional.
+- Workbine SVG/ICO/mobile bookmark icons replace the Laravel favicon.
 
-The owner requested stopping the agent and removing the cron on 2026-09-11. `.github/workflows/continuous-development.yml` is removed from this revision, including its three-hour schedule, manual-dispatch trigger and controller-change push trigger. No replacement coding schedule is introduced.
+The migration adds only nullable bio/location/website columns to users. No existing rows or authentication policy are rewritten. Public data is serialized explicitly; private email, Google identity and security data are omitted. Website input permits only HTTP/HTTPS, and bio is escaped by React. No uploads, new runtime dependencies, fake activity or new scheduled agent.
 
-Do not enable the old Actions PR-creation prerequisite, restore the deleted workflow, rerun historical coding-agent jobs or resume the pending `automation/workbine-continuation` branch on the basis of older instructions. Any new unattended development needs fresh explicit authorization from the owner.
+## Tests and screen coverage
 
-Historical controller code, task/progress files, branches and run logs are retained for audit, not as an active development queue. The ordinary CI, UI preview, read-only production smoke and Dokploy deployment flow are unchanged. No application functionality or production data is removed by this shutdown.
+See docs/SCREENS.md for the exact inventory and limitations. Eight member-profile feature tests cover privacy, owner-only mutation, tabs, pagination, validation and missing users. The existing 85 application tests remain.
 
-See docs/AUTOMATION.md for the shutdown record. Future development is performed only in explicitly requested sessions, not on a timer.
+The UI preview builds a disposable localhost app, runs the original Topic -> Method -> Experience contribution flow and the new profile/account/auth browser flow. New checks exercise profile persistence, public privacy, escaped bio, long names, narrow-screen layout, theme persistence, account menu/logout, clipboard fallback, registration, password confirmation, two-factor setup/recovery and confirmation dialogs. Palette assertions ensure the new neutral canvas and blue primary are actually applied. Screenshots are internal review evidence, not ZIP deliverables.
 
-## Validation and privacy boundaries
+Validation is in progress. The latest PR head CI and actual browser workflow conclusions are the source of truth. Never disable checks to obtain a green build. Temporary source-review/preparation workflows are removed from the release diff; they only applied manually authored changes during this requested session and did not invoke a coding agent.
 
-CI runs build, formatting/lint, TypeScript, Pint, PHPStan and PHPUnit against SQLite and PostgreSQL 16. The public browser workflow tests search/filter recovery, intended login, Topic -> Method creation, Experience create/update/delete, copy links, own-method restrictions, public persistence, horizontal overflow and runtime errors. Internal screenshots are for review, not ZIP deliverables to the owner.
+## Stack, privacy and operational boundaries
 
-The browser test is hard-coded to localhost and uses disposable synthetic data; never point it at production. Live smoke checks are read-only and sample topic/experience pages only if existing real content is available. Zero sampled pages is not coverage of those flows. Real Google OAuth with an actual account is not exercised by the synthetic browser test; the existing backend Google tests remain.
+Keep the Laravel 13 + React 19 + Inertia 3 + TypeScript monolith. Production uses PostgreSQL; CI tests SQLite and PostgreSQL 16. Generate Wayfinder files before build/type checks, never commit them. Fortify and Socialite behavior is unchanged. Routes mentioning verified middleware do not make the User model enforce verification by themselves.
 
-Fortify/Socialite authentication is unchanged. The User model does not enforce verification merely because routes mention verified middleware. Secrets and production environment values stay out of Git. No generated Wayfinder files, artificial reputation, seeded production contributions or generic admin suite are introduced.
+Browser mutation tests are intentionally hard-coded to localhost with synthetic data. Never run them against production. Real Google OAuth and device-specific hardware passkey enrollment require actual provider/device interaction and are not claimed covered by synthetic browser tests. Existing backend security tests remain. Standard framework error responses are outside this screen refinement.
 
-## Infrastructure and access
+`Cloudflare -> Cloudflare Tunnel -> Dokploy Traefik -> Laravel container:80`. Cloudflare terminates HTTPS; Dokploy provides PostgreSQL. The entrypoint runs migrations and optimization; `/up` is the health check. Secrets, production environment values and real customer data must remain out of Git.
 
-`Cloudflare -> Cloudflare Tunnel -> Dokploy Traefik -> Laravel container:80`.
-
-Cloudflare terminates HTTPS. Dokploy provides PostgreSQL. The entrypoint runs migrations and optimization; `/up` is the health check. The Experiences migration is additive and uses cascading foreign keys.
-
-Chromium and service-identified HTTP requests have opened workbine.com with HTTP 200. A prior bare Python probe returned HTTP 403; this does not identify a specific Cloudflare rule or demonstrate an outage. No Cloudflare security configuration was changed. Check actual workflow conclusions, browser output and Dokploy state rather than inferring deployment from a merge or CI alone.
-
-## Community design and member profile implementation
-
-Branch: `feat/community-design-and-profiles`. This requested session implements a cleaner shared design, a public member profile, public introduction fields and a branded private account/authentication experience. See `docs/SCREENS.md` for the exact screen scope and `docs/DESIGN.md` for the refinement and attributed Dribbble references.
-
-The migration only adds nullable bio/location/website fields to users; existing rows, authentication behavior and production content are unchanged. All public member data is explicitly serialized. No runtime dependencies, uploads, artificial community activity, scheduled coding agent or cron are introduced.
-
-Validation is in progress. Use the latest PR head CI and browser result, not this implementation note, as proof of success. Do not merge the temporary source-audit or formatting-preparation workflows.
+Read-only live smoke verifies health/search/listing and samples existing topic/experience pages when content exists; zero sampled pages is not coverage of those flows. It parses initial Inertia HTML, avoiding an unversioned XHR asset-mismatch response. A failed local web/DNS fetch does not prove an outage or identify a Cloudflare rule. CI/merge success alone is not deployment proof.
