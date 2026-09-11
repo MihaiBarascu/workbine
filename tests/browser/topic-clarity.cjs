@@ -80,7 +80,10 @@ async function exerciseTopicClarity(page, root, output) {
         null,
         'Context is optional',
     );
-    await page.getByText('A little context', { exact: false }).first().waitFor();
+    await page
+        .getByText('A little context', { exact: false })
+        .first()
+        .waitFor();
     assert.equal(await page.locator('#first-method-fields').isVisible(), false);
     assert.equal(await page.locator('#method_title').isDisabled(), true);
 
@@ -120,7 +123,9 @@ async function exerciseTopicClarity(page, root, output) {
         'One small step after dinner',
     );
     assert.ok(
-        (await page.locator('#method_body').inputValue()).includes('A reminder'),
+        (await page.locator('#method_body').inputValue()).includes(
+            'A reminder',
+        ),
     );
     assert.equal(
         await page.locator('#method_source_url').inputValue(),
@@ -221,7 +226,9 @@ async function exerciseTopicClarity(page, root, output) {
         },
         { times: 1 },
     );
-    await page.getByRole('link', { name: 'Back to topics', exact: true }).click();
+    await page
+        .getByRole('link', { name: 'Back to topics', exact: true })
+        .click();
     await page
         .getByRole('heading', {
             name: 'A small thing you know can help someone else.',
