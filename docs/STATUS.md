@@ -18,26 +18,30 @@ Topics are independent. Bounded literal search across title/context combines wit
 
 PRs #5-#7 added public discovery, experiences/search and production smoke checks. PR #8 introduced the previous notebook UI; its protected question draft flow remains. Prompts are labelled as prompts, not fake community content. Link copying includes a manual fallback.
 
-## Community design and member profiles in this revision
+## Community design and member profiles
 
-Branch: `feat/community-design-and-profiles`. Check its PR and latest head checks for release status. A checkout is not proof of production deployment.
+PR #12, branch `feat/community-design-and-profiles`. Check the PR merge state and latest head checks before continuing. A checkout or successful merge is not proof of production deployment.
 
 - Unified neutral light/blue theme and neutral dark appearance, shared by public pages, authentication, account settings, dropdowns and dialogs.
 - Public `/members/{id}` profile with introduction, location, personal website, join month, real counts and paginated Methods / Topics / Experiences. Author links lead to member profiles.
 - Private Profile settings distinguish public introduction fields from private email. Security and Appearance no longer use the Laravel starter sidebar.
 - Branded login, registration, forgot/reset password, email verification, password confirmation, two-factor and recovery-code screens preserve existing authentication behavior.
-- Own profile action, account dropdown, POST logout and existing confirmation dialogs remain functional.
+- Own profile action, account dropdown, POST logout and existing confirmation dialogs remain functional. Sign-in alternatives share one email separator; the redundant separator found during visual review was removed.
 - Workbine SVG/ICO/mobile bookmark icons replace the Laravel favicon.
 
 The migration adds only nullable bio/location/website columns to users. No existing rows or authentication policy are rewritten. Public data is serialized explicitly; private email, Google identity and security data are omitted. Website input permits only HTTP/HTTPS, and bio is escaped by React. No uploads, new runtime dependencies, fake activity or new scheduled agent.
 
-## Tests and screen coverage
+## Validation handoff
 
-See docs/SCREENS.md for the exact inventory and limitations. Eight member-profile feature tests cover privacy, owner-only mutation, tabs, pagination, validation and missing users. The existing 85 application tests remain.
+Application revision `9a8eddb6ad4f990a336e229f0cad8af1bbab2df1` passed CI #40 (run `34577150367`) and Public UI preview #20 (run `34577150392`). The full SQLite/PostgreSQL pipeline passed build, formatting/lint, TypeScript, Pint, PHPStan, 93 application tests and 13 existing Python guard/parser tests. Eight new application tests cover member privacy, contribution ownership, tabs/pagination, input validation and missing users.
 
-The UI preview builds a disposable localhost app, runs the original Topic -> Method -> Experience contribution flow and the new profile/account/auth browser flow. New checks exercise profile persistence, public privacy, escaped bio, long names, narrow-screen layout, theme persistence, account menu/logout, clipboard fallback, registration, password confirmation, two-factor setup/recovery and confirmation dialogs. Palette assertions ensure the new neutral canvas and blue primary are actually applied. Screenshots are internal review evidence, not ZIP deliverables.
+The original Topic -> Method -> Experience browser flow and the added profile/account/authentication flow both passed. These check profile persistence, public privacy, escaped bio, long names, narrow-screen overflow, theme persistence, account-menu logout, clipboard-denied fallback, registration, password confirmation and two-factor recovery. Palette assertions check the actual computed neutral canvas and blue primary colors.
 
-Validation is in progress. The latest PR head CI and actual browser workflow conclusions are the source of truth. Never disable checks to obtain a green build. Temporary source-review/preparation workflows are removed from the release diff; they only applied manually authored changes during this requested session and did not invoke a coding agent.
+Desktop feed, public member profile, private settings and authentication screens were visually inspected, together with mobile and dark states across the 37-image preview set. Full-page captures of scrolled pages can include the sticky header at its current scroll position; that is not evidence that the header is duplicated in the application. The two-factor setup capture covers the dialog/loading layout, not a complete authenticator enrollment. See docs/SCREENS.md for scope and limitations.
+
+An initial CI failure identified Markdown formatting in DESIGN.md; it was fixed without disabling the check. Temporary source-review and formatting-preparation workflows are absent from the release diff. They only applied manually authored changes during this requested session and did not invoke a coding agent.
+
+Use the latest PR head checks as the release gate; rerun CI on any subsequent change. Confirm live rendering separately after Dokploy completes the merge-triggered build. Screenshots are internal review evidence, not ZIP deliverables.
 
 ## Stack, privacy and operational boundaries
 
