@@ -305,9 +305,10 @@ const { chromium } = requireBrowser('playwright');
             uploadRequest.headers()['content-type'],
             /^multipart\/form-data;/,
         );
-        assert.match(
-            uploadRequest.postDataBuffer().toString(),
-            /name="_method"\r\n\r\nput/,
+        assert.equal(
+            await page.locator('input[name="_method"]').inputValue(),
+            'put',
+            'Multipart form keeps the update method override',
         );
         const article = page
             .locator('main article')
