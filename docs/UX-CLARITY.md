@@ -36,12 +36,17 @@ controls, optional field submission, retained writing, server-error focus and
 320px/1440px light/dark composer captures. It also checks that the intentionally
 invalid draft does not publish anything. A one-response, browser-only fixture
 checks and captures the true empty discovery state without deleting seeded data.
-Existing topic-only, topic-with-method,
-search, account and experience checks remain part of that flow.
+Existing topic-only, topic-with-method, search, account and experience checks
+remain part of that flow.
 
-Both the existing manual UI preview workflow and local test runner already invoke
-community-flow.cjs; no new workflow triggers, cron, browser dependencies or
-production mutations are introduced.
+Both the UI preview workflow and local test runner invoke community-flow.cjs.
+Remote sessions can now request the existing CI and UI workflows by explicitly
+adding `run-remote-checks` to a same-repository PR, as well as by workflow dispatch.
+This pins checkout to the requested PR head and records it in the job summary.
+Ordinary pushes do not start tests; keeping the label does not test later changes.
+See [TESTING.md](TESTING.md) for requesting and verifying fresh checks after fixes.
+No cron, automatic deployment, new browser dependency or production mutation is
+introduced by the test workflows.
 
 ## Release gate
 
@@ -49,8 +54,9 @@ This document describes implementation and test coverage, not passing test
 results. Run the environment-appropriate checks in [TESTING.md](TESTING.md), review
 the actual screenshots and fix failures before merging. Syntax checks alone do
 not establish a passing application build, integration suite, browser behavior or
-visual review. Human usability and enjoyment remain hypotheses to validate with
-people, not claims established by automated tests.
+visual review. Record the tested revision, actual workflow results and reviewed
+artifacts in the PR. Human usability and enjoyment remain hypotheses to validate
+with people, not claims established by automated tests.
 
 Implementation references: [Inertia forms](https://inertiajs.com/docs/v3/the-basics/forms)
 and [W3C form notifications](https://www.w3.org/WAI/tutorials/forms/notifications/).
