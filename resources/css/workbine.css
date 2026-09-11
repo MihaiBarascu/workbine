@@ -1384,7 +1384,8 @@
         font-size: 12px;
         padding-inline: 10px;
     }
-    .wb-start-button svg {
+    .wb-start-button svg,
+    .wb-account-trigger > svg {
         display: none;
     }
     .wb-topbar-inner {
