@@ -17,6 +17,11 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        return $this->profileRules($this->user()->id);
+        return [
+            ...$this->profileRules($this->user()->id),
+            'bio' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'location' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'website' => ['sometimes', 'nullable', 'url:http,https', 'max:2048'],
+        ];
     }
 }

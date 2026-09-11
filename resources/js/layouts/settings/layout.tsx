@@ -1,78 +1,93 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { ArrowUpRight, Palette, ShieldCheck, UserRound } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
-import Heading from '@/components/heading';
+import { MemberAvatar } from '@/components/community';
+import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { useCurrentUrl } from '@/hooks/use-current-url';
-import { cn, toUrl } from '@/lib/utils';
-import { edit as editAppearance } from '@/routes/appearance';
-import { edit } from '@/routes/profile';
-import { edit as editSecurity } from '@/routes/security';
-import type { NavItem } from '@/types';
+import type { Auth } from '@/types';
 
-const sidebarNavItems: NavItem[] = [
+const sections = [
     {
         title: 'Profile',
-        href: edit(),
-        icon: null,
+        href: '/settings/profile',
+        icon: UserRound,
+        description: 'Your introduction and account',
     },
     {
         title: 'Security',
-        href: editSecurity(),
-        icon: null,
+        href: '/settings/security',
+        icon: ShieldCheck,
+        description: 'Password and sign-in methods',
     },
     {
         title: 'Appearance',
-        href: editAppearance(),
-        icon: null,
+        href: '/settings/appearance',
+        icon: Palette,
+        description: 'Make yourself at home',
     },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
-    const { isCurrentOrParentUrl } = useCurrentUrl();
-
+    const { auth } = usePage<{ auth: Auth }>().props;
+    const path = usePage().url.split('?')[0];
     return (
-        <div className="px-4 py-6">
-            <Heading
-                title="Settings"
-                description="Manage your profile and account settings"
-            />
-
-            <div className="flex flex-col lg:flex-row lg:space-x-12">
-                <aside className="w-full max-w-xl lg:w-48">
-                    <nav
-                        className="flex flex-col space-y-1 space-x-0"
-                        aria-label="Settings"
+        <PublicShell>
+            <main className="wb-page wb-account-page">
+                <header className="wb-account-heading">
+                    <div className="flex min-w-0 items-center gap-4">
+                        <MemberAvatar name={auth.user.name} large />
+                        <div className="min-w-0">
+                            <p className="wb-kicker">Your space on Workbine</p>
+                            <h1>Your account</h1>
+                            <p className="text-muted-foreground mt-1 text-sm [overflow-wrap:anywhere]">
+                                A little about you. Everything under your
+                                control.
+                            </p>
+                        </div>
+                    </div>
+                    <Button asChild variant="outline">
+                        <Link href={`/members/${auth.user.id}`}>
+                            View public profile
+                            <ArrowUpRight aria-hidden="true" />
+                        </Link>
+                    </Button>
+                </header>
+                <div className="wb-settings-grid">
+                    <aside>
+                        <nav aria-label="Settings" className="wb-settings-nav">
+                            {sections.map(
+                                ({ title, href, icon: Icon, description }) => (
+                                    <Link
+                                        key={href}
+                                        href={href}
+                                        aria-current={
+                                            path === href ? 'page' : undefined
+                                        }
+                                    >
+                                        <Icon aria-hidden="true" />
+                                        <span>
+                                            <strong>{title}</strong>
+                                            <small>{description}</small>
+                                        </span>
+                                    </Link>
+                                ),
+                            )}
+                        </nav>
+                        <p className="wb-private-note">
+                            <ShieldCheck aria-hidden="true" />
+                            Only you can see your account settings. Your email
+                            and sign-in details are never shown on your public
+                            profile.
+                        </p>
+                    </aside>
+                    <section
+                        className="wb-settings-content"
+                        aria-label="Account preferences"
                     >
-                        {sidebarNavItems.map((item, index) => (
-                            <Button
-                                key={`${toUrl(item.href)}-${index}`}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': isCurrentOrParentUrl(item.href),
-                                })}
-                            >
-                                <Link href={item.href}>
-                                    {item.icon && (
-                                        <item.icon className="h-4 w-4" />
-                                    )}
-                                    {item.title}
-                                </Link>
-                            </Button>
-                        ))}
-                    </nav>
-                </aside>
-
-                <Separator className="my-6 lg:hidden" />
-
-                <div className="flex-1 md:max-w-2xl">
-                    <section className="max-w-xl space-y-12">
                         {children}
                     </section>
                 </div>
-            </div>
-        </div>
+            </main>
+        </PublicShell>
     );
 }

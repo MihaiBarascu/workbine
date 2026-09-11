@@ -37,3 +37,20 @@ Existing topic/method/experience pages remain functional and use the same paper/
 Run the complete repository CI on SQLite and PostgreSQL, the real browser contribution flow, and visual review of populated and empty states, desktop/mobile, light/dark. Verify the deployed public site separately. Passing a screenshot command is not visual approval.
 
 Do not keep redesigning finished surfaces on a timer. Follow the next concrete backlog item and preserve established components unless user feedback or an observed problem justifies a change.
+
+## 2026-09-11 refinement: community, member and account screens
+
+The owner's new feedback supersedes the earlier deliberately notebook-like visual treatment where it conflicts: the interface should be cleaner, less ornamental, and consistent across all existing screens, especially the former Laravel account area.
+
+Use one quiet community UI: near-white canvas, white content surfaces, a restrained forest-green primary action and terracotta accent. Keep the Workbine wordmark, remove oversized serif statements and decorative AI sparkles, use consistent 8px controls, 12px content surfaces, readable sans-serif headings and generous but purposeful spacing. Navigation has real destinations, never invented notifications, follower counts or unavailable actions.
+
+A member profile (`/members/{id}`) is separate from private account settings. It shows only explicitly serialized public fields, real contribution counts and paginated Methods / Topics / Experiences. Optional bio, location and website are clearly marked public when editing. Email, Google identity, secrets and security settings never enter the public serializer. Initial-based avatars require no uploads, external image service or new dependency.
+
+All existing auth screens use the branded AuthLayout. All three settings screens use SettingsLayout directly, not the Laravel sidebar wrapper. Shared theme tokens live at the document root so Radix dialogs/dropdowns and toasts have the same theme as the page. Existing Fortify password, 2FA, passkey and account deletion behavior remains intact.
+
+### References reviewed, not copied
+
+- Mohammad Ebn Ali, _Forum Community Feed_: https://dribbble.com/shots/25457462-Forum-Community-Feed — compact community navigation, clear author/title/content hierarchy, useful secondary column. The published screenshot was inspected.
+- Creliq UX/UI Design Agency, _Community Feed Dashboard UI for Learning Platform_: https://dribbble.com/shots/27266379-Community-Feed-Dashboard-UI-for-Learning-Platform — documented community/feed navigation structure. Its project description was reviewed; the large image could not be retrieved reliably.
+
+These are attributed portfolio references, not proof of usability testing or business results. No purchased assets, copied illustrations, fake activity or claims of designer validation are part of this implementation. Product validation is the repository's own functional, privacy and browser checks.

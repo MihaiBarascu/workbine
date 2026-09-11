@@ -8,6 +8,7 @@ import {
     Plus,
 } from 'lucide-react';
 import { CopyLinkButton } from '@/components/copy-link-button';
+import { MemberLink } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type { MethodSummary, TopicSummary, User } from '@/types';
@@ -46,7 +47,9 @@ export default function TopicShow({ topic, methods }: Props) {
                             {topic.title}
                         </h1>
                         <div className="text-muted-foreground mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm [overflow-wrap:anywhere]">
-                            <span>Started by {topic.user.name}</span>
+                            <span className="inline-flex flex-wrap items-center gap-1">
+                                Started by <MemberLink user={topic.user} />
+                            </span>
                             {topic.created_at && (
                                 <time dateTime={topic.created_at}>
                                     · {formatDate(topic.created_at)}
@@ -104,9 +107,9 @@ export default function TopicShow({ topic, methods }: Props) {
                                                 <div className="min-w-0">
                                                     <p className="text-muted-foreground text-sm [overflow-wrap:anywhere]">
                                                         Shared by{' '}
-                                                        <span className="text-foreground font-medium">
-                                                            {method.user.name}
-                                                        </span>
+                                                        <MemberLink
+                                                            user={method.user}
+                                                        />
                                                     </p>
                                                     {method.created_at && (
                                                         <time

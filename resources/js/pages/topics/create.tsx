@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { ArrowLeft, MessageSquare } from 'lucide-react';
 import InputError from '@/components/input-error';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ export default function TopicCreate({ initialTitle }: Props) {
         <PublicShell>
             <Head title="Start a topic" />
 
-            <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+            <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
                 <Button asChild variant="ghost" className="mb-6 -ml-3">
                     <Link href="/topics">
                         <ArrowLeft />
@@ -24,7 +24,7 @@ export default function TopicCreate({ initialTitle }: Props) {
 
                 <div className="mb-9">
                     <div className="bg-muted text-muted-foreground mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium">
-                        <Sparkles className="size-4" />
+                        <MessageSquare className="size-4" />
                         Start something useful
                     </div>
                     <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
@@ -40,7 +40,7 @@ export default function TopicCreate({ initialTitle }: Props) {
                     action="/topics"
                     method="post"
                     disableWhileProcessing
-                    className="space-y-6"
+                    className="wb-panel space-y-6"
                 >
                     {({ processing, errors }) => (
                         <>

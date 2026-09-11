@@ -2,6 +2,7 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, ExternalLink, MessageCircleMore } from 'lucide-react';
 import { CopyLinkButton } from '@/components/copy-link-button';
 import { ExperienceForm } from '@/components/experience-form';
+import { MemberLink } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type {
@@ -62,7 +63,8 @@ export default function ExperiencesIndex({
                     {method.title}
                 </h1>
                 <p className="text-muted-foreground mt-3 text-sm [overflow-wrap:anywhere]">
-                    Method shared by {method.user.name} · Topic: {topic.title}
+                    Method shared by <MemberLink user={method.user} /> · Topic:{' '}
+                    {topic.title}
                 </p>
                 <div className="mt-5">
                     <CopyLinkButton path={`${base}/experiences`} />
@@ -152,7 +154,9 @@ export default function ExperiencesIndex({
                                     >
                                         <div className="flex flex-wrap items-center justify-between gap-2">
                                             <h3 className="text-sm font-semibold [overflow-wrap:anywhere]">
-                                                {experience.user.name}
+                                                <MemberLink
+                                                    user={experience.user}
+                                                />
                                             </h3>
                                             <span className="bg-secondary text-secondary-foreground dark:bg-secondary dark:text-secondary-foreground rounded-full px-3 py-1 text-xs font-medium">
                                                 {outcomes[experience.outcome]}

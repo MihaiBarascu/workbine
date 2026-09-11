@@ -7,6 +7,7 @@ import {
     Search,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { MemberLink } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type { PaginatedTopics } from '@/types';
@@ -56,10 +57,8 @@ export default function TopicsIndex({ topics, view, search }: Props) {
             <main className="wb-notebook">
                 <header className="wb-notebook-masthead">
                     <div>
-                        <p className="wb-kicker">
-                            Notes from people doing the work
-                        </p>
-                        <h1>The community notebook.</h1>
+                        <p className="wb-kicker">The Workbine community</p>
+                        <h1>Learn from the people who tried it.</h1>
                         <p>
                             Good questions. Methods worth trying. The honest
                             story afterwards.
@@ -91,7 +90,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
 
                 <div className="wb-layout">
                     <aside className="wb-sidebar">
-                        <p className="wb-kicker">Browse the notebook</p>
+                        <p className="wb-kicker">Explore</p>
                         <nav aria-label="Filter topics" className="wb-feed-nav">
                             <Link
                                 href={filterUrl('latest')}
@@ -123,6 +122,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         <Form
                             action="/topics/create"
                             method="get"
+                            disableWhileProcessing
                             className="wb-compose"
                         >
                             <label htmlFor="new-question">
@@ -156,6 +156,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             key={`${view}:${search}`}
                             action="/topics#topics"
                             method="get"
+                            disableWhileProcessing
                             role="search"
                             className="wb-search"
                         >
@@ -169,7 +170,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 type="search"
                                 defaultValue={search}
                                 maxLength={120}
-                                placeholder="Look through the notebook"
+                                placeholder="Search questions and ideas"
                             />
                             <input type="hidden" name="view" value={view} />
                             <button type="submit">Search</button>
@@ -204,50 +205,50 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                         key={topic.id}
                                         className="wb-entry"
                                     >
-                                        <Link href={`/topics/${topic.slug}`}>
-                                            <div className="wb-entry-meta">
-                                                <span
-                                                    className="wb-initial"
-                                                    aria-hidden="true"
+                                        <div className="wb-entry-meta">
+                                            <MemberLink
+                                                user={topic.user}
+                                                avatar
+                                            />
+                                            {topic.created_at && (
+                                                <time
+                                                    dateTime={topic.created_at}
                                                 >
-                                                    {Array.from(
-                                                        topic.user.name.trim(),
-                                                    )[0] ?? '?'}
-                                                </span>
-                                                <span>{topic.user.name}</span>
-                                                {topic.created_at && (
-                                                    <time
-                                                        dateTime={
-                                                            topic.created_at
-                                                        }
-                                                    >
-                                                        {formatDate(
-                                                            topic.created_at,
-                                                        )}
-                                                    </time>
-                                                )}
-                                            </div>
-                                            <h3>{topic.title}</h3>
-                                            <p className="wb-entry-description">
-                                                {topic.description ||
-                                                    'Have you done this? The details of your approach could help someone else.'}
-                                            </p>
-                                            <div className="wb-entry-bottom">
-                                                <span>
-                                                    <MessagesSquare aria-hidden="true" />
-                                                    {topic.methods_count}{' '}
-                                                    {topic.methods_count === 1
-                                                        ? 'method'
-                                                        : 'methods'}
-                                                </span>
-                                                <span className="wb-entry-invite">
-                                                    {topic.methods_count
-                                                        ? 'Read the approaches'
-                                                        : 'Bring the first method'}
-                                                    <ArrowRight aria-hidden="true" />
-                                                </span>
-                                            </div>
-                                        </Link>
+                                                    {formatDate(
+                                                        topic.created_at,
+                                                    )}
+                                                </time>
+                                            )}
+                                        </div>
+                                        <h3>
+                                            <Link
+                                                href={`/topics/${topic.slug}`}
+                                            >
+                                                {topic.title}
+                                            </Link>
+                                        </h3>
+                                        <p className="wb-entry-description">
+                                            {topic.description ||
+                                                'Have you done this? Share the details of your approach.'}
+                                        </p>
+                                        <div className="wb-entry-bottom">
+                                            <span>
+                                                <MessagesSquare aria-hidden="true" />
+                                                {topic.methods_count}{' '}
+                                                {topic.methods_count === 1
+                                                    ? 'method'
+                                                    : 'methods'}
+                                            </span>
+                                            <Link
+                                                className="wb-entry-invite"
+                                                href={`/topics/${topic.slug}`}
+                                            >
+                                                {topic.methods_count
+                                                    ? 'Read the approaches'
+                                                    : 'Share the first method'}
+                                                <ArrowRight aria-hidden="true" />
+                                            </Link>
+                                        </div>
                                     </article>
                                 ))}
                             </div>
@@ -339,9 +340,9 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         id="field-guide"
                         aria-labelledby="guide-heading"
                     >
-                        <p className="wb-kicker">The Workbine field guide</p>
+                        <p className="wb-kicker">Community guide</p>
                         <h2 id="guide-heading" className="wb-guide-heading">
-                            Leave the useful
+                            Keep the useful
                             <br />
                             part in.
                         </h2>

@@ -20,6 +20,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property string|null $bio
+ * @property string|null $location
+ * @property string|null $website
+ * @property int|null $topics_count
+ * @property int|null $methods_count
+ * @property int|null $experiences_count
  * @property string|null $google_id
  * @property string|null $avatar
  * @property Carbon|null $email_verified_at
@@ -33,7 +39,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Topic> $topics
  * @property-read Collection<int, Method> $methods
  */
-#[Fillable(['name', 'email', 'google_id', 'avatar', 'password'])]
+#[Fillable(['name', 'email', 'google_id', 'avatar', 'password', 'bio', 'location', 'website'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
@@ -50,6 +56,12 @@ class User extends Authenticatable implements PasskeyUser
     public function methods(): HasMany
     {
         return $this->hasMany(Method::class);
+    }
+
+    /** @return HasMany<Experience, $this> */
+    public function experiences(): HasMany
+    {
+        return $this->hasMany(Experience::class);
     }
 
     /**

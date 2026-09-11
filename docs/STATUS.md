@@ -45,3 +45,11 @@ Fortify/Socialite authentication is unchanged. The User model does not enforce v
 Cloudflare terminates HTTPS. Dokploy provides PostgreSQL. The entrypoint runs migrations and optimization; `/up` is the health check. The Experiences migration is additive and uses cascading foreign keys.
 
 Chromium and service-identified HTTP requests have opened workbine.com with HTTP 200. A prior bare Python probe returned HTTP 403; this does not identify a specific Cloudflare rule or demonstrate an outage. No Cloudflare security configuration was changed. Check actual workflow conclusions, browser output and Dokploy state rather than inferring deployment from a merge or CI alone.
+
+## Community design and member profile implementation
+
+Branch: `feat/community-design-and-profiles`. This requested session implements a cleaner shared design, a public member profile, public introduction fields and a branded private account/authentication experience. See `docs/SCREENS.md` for the exact screen scope and `docs/DESIGN.md` for the refinement and attributed Dribbble references.
+
+The migration only adds nullable bio/location/website fields to users; existing rows, authentication behavior and production content are unchanged. All public member data is explicitly serialized. No runtime dependencies, uploads, artificial community activity, scheduled coding agent or cron are introduced.
+
+Validation is in progress. Use the latest PR head CI and browser result, not this implementation note, as proof of success. Do not merge the temporary source-audit or formatting-preparation workflows.
