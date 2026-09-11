@@ -24,6 +24,8 @@ class GoogleAuthController extends Controller
         $googleUser = Socialite::driver('google')->user();
 
         $email = $googleUser->getEmail();
+        // Treat the provider payload as untrusted even though its SDK documents a string.
+        /** @var mixed $googleId */
         $googleId = $googleUser->getId();
         $raw = $googleUser->getRaw();
 
