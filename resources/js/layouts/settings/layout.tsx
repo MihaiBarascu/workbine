@@ -46,7 +46,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                         </div>
                     </div>
                     <Button asChild variant="outline">
-                        <Link href={`/members/${auth.user.id}`}>
+                        <Link href={`/members/${auth.user.username}`}>
                             View public profile
                             <ArrowUpRight aria-hidden="true" />
                         </Link>

@@ -16,9 +16,9 @@ class ExperienceController extends Controller
 {
     public function index(Request $request, Topic $topic, Method $method): Response
     {
-        $method->load('user:id,name');
+        $method->load('user:id,name,username');
         $experiences = $method->experiences()
-            ->with('user:id,name')
+            ->with('user:id,name,username')
             ->latest('updated_at')
             ->orderByDesc('id')
             ->paginate(10)
@@ -31,7 +31,7 @@ class ExperienceController extends Controller
             ->pluck('total', 'outcome');
 
         $own = $request->user() === null ? null : $method->experiences()
-            ->with('user:id,name')
+            ->with('user:id,name,username')
             ->where('user_id', $request->user()->getAuthIdentifier())
             ->first();
 
@@ -40,7 +40,7 @@ class ExperienceController extends Controller
             'method' => [
                 'id' => $method->id,
                 'title' => $method->title,
-                'user' => ['id' => $method->user->id, 'name' => $method->user->name],
+                'user' => ['id' => $method->user->id, 'name' => $method->user->name, 'username' => $method->user->username],
             ],
             'experiences' => $experiences,
             'ownExperience' => $own ? $this->serialize($own) : null,
@@ -100,7 +100,7 @@ class ExperienceController extends Controller
             'tried_on' => $experience->tried_on?->toDateString(),
             'created_at' => $experience->created_at?->toIso8601String(),
             'updated_at' => $experience->updated_at?->toIso8601String(),
-            'user' => ['id' => $experience->user->id, 'name' => $experience->user->name],
+            'user' => ['id' => $experience->user->id, 'name' => $experience->user->name, 'username' => $experience->user->username],
         ];
     }
 }

@@ -1,5 +1,6 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
 import { ArrowUpRight, Globe, LockKeyhole } from 'lucide-react';
+import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
@@ -17,6 +18,7 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage<{ auth: Auth }>().props;
+    const [username, setUsername] = useState(auth.user.username);
     return (
         <>
             <Head title="Profile settings" />
@@ -58,6 +60,58 @@ export default function Profile({
                                     <InputError
                                         id="name-error"
                                         message={errors.name}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="username">Username</Label>
+                                    <Input
+                                        id="username"
+                                        name="username"
+                                        value={username}
+                                        onChange={(event) =>
+                                            setUsername(
+                                                event.target.value.toLowerCase(),
+                                            )
+                                        }
+                                        onBlur={() =>
+                                            setUsername(username.trim())
+                                        }
+                                        minLength={3}
+                                        maxLength={30}
+                                        required
+                                        autoComplete="username"
+                                        autoCapitalize="none"
+                                        autoCorrect="off"
+                                        spellCheck={false}
+                                        aria-invalid={Boolean(errors.username)}
+                                        aria-describedby="username-help username-link username-history username-error"
+                                    />
+                                    <p
+                                        id="username-help"
+                                        className="text-muted-foreground text-xs"
+                                    >
+                                        3–30 characters. Start with a letter;
+                                        use lowercase letters (a–z), numbers and
+                                        hyphens, without spaces.
+                                    </p>
+                                    <p
+                                        id="username-link"
+                                        className="text-muted-foreground text-xs [overflow-wrap:anywhere]"
+                                    >
+                                        Your profile: workbine.com/members/
+                                        {username.trim() || 'your-username'}
+                                    </p>
+                                    <p
+                                        id="username-history"
+                                        className="text-muted-foreground text-xs"
+                                    >
+                                        Changing your username changes your
+                                        profile link. Your previous username
+                                        becomes available to others.
+                                    </p>
+                                    <InputError
+                                        id="username-error"
+                                        message={errors.username}
                                     />
                                 </div>
                                 <div className="grid gap-2">
@@ -142,7 +196,7 @@ export default function Profile({
                                 </div>
                             </div>
                             <Link
-                                href={`/members/${auth.user.id}`}
+                                href={`/members/${auth.user.username}`}
                                 className="wb-inline-link mt-6"
                             >
                                 See your public profile

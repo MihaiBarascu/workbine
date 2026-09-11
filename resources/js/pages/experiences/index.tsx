@@ -15,7 +15,11 @@ import '../../../css/topic-detail.css';
 
 type Props = {
     topic: { id: number; title: string; slug: string };
-    method: { id: number; title: string; user: { id: number; name: string } };
+    method: {
+        id: number;
+        title: string;
+        user: { id: number; name: string; username: string };
+    };
     experiences: PaginatedExperiences;
     ownExperience: ExperienceSummary | null;
     summary: Record<ExperienceOutcome, number>;

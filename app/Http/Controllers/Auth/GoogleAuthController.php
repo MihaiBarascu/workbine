@@ -53,7 +53,7 @@ class GoogleAuthController extends Controller
             ])->save();
         } else {
             $user = User::query()->create([
-                'name' => $googleUser->getName() ?: Str::before($email, '@'),
+                'name' => $googleUser->getName() ?: 'Member',
                 'email' => $email,
                 'google_id' => $googleId,
                 'avatar' => $googleUser->getAvatar(),

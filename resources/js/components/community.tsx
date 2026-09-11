@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { cn } from '@/lib/utils';
 
-type Person = { id: number; name: string };
+type Person = { id: number; name: string; username: string };
 
 export function WorkbineBrand() {
     return (
@@ -54,7 +54,7 @@ export function MemberLink({
     avatar?: boolean;
 }) {
     return (
-        <Link href={`/members/${user.id}`} className="wb-member-link">
+        <Link href={`/members/${user.username}`} className="wb-member-link">
             {avatar && <MemberAvatar name={user.name} />}
             <span>{user.name}</span>
         </Link>

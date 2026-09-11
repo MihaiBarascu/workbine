@@ -35,7 +35,7 @@ class TopicController extends Controller
         }
 
         $topics = $query
-            ->with('user:id,name')
+            ->with('user:id,name,username')
             ->withCount('methods')
             ->latest()
             ->orderByDesc('id')
@@ -96,10 +96,10 @@ class TopicController extends Controller
 
     public function show(Topic $topic): Response
     {
-        $topic->load('user:id,name')->loadCount('methods');
+        $topic->load('user:id,name,username')->loadCount('methods');
 
         $methods = $topic->methods()
-            ->with('user:id,name')
+            ->with('user:id,name,username')
             ->withCount('experiences')
             ->latest()
             ->orderByDesc('id')
@@ -125,6 +125,7 @@ class TopicController extends Controller
             'user' => [
                 'id' => $topic->user->id,
                 'name' => $topic->user->name,
+                'username' => $topic->user->username,
             ],
         ];
     }
@@ -142,6 +143,7 @@ class TopicController extends Controller
             'user' => [
                 'id' => $method->user->id,
                 'name' => $method->user->name,
+                'username' => $method->user->username,
             ],
         ];
     }

@@ -38,7 +38,9 @@ conformance or measured audience growth.
 
 ## Screens and behavior
 
-The public member profile (`/members/{id}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public text is rendered as text, not injected HTML; website links accept only HTTP/HTTPS. No uploads or external avatar service are required.
+The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public text is rendered as text, not injected HTML; website links accept only HTTP/HTTPS. No uploads or external avatar service are required.
+
+Each member has one unique lowercase username, separate from their display name. Profile settings show the current public URL and explain that changing the username makes the previous one available to others. Numeric profile links redirect to the current username; previous usernames are not retained as aliases.
 
 All authentication pages share the Workbine AuthLayout. Profile, Security and Appearance settings share SettingsLayout directly; the Laravel starter sidebar is not used. Fortify password, 2FA, recovery, passkey and account deletion behavior is preserved. Retain visible error messages, focus outlines, labels, reduced-motion support and readable mobile wrapping.
 

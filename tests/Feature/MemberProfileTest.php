@@ -17,10 +17,11 @@ class MemberProfileTest extends TestCase
     public function test_public_profile_only_exposes_explicit_public_fields(): void
     {
         $user = User::factory()->create(['bio' => 'I simplify product imports.', 'location' => 'Pitesti', 'website' => 'https://example.com']);
-        $this->get(route('members.show', $user))->assertOk()
+        $this->get(route('members.show', $user->username))->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('members/show')
                 ->where('member.name', $user->name)
+                ->where('member.username', $user->username)
                 ->where('member.bio', $user->bio)
                 ->where('view', 'methods')
                 ->where('member.counts.methods', 0)
@@ -39,13 +40,13 @@ class MemberProfileTest extends TestCase
         $method = Method::factory()->create(['user_id' => $user->id, 'topic_id' => $topic->id]);
         Method::factory()->create();
         Topic::factory()->create();
-        $this->get(route('members.show', $user))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('members.show', $user->username))->assertInertia(fn (Assert $page) => $page
             ->where('member.counts.methods', 1)
             ->has('contributions.data', 1)
             ->where('contributions.data.0.id', $method->id)
             ->where('contributions.data.0.href', '/topics/'.$topic->slug.'#method-'.$method->id)
             ->missing('contributions.data.0.user'));
-        $this->get(route('members.show', [$user, 'view' => 'topics']))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('members.show', [$user->username, 'view' => 'topics']))->assertInertia(fn (Assert $page) => $page
             ->where('view', 'topics')->has('contributions.data', 1)->where('contributions.data.0.id', $topic->id));
     }
 
@@ -54,7 +55,7 @@ class MemberProfileTest extends TestCase
         $user = User::factory()->create();
         $method = Method::factory()->create();
         $experience = Experience::query()->create(['user_id' => $user->id, 'method_id' => $method->id, 'outcome' => 'partly', 'body' => 'It helped but required adjustments to the inputs.']);
-        $this->get(route('members.show', [$user, 'view' => 'experiences']))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('members.show', [$user->username, 'view' => 'experiences']))->assertInertia(fn (Assert $page) => $page
             ->where('member.counts.experiences', 1)
             ->has('contributions.data', 1)
             ->where('contributions.data.0.id', $experience->id)
@@ -68,12 +69,12 @@ class MemberProfileTest extends TestCase
     {
         $user = User::factory()->create();
         $topics = Topic::factory()->count(11)->create(['user_id' => $user->id, 'created_at' => now()]);
-        $this->get(route('members.show', [$user, 'view' => 'topics']))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('members.show', [$user->username, 'view' => 'topics']))->assertInertia(fn (Assert $page) => $page
             ->has('contributions.data', 10)
             ->where('contributions.total', 11)
             ->where('contributions.data.0.id', $topics->last()?->id)
             ->where('contributions.next_page_url', fn ($url) => is_string($url) && str_contains($url, 'view=topics')));
-        $this->get(route('members.show', [$user, 'view' => 'topics', 'page' => 2]))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('members.show', [$user->username, 'view' => 'topics', 'page' => 2]))->assertInertia(fn (Assert $page) => $page
             ->has('contributions.data', 1)->where('contributions.data.0.id', $topics->first()?->id));
     }
 
@@ -81,7 +82,7 @@ class MemberProfileTest extends TestCase
     {
         $user = User::factory()->create();
         foreach (['invalid', ['bad']] as $view) {
-            $this->get(route('members.show', [$user, 'view' => $view]))->assertOk()
+            $this->get(route('members.show', [$user->username, 'view' => $view]))->assertOk()
                 ->assertInertia(fn (Assert $page) => $page->where('view', 'methods'));
         }
         $this->get('/members/999999999')->assertNotFound();

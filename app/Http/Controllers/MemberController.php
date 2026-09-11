@@ -6,6 +6,7 @@ use App\Models\Experience;
 use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -13,8 +14,19 @@ use Inertia\Response;
 
 class MemberController extends Controller
 {
-    public function show(Request $request, User $user): Response
+    public function redirectFromId(Request $request, User $user): RedirectResponse
     {
+        return $this->redirectToUsername($request, $user);
+    }
+
+    public function show(Request $request, string $username): Response|RedirectResponse
+    {
+        $user = User::query()->where('username', Str::lower($username))->firstOrFail();
+
+        if ($username !== $user->username) {
+            return $this->redirectToUsername($request, $user);
+        }
+
         $view = $request->query('view');
         $view = in_array($view, ['topics', 'methods', 'experiences'], true) ? $view : 'methods';
         $user->loadCount(['topics', 'methods', 'experiences']);
@@ -57,6 +69,7 @@ class MemberController extends Controller
             'member' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'username' => $user->username,
                 'bio' => $user->bio,
                 'location' => $user->location,
                 'website' => $user->website,
@@ -70,5 +83,13 @@ class MemberController extends Controller
             'view' => $view,
             'contributions' => $contributions,
         ]);
+    }
+
+    private function redirectToUsername(Request $request, User $user): RedirectResponse
+    {
+        return redirect()->route('members.show', [
+            'username' => $user->username,
+            ...$request->only(['view', 'page']),
+        ], 301);
     }
 }

@@ -15,6 +15,45 @@ const { chromium } = requireBrowser('playwright');
     const output = '/tmp/workbine-ui-preview';
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
+    // Read only after a full navigation/reload: Inertia's initial payload is not
+    // rewritten by every client-side visit.
+    async function initialProps() {
+        return page.evaluate(() => {
+            const script = document.querySelector(
+                'script[type="application/json"][data-page]',
+            );
+            const payload =
+                script?.textContent ??
+                document
+                    .querySelector('[data-page]')
+                    ?.getAttribute('data-page');
+            return JSON.parse(payload).props;
+        });
+    }
+    async function rejectUsername(value, reason) {
+        const input = page.locator('input[name="username"]');
+        const previousUsername = await input.inputValue();
+        await input.fill(value);
+        await page
+            .getByRole('button', { name: 'Save changes', exact: true })
+            .click();
+        await page.locator('#username-error').waitFor();
+        assert.equal(await input.getAttribute('aria-invalid'), 'true', reason);
+        assert.match(await page.locator('#username-error').innerText(), /\S/);
+        assert.ok(
+            (await input.getAttribute('aria-describedby'))
+                .split(' ')
+                .includes('username-error'),
+            'Username error is associated with its input',
+        );
+        await page.reload();
+        await input.waitFor();
+        assert.equal(
+            await input.inputValue(),
+            previousUsername,
+            `${reason}: rejected username must not be saved`,
+        );
+    }
     async function inspect(name) {
         await page.locator('.wb-public main').waitFor();
         assert.equal(
@@ -86,6 +125,9 @@ const { chromium } = requireBrowser('playwright');
         await page.getByRole('link', { name: 'Log in', exact: true }).waitFor();
     }
     try {
+        await page.goto(`${root}/topics/preview-first-customer`);
+        const otherMember = (await initialProps()).topic.user;
+        assert.match(otherMember.username, /^[a-z][a-z0-9-]{2,29}$/);
         for (const [path, name] of [
             ['/login', 'login'],
             ['/register', 'register'],
@@ -116,6 +158,11 @@ const { chromium } = requireBrowser('playwright');
         await page.getByRole('button', { name: 'Account menu' }).click();
         await page.getByRole('menuitem', { name: 'Account settings' }).click();
         await page.locator('textarea[name="bio"]').waitFor();
+        await page.reload();
+        const initialMember = (await initialProps()).auth.user;
+        assert.ok(Number.isInteger(initialMember.id));
+        assert.match(initialMember.username, /^[a-z][a-z0-9-]{2,29}$/);
+        assert.notEqual(initialMember.username, otherMember.username);
         await inspect('settings-profile-desktop');
         await page
             .locator('input[name="name"]')
@@ -139,6 +186,52 @@ const { chromium } = requireBrowser('playwright');
             await page.locator('textarea[name="bio"]').inputValue(),
             bio,
         );
+        assert.equal(
+            await page.locator('input[name="username"]').inputValue(),
+            initialMember.username,
+            'Changing the display name must keep the username',
+        );
+        await rejectUsername('invalid username', 'Spaces are invalid');
+        await rejectUsername(
+            otherMember.username,
+            'Another member already owns this username',
+        );
+        const username = 'sam-practical-advice-2026-test';
+        assert.equal(username.length, 30, 'Exercise the maximum handle length');
+        await page.locator('input[name="username"]').fill(username);
+        assert.equal(
+            await page.locator('#username-link').innerText(),
+            `Your profile: workbine.com/members/${username}`,
+            'The public URL preview follows the edited username',
+        );
+        await page
+            .getByRole('button', { name: 'Save changes', exact: true })
+            .click();
+        await page
+            .getByRole('status')
+            .filter({ hasText: 'Your profile has been saved.' })
+            .waitFor();
+        await page.reload();
+        assert.equal(
+            await page.locator('input[name="username"]').inputValue(),
+            username,
+            'The renamed username persists after reload',
+        );
+        const profilePath = `/members/${username}`;
+        for (const label of [
+            'View public profile',
+            'See your public profile',
+        ]) {
+            assert.equal(
+                await page
+                    .getByRole('link', { name: label, exact: true })
+                    .getAttribute('href'),
+                profilePath,
+                `${label} uses the saved username`,
+            );
+        }
+        await page.setViewportSize({ width: 320, height: 812 });
+        await inspect('settings-username-small');
         await page.setViewportSize({ width: 375, height: 812 });
         await inspect('settings-profile-mobile');
         await page
@@ -146,7 +239,11 @@ const { chromium } = requireBrowser('playwright');
             .click();
         await page.locator('#member-name').waitFor();
         const profileUrl = page.url().split('?')[0];
+        assert.equal(profileUrl, root + profilePath);
+        await page.getByText(`@${username}`, { exact: true }).waitFor();
         await inspect('member-mobile');
+        await page.setViewportSize({ width: 320, height: 812 });
+        await inspect('member-username-small');
         await page.setViewportSize({ width: 1440, height: 1080 });
         await inspect('member-desktop');
         assert.equal(
@@ -155,12 +252,16 @@ const { chromium } = requireBrowser('playwright');
             'Bio must be escaped',
         );
         for (const view of ['topics', 'experiences', 'methods']) {
-            await page
-                .locator(
-                    `nav[aria-label="Profile contributions"] a[href$="view=${view}"]`,
-                )
-                .click();
-            await page.waitForURL(new RegExp(`view=${view}$`));
+            const tab = page.locator(
+                `nav[aria-label="Profile contributions"] a[href$="view=${view}"]`,
+            );
+            assert.equal(
+                await tab.getAttribute('href'),
+                `${profilePath}?view=${view}`,
+                'Contribution tabs use the current username',
+            );
+            await tab.click();
+            await page.waitForURL(`${profileUrl}?view=${view}`);
             await page
                 .locator(
                     `nav[aria-label="Profile contributions"] a[aria-current="page"]`,
@@ -187,6 +288,38 @@ const { chromium } = requireBrowser('playwright');
                 .getByRole('textbox', { name: 'Link to copy' })
                 .inputValue(),
             profileUrl,
+        );
+        const previousUsernameResponse = await context.request.get(
+            `${root}/members/${initialMember.username}`,
+            { maxRedirects: 0 },
+        );
+        assert.equal(
+            previousUsernameResponse.status(),
+            404,
+            'The previous username does not redirect after a rename',
+        );
+        const response = await page.goto(
+            `${root}/members/${initialMember.id}?view=topics&page=2`,
+        );
+        await page.locator('#member-name').waitFor();
+        const redirectedRequest = response.request().redirectedFrom();
+        assert.ok(redirectedRequest, 'The numeric profile URL must redirect');
+        assert.equal(
+            (await redirectedRequest.response()).status(),
+            301,
+            'Numeric profile addresses redirect permanently',
+        );
+        const canonicalUrl = new URL(page.url());
+        assert.equal(canonicalUrl.pathname, profilePath);
+        assert.equal(canonicalUrl.searchParams.get('view'), 'topics');
+        assert.equal(canonicalUrl.searchParams.get('page'), '2');
+        const props = await initialProps();
+        assert.equal(props.member.id, initialMember.id);
+        assert.equal(props.member.username, username);
+        assert.equal(props.view, 'topics');
+        assert.equal(props.contributions.current_page, 2);
+        console.log(
+            'PASS username validation, rename persistence, canonical links and numeric 301 redirect preserving contribution filters and pagination.',
         );
         await page.goto(`${root}/settings/security`);
         await page.waitForURL(/confirm-password/);
@@ -280,8 +413,13 @@ const { chromium } = requireBrowser('playwright');
         await page.goto(`${root}/email/verify`);
         await page.locator('.wb-auth-form').waitFor();
         await inspect('verify-email-desktop');
+        await page.goto(`${root}/settings/profile`);
+        const newMember = (await initialProps()).auth.user;
+        assert.match(newMember.username, /^[a-z][a-z0-9-]{2,29}$/);
+        assert.notEqual(newMember.username, username);
         await page.getByRole('button', { name: 'Account menu' }).click();
         await page.getByRole('menuitem', { name: 'My public profile' }).click();
+        await page.waitForURL(`${root}/members/${newMember.username}`);
         await page
             .getByRole('heading', {
                 name: 'Your next contribution starts here',

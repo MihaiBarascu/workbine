@@ -26,6 +26,7 @@ type Props = {
     member: {
         id: number;
         name: string;
+        username: string;
         bio: string | null;
         location: string | null;
         website: string | null;
@@ -81,11 +82,16 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                                     </Link>
                                 </Button>
                             )}
-                            <CopyLinkButton path={`/members/${member.id}`} />
+                            <CopyLinkButton
+                                path={`/members/${member.username}`}
+                            />
                         </div>
                         <div className="wb-profile-name">
                             <p className="wb-kicker">Community member</p>
                             <h1 id="member-name">{member.name}</h1>
+                            <p className="text-muted-foreground mt-1 text-sm [overflow-wrap:anywhere]">
+                                @{member.username}
+                            </p>
                             <p className="wb-profile-bio">
                                 {member.bio ||
                                     (own
@@ -134,7 +140,7 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                             {tabs.map((tab) => (
                                 <Link
                                     key={tab.value}
-                                    href={`/members/${member.id}?view=${tab.value}`}
+                                    href={`/members/${member.username}?view=${tab.value}`}
                                     aria-current={
                                         view === tab.value ? 'page' : undefined
                                     }

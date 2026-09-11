@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [TopicController::class, 'index'])->name('home');
 Route::get('topics', [TopicController::class, 'index'])->name('topics.index');
-Route::get('members/{user}', [MemberController::class, 'show'])->whereNumber('user')->name('members.show');
+Route::get('members/{user}', [MemberController::class, 'redirectFromId'])->whereNumber('user')->name('members.legacy');
+Route::get('members/{username}', [MemberController::class, 'show'])->where('username', '[A-Za-z][A-Za-z0-9-]{2,29}')->name('members.show');
 
 Route::middleware('guest')->group(function () {
     Route::get('auth/google', [GoogleAuthController::class, 'redirect'])->name('google.redirect');

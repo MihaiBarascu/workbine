@@ -93,7 +93,7 @@ export function PublicShell({ children }: Props) {
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem asChild>
                                             <Link
-                                                href={`/members/${auth.user.id}`}
+                                                href={`/members/${auth.user.username}`}
                                             >
                                                 <UserRound aria-hidden="true" />
                                                 My public profile
