@@ -1,0 +1,551 @@
+.wb-detail-page {
+    width: 100%;
+    max-width: 1600px;
+    margin-inline: auto;
+    padding: 32px 40px 88px;
+}
+.wb-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 36px;
+    margin-bottom: 30px;
+    border-radius: 4px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+.wb-detail-back svg,
+.wb-topic-tools svg,
+.wb-method-permalink svg,
+.wb-method-source svg,
+.wb-method-footer svg,
+.wb-detail-text-link svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+.wb-detail-back:hover,
+.wb-topic-tools > a:hover {
+    color: var(--foreground);
+}
+.wb-topic-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+    gap: 64px;
+}
+.wb-detail-label {
+    color: var(--muted-foreground);
+    font-size: 14px;
+    font-weight: 500;
+}
+.wb-topic-heading h1,
+.wb-experiences-heading h1 {
+    max-width: 32ch;
+    margin-top: 12px;
+    font-size: clamp(32px, 3.2vw, 48px);
+    line-height: 1.16;
+    overflow-wrap: anywhere;
+}
+.wb-detail-author {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 12px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+.wb-detail-author .wb-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+}
+.wb-detail-author > div > time,
+.wb-detail-author .wb-experience-date {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+}
+.wb-topic-heading > .wb-detail-author {
+    margin-top: 24px;
+}
+.wb-detail-context {
+    max-width: 76ch;
+    margin-top: 28px;
+    color: var(--muted-foreground);
+    font-size: 17px;
+    line-height: 1.85;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+.wb-topic-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 24px;
+    margin-top: 24px;
+}
+.wb-topic-tools > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+}
+.wb-methods-section {
+    margin-top: 40px;
+    border-top: 1px solid var(--border);
+    padding-top: 32px;
+}
+.wb-detail-section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.wb-detail-section-heading h2 {
+    scroll-margin-top: 148px;
+    font-size: 23px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.3;
+}
+.wb-detail-section-heading p {
+    margin-top: 7px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.wb-method-list {
+    display: grid;
+    gap: 24px;
+}
+.wb-method-article {
+    min-width: 0;
+    padding: 32px;
+    scroll-margin-top: 148px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+}
+.wb-method-meta,
+.wb-experience-meta {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+.wb-method-permalink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    color: var(--muted-foreground);
+}
+.wb-method-permalink:hover {
+    background: var(--muted);
+    color: var(--foreground);
+}
+.wb-method-article h3 {
+    max-width: 52ch;
+    margin-top: 24px;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+.wb-detail-body {
+    max-width: 76ch;
+    margin-top: 18px;
+    font-size: 16px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+.wb-method-source {
+    margin-top: 28px;
+    border-left: 2px solid var(--border);
+    padding-left: 16px;
+}
+.wb-method-source a,
+.wb-detail-text-link,
+.wb-method-footer > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 3px;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+}
+.wb-method-source a:hover,
+.wb-detail-text-link:hover,
+.wb-method-footer > a:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.wb-method-source p {
+    margin-top: 5px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+.wb-method-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+.wb-topic-aside {
+    min-width: 0;
+    padding-top: 7px;
+}
+.wb-topic-aside h2 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+.wb-method-index {
+    display: grid;
+    gap: 18px;
+    margin: 22px 0;
+}
+.wb-method-index a {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+.wb-method-index a > span:first-child {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.9;
+    font-variant-numeric: tabular-nums;
+}
+.wb-method-index a:hover > span:last-child {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.wb-topic-aside nav + .wb-topic-guidance {
+    margin-top: 30px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+}
+.wb-topic-guidance > p,
+.wb-topic-guidance li {
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.8;
+}
+.wb-topic-guidance > p {
+    margin-top: 12px;
+}
+.wb-topic-guidance ul {
+    display: grid;
+    gap: 7px;
+    margin: 18px 0 24px;
+    padding-left: 16px;
+    list-style: disc;
+}
+.wb-detail-note {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.8;
+}
+.wb-topic-aside > .wb-detail-note {
+    margin-top: 28px;
+}
+.wb-detail-empty {
+    padding: 40px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+}
+.wb-detail-empty h3 {
+    max-width: 32ch;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.4;
+}
+.wb-detail-empty > .wb-detail-label {
+    margin-bottom: 12px;
+}
+.wb-detail-empty > h3 + p {
+    max-width: 58ch;
+    margin-top: 12px;
+    color: var(--muted-foreground);
+    font-size: 15px;
+    line-height: 1.8;
+}
+.wb-experiences-heading {
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+}
+.wb-experiences-heading h1 {
+    max-width: 36ch;
+}
+.wb-experience-topic {
+    max-width: 80ch;
+    margin-top: 16px;
+    color: var(--muted-foreground);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+.wb-experience-topic a {
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 4px;
+}
+.wb-experience-topic a:hover {
+    color: var(--foreground);
+    text-decoration-color: currentColor;
+}
+.wb-experience-heading-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 24px;
+}
+.wb-experiences-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    align-items: start;
+    gap: 48px;
+    margin-top: 32px;
+}
+.wb-outcome-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 24px 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+}
+.wb-outcome-summary > div {
+    padding-inline: 24px;
+}
+.wb-outcome-summary > div + div {
+    border-left: 1px solid var(--border);
+}
+.wb-outcome-summary .wb-outcome-count {
+    color: var(--foreground);
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+.wb-outcome-summary p + p {
+    margin-top: 8px;
+    color: var(--muted-foreground);
+    font-size: 13px;
+    line-height: 1.5;
+}
+.wb-outcome-note {
+    max-width: 85ch;
+    margin: 14px 0 32px;
+}
+.wb-experience-list {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+}
+.wb-experience-article {
+    padding: 28px 32px;
+    scroll-margin-top: 148px;
+}
+.wb-experience-article + .wb-experience-article {
+    border-top: 1px solid var(--border);
+}
+.wb-experience-outcome {
+    flex-shrink: 0;
+    border-radius: 6px;
+    padding: 6px 10px;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.6;
+}
+.wb-experience-tried {
+    margin-top: 18px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+.wb-experience-evidence {
+    margin-top: 16px;
+}
+.wb-experience-share {
+    min-width: 0;
+    padding: 28px;
+    scroll-margin-top: 148px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+}
+.wb-experience-share h2 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.4;
+}
+.wb-experience-share-intro {
+    margin: 10px 0 26px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.8;
+}
+.wb-experience-share [data-slot='button'] {
+    min-height: 40px;
+    height: auto;
+    padding-block: 10px;
+    white-space: normal;
+}
+.wb-experience-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 24px;
+}
+.wb-experience-pagination > span {
+    color: var(--muted-foreground);
+    font-size: 13px;
+    text-align: center;
+}
+@media (max-width: 1199px) {
+    .wb-topic-layout {
+        grid-template-columns: minmax(0, 1fr) 260px;
+        gap: 36px;
+    }
+    .wb-experiences-layout {
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 28px;
+    }
+    .wb-experience-share {
+        padding: 24px;
+    }
+}
+@media (max-width: 1023px) {
+    .wb-detail-page {
+        padding: 28px 24px 64px;
+    }
+    .wb-topic-layout,
+    .wb-experiences-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-topic-aside {
+        border-top: 1px solid var(--border);
+        padding-top: 28px;
+    }
+    .wb-topic-aside > nav {
+        display: none;
+    }
+    .wb-topic-aside nav + .wb-topic-guidance {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+    }
+    .wb-topic-guidance {
+        max-width: 60ch;
+    }
+    .wb-experience-share {
+        padding: 28px;
+    }
+}
+@media (max-width: 639px) {
+    .wb-detail-page {
+        padding: 20px 16px 48px;
+    }
+    .wb-detail-back {
+        margin-bottom: 22px;
+    }
+    .wb-topic-heading h1,
+    .wb-experiences-heading h1 {
+        font-size: 30px;
+        line-height: 1.2;
+    }
+    .wb-detail-context {
+        margin-top: 24px;
+        font-size: 16px;
+    }
+    .wb-methods-section {
+        margin-top: 28px;
+        padding-top: 26px;
+    }
+    .wb-detail-section-heading h2 {
+        font-size: 21px;
+    }
+    .wb-detail-section-heading p {
+        font-size: 13px;
+    }
+    .wb-method-article,
+    .wb-experience-article,
+    .wb-experience-share {
+        padding: 22px 20px;
+    }
+    .wb-method-article h3 {
+        font-size: 21px;
+    }
+    .wb-detail-body {
+        font-size: 15px;
+        line-height: 1.85;
+    }
+    .wb-detail-empty {
+        padding: 28px 22px;
+    }
+    .wb-detail-empty h3 {
+        font-size: 22px;
+    }
+    .wb-detail-empty [data-slot='button'] {
+        height: auto;
+        min-height: 40px;
+        white-space: normal;
+    }
+    .wb-experience-heading-footer {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .wb-experience-meta {
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    .wb-outcome-summary {
+        padding-block: 18px;
+    }
+    .wb-outcome-summary > div {
+        padding-inline: 12px;
+    }
+    .wb-outcome-summary .wb-outcome-count {
+        font-size: 27px;
+    }
+    .wb-outcome-summary p + p {
+        font-size: 12px;
+    }
+    .wb-experience-share h2 {
+        font-size: 21px;
+    }
+}

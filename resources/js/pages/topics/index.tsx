@@ -5,6 +5,7 @@ import {
     BookOpen,
     MessagesSquare,
     Search,
+    PenLine,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { MemberLink } from '@/components/community';
@@ -52,69 +53,43 @@ export default function TopicsIndex({ topics, view, search }: Props) {
     return (
         <PublicShell>
             <Head
-                title={search ? `Search: ${search}` : 'The community notebook'}
+                title={search ? `Search: ${search}` : 'Explore the community'}
             />
             <main className="wb-notebook">
                 <header className="wb-notebook-masthead">
                     <div>
-                        <p className="wb-kicker">The Workbine community</p>
-                        <h1>Share how you do it. Discover how others do.</h1>
+                        <h1>Explore the community</h1>
                         <p>
-                            Start a topic with your own method, or open a
-                            subject you want to explore. Share approaches and
-                            learn from what happens in practice.
+                            Real approaches, shared by the people who tried
+                            them.
                         </p>
                     </div>
-                    <div className="wb-masthead-mark" aria-hidden="true">
-                        <svg viewBox="0 0 48 48" fill="none">
-                            <path
-                                d="M24 3V45M3 24H45M9 9L39 39M9 39L39 9"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            />
-                            <circle
-                                cx="24"
-                                cy="24"
-                                r="9"
-                                fill="var(--wb-paper)"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                            />
-                        </svg>
-                        <span>
-                            Many ways.
-                            <br />
-                            Real attempts.
-                        </span>
-                    </div>
+                    <Form
+                        key={`${view}:${search}`}
+                        action="/topics#topics"
+                        method="get"
+                        disableWhileProcessing
+                        role="search"
+                        className="wb-search"
+                    >
+                        <Search aria-hidden="true" />
+                        <label htmlFor="topic-search" className="sr-only">
+                            Search topics
+                        </label>
+                        <input
+                            id="topic-search"
+                            name="q"
+                            type="search"
+                            defaultValue={search}
+                            maxLength={120}
+                            placeholder="Search topics and ideas"
+                        />
+                        <input type="hidden" name="view" value={view} />
+                        <button type="submit">Search</button>
+                    </Form>
                 </header>
 
                 <div className="wb-layout">
-                    <aside className="wb-sidebar">
-                        <p className="wb-kicker">Explore</p>
-                        <nav aria-label="Filter topics" className="wb-feed-nav">
-                            <Link
-                                href={filterUrl('latest')}
-                                aria-current={unanswered ? undefined : 'page'}
-                            >
-                                <BookOpen aria-hidden="true" />
-                                Latest
-                            </Link>
-                            <Link
-                                href={filterUrl('unanswered')}
-                                aria-current={unanswered ? 'page' : undefined}
-                            >
-                                <MessagesSquare aria-hidden="true" />
-                                Needs a method
-                            </Link>
-                        </nav>
-                        <div className="wb-side-note">
-                            <strong>Useful beats impressive.</strong>
-                            A small thing that worked in a real situation can be
-                            more useful than the perfect advice.
-                        </div>
-                    </aside>
-
                     <section
                         className="wb-feed"
                         id="topics"
@@ -126,9 +101,12 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             disableWhileProcessing
                             className="wb-compose"
                         >
-                            <label htmlFor="new-topic">
-                                What would you like to share or explore?
-                            </label>
+                            <div className="wb-compose-heading">
+                                <PenLine aria-hidden="true" />
+                                <label htmlFor="new-topic">
+                                    What are you working on?
+                                </label>
+                            </div>
                             <div className="wb-compose-row">
                                 <input
                                     ref={topicInput}
@@ -140,7 +118,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     }
                                     required
                                     maxLength={160}
-                                    placeholder="A subject, a goal or a practical question…"
+                                    placeholder="A topic you know about, or want to explore…"
                                 />
                                 <button type="submit">
                                     Start a topic
@@ -148,48 +126,47 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 </button>
                             </div>
                             <p>
-                                Add context and, optionally, your own method on
-                                the next page.
+                                Share your own method, or invite others to share
+                                theirs.
                             </p>
                         </Form>
 
-                        <Form
-                            key={`${view}:${search}`}
-                            action="/topics#topics"
-                            method="get"
-                            disableWhileProcessing
-                            role="search"
-                            className="wb-search"
-                        >
-                            <Search aria-hidden="true" />
-                            <label htmlFor="topic-search" className="sr-only">
-                                Search topics
-                            </label>
-                            <input
-                                id="topic-search"
-                                name="q"
-                                type="search"
-                                defaultValue={search}
-                                maxLength={120}
-                                placeholder="Search topics and ideas"
-                            />
-                            <input type="hidden" name="view" value={view} />
-                            <button type="submit">Search</button>
-                        </Form>
-
-                        <div className="wb-feed-title">
-                            <h2 id="topics-heading">
-                                {search
-                                    ? 'From the notebook'
-                                    : unanswered
-                                      ? 'Topics waiting for a first method'
-                                      : 'Latest from the community'}
-                            </h2>
-                            <span>
+                        <div className="wb-feed-toolbar">
+                            <nav
+                                aria-label="Filter topics"
+                                className="wb-feed-nav"
+                            >
+                                <Link
+                                    href={filterUrl('latest')}
+                                    aria-current={
+                                        unanswered ? undefined : 'page'
+                                    }
+                                >
+                                    <BookOpen aria-hidden="true" />
+                                    Latest
+                                </Link>
+                                <Link
+                                    href={filterUrl('unanswered')}
+                                    aria-current={
+                                        unanswered ? 'page' : undefined
+                                    }
+                                >
+                                    <MessagesSquare aria-hidden="true" />
+                                    Needs a method
+                                </Link>
+                            </nav>
+                            <span className="wb-topic-count">
                                 {topics.total}{' '}
                                 {topics.total === 1 ? 'topic' : 'topics'}
                             </span>
                         </div>
+                        <h2 id="topics-heading" className="sr-only">
+                            {search
+                                ? 'Search results'
+                                : unanswered
+                                  ? 'Topics waiting for a first method'
+                                  : 'Latest from the community'}
+                        </h2>
                         {search && (
                             <p role="status" className="wb-search-state">
                                 Matching “{search}” ·{' '}
@@ -200,7 +177,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         )}
 
                         {topics.data.length ? (
-                            <div>
+                            <div className="wb-entry-list">
                                 {topics.data.map((topic) => (
                                     <article
                                         key={topic.id}
@@ -233,7 +210,13 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                                 'Have you done this? Share the details of your approach.'}
                                         </p>
                                         <div className="wb-entry-bottom">
-                                            <span>
+                                            <span
+                                                className={
+                                                    topic.methods_count
+                                                        ? 'wb-method-count'
+                                                        : 'wb-method-count wb-method-count-empty'
+                                                }
+                                            >
                                                 <MessagesSquare aria-hidden="true" />
                                                 {topic.methods_count}{' '}
                                                 {topic.methods_count === 1
@@ -255,17 +238,16 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             </div>
                         ) : (
                             <div className="wb-empty">
-                                <p className="wb-kicker">
-                                    {search || unanswered
-                                        ? 'Keep looking. Or start something.'
-                                        : 'The first page is still blank'}
-                                </p>
+                                <BookOpen
+                                    aria-hidden="true"
+                                    className="wb-empty-icon"
+                                />
                                 <h3>
                                     {search
                                         ? 'No matching topics yet'
                                         : unanswered
                                           ? 'No topics are waiting for a first method'
-                                          : 'Share a useful approach. Open a subject to explore.'}
+                                          : 'Every useful topic starts with someone.'}
                                 </h3>
                                 <p>
                                     {search
@@ -286,7 +268,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     >
                                         {unanswered && !search
                                             ? 'Explore all topics'
-                                            : 'Write the first page'}
+                                            : 'Start a topic'}
                                         <ArrowUpRight aria-hidden="true" />
                                     </Link>
                                 </Button>
@@ -341,49 +323,52 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         id="field-guide"
                         aria-labelledby="guide-heading"
                     >
-                        <p className="wb-kicker">Community guide</p>
+                        <p className="wb-kicker">How Workbine works</p>
                         <h2 id="guide-heading" className="wb-guide-heading">
-                            Keep the useful
-                            <br />
-                            part in.
+                            A little experience goes a long way.
                         </h2>
+                        <p className="wb-guide-intro">
+                            A topic brings people together. Methods show how
+                            they approach it. Experiences tell you what happened
+                            when others tried.
+                        </p>
                         <ol className="wb-guide-list">
                             <li>
                                 <span>01</span>
                                 <div>
-                                    <strong>The situation</strong>
+                                    <strong>Start with the situation</strong>
                                     <p>
-                                        What were you trying to do? Time, tools
-                                        and constraints shape the approach.
+                                        A goal, a constraint, something you
+                                        wanted to figure out.
                                     </p>
                                 </div>
                             </li>
                             <li>
                                 <span>02</span>
                                 <div>
-                                    <strong>The actual steps</strong>
+                                    <strong>Share the actual steps</strong>
                                     <p>
-                                        Share what you did, not just what
-                                        someone could do. Credit your sources.
+                                        What you did and what you used. Credit
+                                        the source if it came from someone else.
                                     </p>
                                 </div>
                             </li>
                             <li>
                                 <span>03</span>
                                 <div>
-                                    <strong>What happened next</strong>
+                                    <strong>Tell us how it went</strong>
                                     <p>
-                                        What worked? What fell short? An honest
-                                        limit is useful knowledge too.
+                                        What worked, what didn’t, and what you’d
+                                        change.
                                     </p>
                                 </div>
                             </li>
                         </ol>
                         <div className="wb-starters">
-                            <p className="wb-kicker">A topic to start with</p>
+                            <h3>Need a starting point?</h3>
                             <p>
-                                Prompts, not published topics. Pick one and make
-                                it your own.
+                                These are prompts, not published topics. Make
+                                one your own.
                             </p>
                             {starters.map((title) => (
                                 <button
