@@ -1,9 +1,7 @@
 name: Public UI preview
 
+# Local development runs tools/test-local.sh. Dispatch only when no local runner is available.
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
   workflow_call:
     inputs:
@@ -52,18 +50,11 @@ jobs:
 
       - name: Add preview-only community content
         run: |
-          php artisan tinker --execute='
-            $author = App\Models\User::factory()->create(["name" => "A community contributor with a deliberately long name"]);
-            App\Models\User::factory()->create(["email" => "preview-two-factor@example.test", "password" => Illuminate\Support\Facades\Hash::make("preview-only-password"), "two_factor_secret" => encrypt("JBSWY3DPEHPK3PXP"), "two_factor_recovery_codes" => encrypt(json_encode(["preview-recovery-code"])), "two_factor_confirmed_at" => now()]);
-            App\Models\User::factory()->create(["name" => "Preview Contributor", "email" => "preview-contributor@example.test", "password" => Illuminate\Support\Facades\Hash::make("preview-only-password")]);
-            $topic = App\Models\Topic::factory()->create(["user_id" => $author->id, "slug" => "preview-first-customer", "title" => "How do you find the first customer for a small SaaS?", "description" => "I have a working prototype and limited time outside my day job. What helped you find a real problem someone would pay to solve?"]);
-            App\Models\Method::factory()->create(["topic_id" => $topic->id, "user_id" => $author->id, "title" => "Watch one person do the work before writing more code", "body" => "I asked a shop owner to walk me through a weekly product import.\n\nFirst, we noted which steps repeated. Then I automated only the slowest part and tested it on a copy of the data.\n\nIt saved time in that situation, but I still needed to handle unusual supplier files manually. Start with one workflow, not an entire platform.", "source_url" => "https://example.com/a-source-with-a-deliberately-long-path-to-check-small-screen-wrapping"]);
-            App\Models\Topic::factory()->create(["user_id" => $author->id, "slug" => "preview-unanswered", "title" => "How do you keep a side project moving with only a few hours a week?", "description" => "I am looking for a routine that people have actually kept up, not an ideal schedule."]);
-          '
+          php tools/seed-preview.php
 
       - name: Start preview server
         run: |
-          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/workbine-preview-server.log 2>&1 &
+          php artisan serve --no-reload --host=127.0.0.1 --port=8000 > /tmp/workbine-preview-server.log 2>&1 &
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:8000/up > /dev/null; then
               exit 0
@@ -80,14 +71,7 @@ jobs:
 
       - name: Capture desktop, mobile, empty and dark states
         run: |
-          mkdir -p /tmp/workbine-ui-preview
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "1440,1080" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics /tmp/workbine-ui-preview/topics-desktop.png
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics /tmp/workbine-ui-preview/topics-mobile.png
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "1440,1080" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-desktop.png
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-mobile.png
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --color-scheme dark --full-page --wait-for-selector "main article" http://127.0.0.1:8000/topics/preview-first-customer /tmp/workbine-ui-preview/method-mobile-dark.png
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "#methods-heading" http://127.0.0.1:8000/topics/preview-unanswered /tmp/workbine-ui-preview/topic-without-methods-mobile.png
-          node /tmp/workbine-browser/node_modules/playwright/cli.js screenshot --browser chromium --viewport-size "375,812" --full-page --wait-for-selector "main article" "http://127.0.0.1:8000/topics?view=unanswered" /tmp/workbine-ui-preview/unanswered-feed-mobile.png
+          node tests/browser/capture-public.cjs
 
       - name: Exercise real browser contribution and account flows
         run: |

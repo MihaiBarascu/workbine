@@ -6,7 +6,7 @@ Only explicitly requested development sessions are authorized. The owner cancell
 
 ## Current release
 
-Review `feat/community-design-and-profiles`: unified white/grey/blue community UI, separate public member profile and private account, all existing authentication/account screens, matching brand icons, profile privacy/validation tests and extended browser coverage. Confirm current PR checks and visual review before marking the work released.
+Review `feat/community-design-and-profiles`: unified white/grey/blue community UI, separate public member profile and private account, all existing authentication/account screens, matching brand icons, profile privacy/validation tests and extended browser coverage. Confirm current local checks and visual review before marking work released; use explicitly dispatched GitHub checks only without a local runtime (docs/TESTING.md).
 
 ## Next useful increments for requested sessions
 
@@ -15,4 +15,4 @@ Review `feat/community-design-and-profiles`: unified white/grey/blue community U
 - Small content-reporting tools when a safe operational review path exists, not a speculative admin suite.
 - Branded error pages as a separate tested improvement to the framework error responses.
 
-Read the latest main and existing PRs before changing files. Keep STATUS truthful about actual validation and limitations. Do not claim measured growth or independent usability validation based on UI screenshots.
+Follow the environment-selection policy in AGENTS.md and docs/TESTING.md. Read the latest main and existing PRs before changing files. Keep STATUS truthful about actual validation and limitations. Do not claim measured growth or independent usability validation based on UI screenshots.

@@ -17,3 +17,7 @@ Laravel 13 + React 19 + Inertia 3 + TypeScript + PostgreSQL.
 Production uses PostgreSQL through environment variables. Local setup and CI keep Laravel's lightweight SQLite defaults.
 
 The application is intentionally kept as a single deployable monolith for fast product iteration. A Dockerfile and `/up` health check are included for Dokploy deployment.
+
+## Testing
+
+Use `bash tools/test-local.sh` for local checks, including PostgreSQL and browser flows. GitHub checks are explicitly dispatched only when working without a local runtime. See [testing instructions](docs/TESTING.md).

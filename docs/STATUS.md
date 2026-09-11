@@ -6,9 +6,13 @@ Last updated: 2026-09-11
 
 Production is `main` -> Dokploy build/migrations -> `https://workbine.com`. The owner authorizes tested feature work and merges and does not want ZIP deliverables. Read README.md, AGENTS.md, this file, docs/DESIGN.md and docs/BACKLOG.md before changing anything.
 
-On 2026-09-11 the owner stopped the GitHub coding agent and requested removal of its cron. PR #11 removed the scheduled workflow. This revokes the earlier request for unattended development. Do not restore the workflow, rerun old agent jobs, activate publication permissions or continue its pending branch without a new explicit request. The retained controller/task files are inactive history. Ordinary CI, browser tests and Dokploy remain in place.
+On 2026-09-11 the owner stopped the GitHub coding agent and requested removal of its cron. PR #11 removed the scheduled workflow. This revokes the earlier request for unattended development. Do not restore the workflow, rerun old agent jobs, activate publication permissions or continue its pending branch without a new explicit request. The retained controller/task files are inactive history. Quality checks and browser tests remain required; they now run locally during sessions on this machine. Dokploy remains automatic.
 
 The latest visual direction is white, very light neutral grey, graphite text and restrained blue actions. The owner rejected the previous green/olive/teal and terracotta treatment. The current docs/DESIGN.md supersedes historical palette instructions.
+
+## Testing policy — local environment first
+
+The owner requests local testing on this machine to avoid GitHub Actions usage. Run `bash tools/test-local.sh` before merging. It checks a working-tree snapshot in disposable containers, including SQLite, PostgreSQL and browser flows. No production services, databases or environment files are used. CI, UI preview and read-only production smoke now require explicit dispatch; the historical bootstrap workflow is also manual. GPT Web sessions without a local runtime can use the retained GitHub workflows. See docs/TESTING.md. This supersedes historical instructions below to require GitHub head checks for every release.
 
 ## HTTPS simplification handoff
 
@@ -54,7 +58,7 @@ Desktop feed, public member profile, private settings and authentication screens
 
 An initial CI failure identified Markdown formatting in DESIGN.md; it was fixed without disabling the check. Temporary source-review and formatting-preparation workflows are absent from the release diff. They only applied manually authored changes during this requested session and did not invoke a coding agent.
 
-Use the latest PR head checks as the release gate; rerun CI on any subsequent change. Confirm live rendering separately after Dokploy completes the merge-triggered build. Screenshots are internal review evidence, not ZIP deliverables.
+Use fresh local results for the exact changes being merged as the release gate; use dispatched GitHub checks only when no local runtime is available. Confirm live rendering separately after Dokploy completes the merge-triggered build. Screenshots are internal review evidence, not ZIP deliverables.
 
 ## Stack, privacy and operational boundaries
 

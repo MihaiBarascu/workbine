@@ -1,12 +1,7 @@
 name: CI
 
+# Local development runs tools/test-local.sh. Dispatch only when no local runner is available.
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
   workflow_call:
     inputs:
