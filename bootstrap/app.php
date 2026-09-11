@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureHttps;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -15,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Only the protocol is forwarded; keep the original Host and client identity.
+        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_PROTO);
+        $middleware->append(EnsureHttps::class);
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
