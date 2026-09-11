@@ -1,0 +1,239 @@
+/* Small, human-first additions to the existing white/grey/blue community shell. */
+.wb-public input:focus-visible,
+.wb-public textarea:focus-visible,
+.wb-public select:focus-visible {
+    /* Keep one clear outline instead of stacking an outline with an input ring. */
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+.wb-topic-composer input,
+.wb-topic-composer textarea,
+.wb-form-errors {
+    scroll-margin-top: 120px;
+}
+.wb-starter-feedback {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    color: var(--muted-foreground);
+    font-size: 13px;
+}
+.wb-starter-feedback button {
+    min-height: 44px;
+    padding: 6px;
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.wb-starter-hint {
+    margin: 10px 0 14px;
+    color: var(--muted-foreground);
+    font-size: 13px;
+    line-height: 1.6;
+}
+.wb-starter-options {
+    display: grid;
+    gap: 10px;
+}
+.wb-starter-options button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    min-height: 64px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    text-align: left;
+    cursor: pointer;
+}
+.wb-starter-options button:hover {
+    border-color: var(--primary);
+    background: var(--muted);
+}
+.wb-starter-options button > span {
+    min-width: 0;
+}
+.wb-starter-options button > svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--primary);
+}
+.wb-starter-category,
+.wb-starter-title {
+    display: block;
+    overflow-wrap: anywhere;
+}
+.wb-starter-category {
+    margin-bottom: 4px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.wb-starter-title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+.wb-first-topic .wb-topic-starters {
+    max-width: 640px;
+}
+.wb-worked-example {
+    padding: 4px 0 12px;
+    border-top: 1px solid var(--border);
+}
+.wb-worked-example summary,
+.wb-writing-help summary {
+    min-height: 44px;
+    padding: 12px 4px;
+    cursor: pointer;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+.wb-example-label {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.6;
+    margin: 4px 0 16px;
+}
+.wb-worked-example dt {
+    margin-top: 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.wb-worked-example dd {
+    margin-top: 4px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+.wb-method-choice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+}
+.wb-method-choice:hover,
+.wb-method-choice[data-selected='true'] {
+    border-color: var(--primary);
+}
+.wb-method-choice > input {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 3px;
+    accent-color: var(--primary);
+}
+.wb-method-choice > span {
+    min-width: 0;
+}
+.wb-method-choice-title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+.wb-method-choice-title > svg {
+    width: 16px;
+    height: 16px;
+    color: var(--muted-foreground);
+}
+.wb-optional {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-weight: 400;
+}
+.wb-method-choice-hint {
+    display: block;
+    margin-top: 5px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.wb-writing-help ul {
+    padding: 0 0 8px 22px;
+    color: var(--muted-foreground);
+    list-style: disc;
+    font-size: 14px;
+    line-height: 1.8;
+}
+.wb-publish-area {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+}
+.wb-publish-next {
+    margin-bottom: 16px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.wb-public-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 18px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.7;
+}
+.wb-public-note svg {
+    width: 15px;
+    height: 15px;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+.wb-form-errors {
+    padding: 16px;
+    border: 1px solid var(--destructive);
+    border-radius: 8px;
+}
+.wb-form-errors h2 {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+.wb-form-errors p {
+    margin-top: 4px;
+    color: var(--muted-foreground);
+    font-size: 14px;
+    line-height: 1.6;
+}
+.wb-form-errors ul {
+    margin-top: 8px;
+    padding-left: 20px;
+    list-style: disc;
+    font-size: 14px;
+}
+.wb-form-errors a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+@media (max-width: 640px) {
+    .wb-method-choice {
+        padding: 14px;
+    }
+    .wb-topic-composer [type='submit'] {
+        width: 100%;
+        min-height: 44px;
+    }
+}

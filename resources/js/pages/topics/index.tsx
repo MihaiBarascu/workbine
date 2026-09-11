@@ -1,30 +1,24 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Form, Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
-    ArrowUpRight,
     BookOpen,
     Bookmark,
     MessagesSquare,
-    Search,
     PenLine,
+    Search,
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { MemberLink } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
+import { TopicStarters } from '@/components/topic-starters';
 import { Button } from '@/components/ui/button';
-import type { PaginatedTopics } from '@/types';
+import type { PaginatedTopics, User } from '@/types';
 
 type Props = {
     topics: PaginatedTopics & { total: number };
     view: 'latest' | 'unanswered';
     search: string;
 };
-
-const starters = [
-    'Automating product imports for an online store',
-    'Learning a new skill while working full-time',
-    'Finding the first customer for a small project',
-];
 
 function formatDate(value: string): string {
     return new Intl.DateTimeFormat('en', {
@@ -36,19 +30,35 @@ function formatDate(value: string): string {
 }
 
 export default function TopicsIndex({ topics, view, search }: Props) {
+    const { auth } = usePage<{ auth: { user: User | null } }>().props;
     const [topicTitle, setTopicTitle] = useState('');
+    const [previousTitle, setPreviousTitle] = useState<string | null>(null);
     const topicInput = useRef<HTMLInputElement>(null);
     const unanswered = view === 'unanswered';
+    const emptyCommunity = !search && !unanswered && topics.total === 0;
     const filterUrl = (value: string) =>
         `/topics?${new URLSearchParams({ view: value, q: search })}#topics`;
 
-    function chooseStarter(title: string) {
-        setTopicTitle(title);
+    function focusTopic() {
         topicInput.current?.focus();
         topicInput.current?.scrollIntoView({
             block: 'center',
             behavior: 'instant',
         });
+    }
+
+    function chooseStarter(title: string) {
+        setPreviousTitle(topicTitle);
+        setTopicTitle(title);
+        focusTopic();
+    }
+
+    function undoStarter() {
+        if (previousTitle !== null) {
+            setTopicTitle(previousTitle);
+            setPreviousTitle(null);
+            focusTopic();
+        }
     }
 
     return (
@@ -61,8 +71,8 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                     <div>
                         <h1>Explore the community</h1>
                         <p>
-                            Real approaches, shared by the people who tried
-                            them.
+                            Find a useful approach, share yours, or figure it
+                            out together.
                         </p>
                     </div>
                     <Form
@@ -105,7 +115,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             <div className="wb-compose-heading">
                                 <PenLine aria-hidden="true" />
                                 <label htmlFor="new-topic">
-                                    What are you working on?
+                                    What would you like to share or figure out?
                                 </label>
                             </div>
                             <div className="wb-compose-row">
@@ -114,22 +124,43 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     id="new-topic"
                                     name="title"
                                     value={topicTitle}
-                                    onChange={(event) =>
-                                        setTopicTitle(event.target.value)
-                                    }
+                                    onChange={(event) => {
+                                        setTopicTitle(event.target.value);
+                                        setPreviousTitle(null);
+                                    }}
                                     required
                                     maxLength={160}
-                                    placeholder="A topic to share or explore…"
+                                    aria-describedby="new-topic-hint"
+                                    placeholder="For example: Making time to learn after work"
                                 />
                                 <button type="submit">
-                                    Start a topic
-                                    <ArrowUpRight aria-hidden="true" />
+                                    Continue
+                                    <ArrowRight aria-hidden="true" />
                                 </button>
                             </div>
-                            <p>
-                                Share your own method, or invite others to share
-                                theirs.
+                            <p id="new-topic-hint">
+                                {auth.user
+                                    ? 'Start with a title. You can add your method on the next page.'
+                                    : 'Start with a title. You’ll log in to finish your topic.'}{' '}
+                                Nothing is published yet.
                             </p>
+                            <div
+                                className="wb-starter-feedback"
+                                aria-live="polite"
+                                aria-atomic="true"
+                            >
+                                {previousTitle !== null && (
+                                    <>
+                                        <span>Idea added. Make it yours.</span>
+                                        <button
+                                            type="button"
+                                            onClick={undoStarter}
+                                        >
+                                            Undo
+                                        </button>
+                                    </>
+                                )}
+                            </div>
                         </Form>
 
                         <div className="wb-feed-toolbar">
@@ -156,10 +187,12 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     Needs a method
                                 </Link>
                             </nav>
-                            <span className="wb-topic-count">
-                                {topics.total}{' '}
-                                {topics.total === 1 ? 'topic' : 'topics'}
-                            </span>
+                            {!emptyCommunity && (
+                                <span className="wb-topic-count">
+                                    {topics.total}{' '}
+                                    {topics.total === 1 ? 'topic' : 'topics'}
+                                </span>
+                            )}
                         </div>
                         <h2 id="topics-heading" className="sr-only">
                             {search
@@ -170,7 +203,9 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         </h2>
                         {search && (
                             <p role="status" className="wb-search-state">
-                                Matching “{search}” ·{' '}
+                                {topics.total}{' '}
+                                {topics.total === 1 ? 'topic' : 'topics'} matching
+                                “{search}” ·{' '}
                                 <Link href={`/topics?view=${view}#topics`}>
                                     Clear search
                                 </Link>
@@ -208,7 +243,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                         </h3>
                                         <p className="wb-entry-description">
                                             {topic.description ||
-                                                'Have you done this? Share the details of your approach.'}
+                                                'Know a way to do this? Share what works for you.'}
                                         </p>
                                         <div className="wb-entry-bottom">
                                             <span
@@ -219,10 +254,9 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                                 }
                                             >
                                                 <MessagesSquare aria-hidden="true" />
-                                                {topic.methods_count}{' '}
-                                                {topic.methods_count === 1
-                                                    ? 'method'
-                                                    : 'methods'}
+                                                {topic.methods_count
+                                                    ? `${topic.methods_count} ${topic.methods_count === 1 ? 'method' : 'methods'}`
+                                                    : 'Open for a first method'}
                                             </span>
                                             {topic.saves_count > 0 && (
                                                 <span
@@ -249,42 +283,56 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     </article>
                                 ))}
                             </div>
+                        ) : emptyCommunity ? (
+                            <div className="wb-empty wb-first-topic">
+                                <BookOpen
+                                    aria-hidden="true"
+                                    className="wb-empty-icon"
+                                />
+                                <h3>
+                                    A small thing you know can help someone else.
+                                </h3>
+                                <p>
+                                    There are no topics yet. Start with an
+                                    everyday task, a useful habit, or something
+                                    you’re curious about. You don’t need to be an
+                                    expert.
+                                </p>
+                                <TopicStarters onChoose={chooseStarter} />
+                            </div>
                         ) : (
                             <div className="wb-empty">
-                                <BookOpen
+                                <Search
                                     aria-hidden="true"
                                     className="wb-empty-icon"
                                 />
                                 <h3>
                                     {search
                                         ? 'No matching topics yet'
-                                        : unanswered
-                                          ? 'No topics are waiting for a first method'
-                                          : 'Every useful topic starts with someone.'}
+                                        : 'No topics are waiting for a first method'}
                                 </h3>
                                 <p>
                                     {search
-                                        ? 'Try a different phrase, change the filter, or start this topic with your own method or context.'
-                                        : unanswered
-                                          ? 'Explore the other topics and add another approach. There is rarely just one way to do something.'
-                                          : 'Start with something you know how to do, or something you want to explore. You can publish a topic with your method or invite others to share theirs.'}
+                                        ? 'Try fewer words or explore all topics. You can also start a topic about this.'
+                                        : 'Explore the other topics. Your way of doing something may help someone new.'}
                                 </p>
-                                <Button asChild variant="outline">
-                                    <Link
-                                        href={
-                                            unanswered && !search
-                                                ? '/topics#topics'
-                                                : search
-                                                  ? `/topics/create?title=${encodeURIComponent(search)}`
-                                                  : '/topics/create'
-                                        }
-                                    >
-                                        {unanswered && !search
-                                            ? 'Explore all topics'
-                                            : 'Start a topic'}
-                                        <ArrowUpRight aria-hidden="true" />
-                                    </Link>
-                                </Button>
+                                <div className="flex flex-wrap gap-3">
+                                    <Button asChild variant="outline">
+                                        <Link href="/topics#topics">
+                                            Explore all topics
+                                        </Link>
+                                    </Button>
+                                    {search && (
+                                        <Button asChild variant="ghost">
+                                            <Link
+                                                href={`/topics/create?title=${encodeURIComponent(search)}`}
+                                            >
+                                                Start this topic
+                                                <ArrowRight aria-hidden="true" />
+                                            </Link>
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         )}
 
@@ -338,62 +386,66 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                     >
                         <p className="wb-kicker">How Workbine works</p>
                         <h2 id="guide-heading" className="wb-guide-heading">
-                            A little experience goes a long way.
+                            Real steps. Shared experience.
                         </h2>
-                        <p className="wb-guide-intro">
-                            A topic brings people together. Methods show how
-                            they approach it. Experiences tell you what happened
-                            when others tried.
-                        </p>
                         <ol className="wb-guide-list">
                             <li>
-                                <span>01</span>
+                                <span aria-hidden="true">01</span>
                                 <div>
-                                    <strong>Start with the situation</strong>
+                                    <strong>Find something you want to do</strong>
                                     <p>
-                                        A goal, a constraint, something you
-                                        wanted to figure out.
+                                        That’s a topic. Start one or explore
+                                        what’s here.
                                     </p>
                                 </div>
                             </li>
                             <li>
-                                <span>02</span>
+                                <span aria-hidden="true">02</span>
                                 <div>
-                                    <strong>Share the actual steps</strong>
+                                    <strong>See how someone does it</strong>
                                     <p>
-                                        What you did and what you used. Credit
-                                        the source if it came from someone else.
+                                        That’s a method: practical steps you can
+                                        try.
                                     </p>
                                 </div>
                             </li>
                             <li>
-                                <span>03</span>
+                                <span aria-hidden="true">03</span>
                                 <div>
-                                    <strong>Tell us how it went</strong>
+                                    <strong>Tried it? Share what happened</strong>
                                     <p>
-                                        What worked, what didn’t, and what you’d
-                                        change.
+                                        What worked, what didn’t, or what you
+                                        changed. That’s an experience.
                                     </p>
                                 </div>
                             </li>
                         </ol>
-                        <div className="wb-starters">
-                            <h3>Need a starting point?</h3>
-                            <p>
-                                These are prompts, not published topics. Make
-                                one your own.
+                        <details className="wb-worked-example">
+                            <summary>See a simple example</summary>
+                            <p className="wb-example-label">
+                                Illustration only, not a community post.
                             </p>
-                            {starters.map((title) => (
-                                <button
-                                    key={title}
-                                    type="button"
-                                    onClick={() => chooseStarter(title)}
-                                >
-                                    {title}
-                                    <ArrowUpRight aria-hidden="true" />
-                                </button>
-                            ))}
-                        </div>
+                            <dl>
+                                <dt>Topic</dt>
+                                <dd>Making time to learn after work</dd>
+                                <dt>Method</dt>
+                                <dd>
+                                    Set aside 15 minutes after dinner and
+                                    practise one small thing.
+                                </dd>
+                                <dt>Experience</dt>
+                                <dd>
+                                    “I tried it for a week. Short sessions were
+                                    easier to fit in, but I needed a reminder.”
+                                </dd>
+                            </dl>
+                        </details>
+                        {!emptyCommunity && (
+                            <div className="wb-starters">
+                                <h3>Need a starting point?</h3>
+                                <TopicStarters onChoose={chooseStarter} />
+                            </div>
+                        )}
                     </aside>
                 </div>
             </main>

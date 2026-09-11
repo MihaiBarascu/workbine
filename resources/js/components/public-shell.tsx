@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
-    ArrowUpRight,
+    ArrowRight,
     Bookmark,
     ChevronDown,
     LogOut,
@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { User } from '@/types';
 import '../../css/workbine.css';
+import '../../css/community-clarity.css';
 
 type Props = { children: ReactNode };
 
@@ -27,6 +28,7 @@ export function PublicShell({ children }: Props) {
         props: { auth },
         url,
     } = usePage<{ auth: { user: User | null } }>();
+    const composingTopic = url.split('?')[0] === '/topics/create';
 
     return (
         <div className="wb-public flex min-h-screen flex-col">
@@ -58,16 +60,18 @@ export function PublicShell({ children }: Props) {
                         </Link>
                         {auth.user ? (
                             <>
-                                <Button
-                                    asChild
-                                    size="sm"
-                                    className="wb-start-button"
-                                >
-                                    <Link href="/topics/create">
-                                        Start a topic
-                                        <ArrowUpRight aria-hidden="true" />
-                                    </Link>
-                                </Button>
+                                {!composingTopic && (
+                                    <Button
+                                        asChild
+                                        size="sm"
+                                        className="wb-start-button"
+                                    >
+                                        <Link href="/topics/create">
+                                            Start a topic
+                                            <ArrowRight aria-hidden="true" />
+                                        </Link>
+                                    </Button>
+                                )}
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <button
@@ -165,7 +169,9 @@ export function PublicShell({ children }: Props) {
                         <Link href="/community/reputation">
                             How reputation works
                         </Link>
-                        <Link href="/topics/create">Start a topic ↗</Link>
+                        {!composingTopic && (
+                            <Link href="/topics/create">Start a topic</Link>
+                        )}
                     </div>
                 </div>
             </footer>

@@ -2,6 +2,7 @@
 const assert = require('node:assert/strict');
 const { createRequire } = require('node:module');
 const { mkdir } = require('node:fs/promises');
+const { exerciseTopicClarity } = require('./topic-clarity.cjs');
 const browserRequire = createRequire('/tmp/workbine-browser/package.json');
 const { chromium } = browserRequire('playwright');
 
@@ -166,6 +167,8 @@ const { chromium } = browserRequire('playwright');
             animations: 'disabled',
         });
 
+        await exerciseTopicClarity(page, root, output);
+
         await page.goto(`${root}/topics/create`);
         await page
             .locator('input[name="title"]')
@@ -231,7 +234,7 @@ const { chromium } = browserRequire('playwright');
             .locator('#new-topic')
             .fill('Automating product imports for an online store');
         await page
-            .getByRole('button', { name: 'Start a topic', exact: true })
+            .getByRole('button', { name: 'Continue', exact: true })
             .click();
         await page.waitForURL(/\/topics\/create\?/);
         assert.equal(
