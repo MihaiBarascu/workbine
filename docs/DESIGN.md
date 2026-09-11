@@ -4,6 +4,29 @@
 
 The owner explicitly rejected the green/olive/teal palette and requested a much lighter, cleaner interface. This supersedes the previous notebook palette. Use white surfaces, a nearly white neutral canvas, graphite text and a restrained blue accent. Do not reintroduce forest green, terracotta, tinted page backgrounds, decorative gradients or large marketing-hero statements.
 
+## Open community layout - 2026-09-11
+
+The owner requested a wider, more natural community interface. The discovery page
+uses a fluid shell up to 1600px, with a generous main feed and one 280px supporting
+column. The redundant left sidebar is replaced by filters directly above the
+contributions. Search sits beside the short page heading on desktop and below it
+on mobile. Contributions share one quiet surface with dividing lines, larger
+headings and readable summaries. The topic composer still supports sharing a
+method or inviting approaches equally; prompts remain explicitly labelled.
+
+Navigation, topic detail and experience pages share the wider alignment. Long
+method text keeps a readable line length. At tablet widths supporting content
+moves below the main column. Mobile controls retain visible labels, keyboard
+focus and usable touch targets; the interface is checked from 320px to 1920px in
+light and dark appearance. No decorative hero, new dependency, invented activity
+or change to the Topic -> Method -> Experience model.
+
+The direction uses content and working controls as the visual focus. Contemporary
+community reference: [Discourse's Horizon design process](https://blog.discourse.org/2025/10/how-we-built-horizon-with-design-driven-development/).
+Responsive validation follows the intent of [W3C reflow guidance](https://www.w3.org/WAI/WCAG21/Understanding/reflow).
+These references inform implementation; browser checks do not establish full WCAG
+conformance or measured audience growth.
+
 ## Shared design system
 
 - Canvas `#f8f9fb`, surfaces `#ffffff`, graphite `#242730`, secondary text `#626b7c`, rules `#e3e7ee` and blue actions `#315ed7`.

@@ -27,6 +27,36 @@ Dokploy; observe the deployment instead of invoking another deploy or restarting
 containers. Infrastructure changes require a separate concrete explanation and
 explicit authorization, preferably through Dokploy's UI/API.
 
+## Wider community design - 2026-09-11
+
+The owner requested a more spacious, natural community interface. Branch
+`feat/open-community-layout` replaces the three-column discovery layout with a
+1600px shell, a wide contribution column, inline filters, compact search and a
+quieter supporting guide. The feed measures 1040px at a 1440px viewport, up from
+744px. Topic and experience pages share the wider alignment with readable body
+widths, real author avatars and a linked index of existing methods. Navigation
+and member/account page spacing are aligned with the new layout. The neutral
+light/blue palette, dark preference, topic draft and first-method flow remain.
+No backend, database, dependency or infrastructure changes are part of this work.
+
+Application revision `106d8c95f8749ae22540074fed730be2d8cea325` passed
+`bash tools/test-local.sh`: production frontend build, formatting/lint, TypeScript,
+Pint, PHPStan, 115 application tests (912 assertions) on each of SQLite and
+PostgreSQL, 13 Python tests, 25 public responsive captures and the complete
+contribution/profile/authentication browser flows. The snapshot contained no
+uncommitted application changes. Final logs and 58 screenshots:
+`/tmp/workbine-local-tests.IH2N7x/`. Desktop, tablet, wide/dark, small-phone,
+method, experience, account and search-empty captures were visually reviewed.
+Mobile prompts fit their inputs and the authenticated header stays on one row at
+320px. The subsequent documentation commit only records these results and is
+checked separately for formatting. No GitHub Actions were dispatched.
+
+The expanded capture matrix covers feed widths 320 through 1920px in light/dark,
+search results and empty results, link navigation and keyboard focus. Preview
+content is synthetic and stays in disposable local containers. Production had no
+public topics during the initial read-only check; design validation does not
+claim audience growth. Merge and live deployment must be confirmed separately.
+
 ## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.

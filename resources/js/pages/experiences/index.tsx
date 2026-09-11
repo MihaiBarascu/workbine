@@ -1,8 +1,8 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, ExternalLink, MessageCircleMore } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { MemberAvatar, MemberLink } from '@/components/community';
 import { CopyLinkButton } from '@/components/copy-link-button';
 import { ExperienceForm } from '@/components/experience-form';
-import { MemberLink } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type {
@@ -11,6 +11,7 @@ import type {
     PaginatedExperiences,
     User,
 } from '@/types';
+import '../../../css/topic-detail.css';
 
 type Props = {
     topic: { id: number; title: string; slug: string };
@@ -49,226 +50,242 @@ export default function ExperiencesIndex({
     return (
         <PublicShell>
             <Head title={`Experiences - ${method.title}`} />
-            <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-                <Button asChild variant="ghost" className="mb-6 -ml-3">
-                    <Link href={`/topics/${topic.slug}#method-${method.id}`}>
-                        <ArrowLeft aria-hidden="true" />
-                        Back to the method
-                    </Link>
-                </Button>
-                <p className="text-primary dark:text-primary text-sm font-medium">
-                    After trying the method
-                </p>
-                <h1 className="mt-2 max-w-3xl text-3xl font-semibold tracking-tight [overflow-wrap:anywhere] sm:text-4xl">
-                    {method.title}
-                </h1>
-                <p className="text-muted-foreground mt-3 text-sm [overflow-wrap:anywhere]">
-                    Method shared by <MemberLink user={method.user} /> · Topic:{' '}
-                    {topic.title}
-                </p>
-                <div className="mt-5">
-                    <CopyLinkButton path={`${base}/experiences`} />
-                </div>
-
-                <section
-                    aria-label="Reported outcomes"
-                    className="mt-8 grid grid-cols-3 gap-2 sm:gap-3"
+            <main className="wb-detail-page">
+                <Link
+                    href={`/topics/${topic.slug}#method-${method.id}`}
+                    className="wb-detail-back"
                 >
-                    {(Object.keys(outcomes) as ExperienceOutcome[]).map(
-                        (outcome) => (
-                            <div
-                                key={outcome}
-                                className="bg-card rounded-xl border p-3 sm:p-4"
-                            >
-                                <p className="text-2xl font-semibold">
-                                    {summary[outcome]}
-                                </p>
-                                <p className="text-muted-foreground mt-1 text-xs sm:text-sm">
-                                    {outcomes[outcome]}
-                                </p>
-                            </div>
-                        ),
-                    )}
-                </section>
-                <p className="text-muted-foreground mt-3 text-xs leading-5">
-                    Self-reported experiences, not independent verification.
-                    Results depend on context. One experience per person;
-                    updates replace their earlier entry.
-                </p>
-
-                <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-                    <section
-                        aria-labelledby="experiences-heading"
-                        className="min-w-0"
-                    >
-                        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                            <h2
-                                id="experiences-heading"
-                                className="text-xl font-semibold"
-                            >
-                                {experiences.total}{' '}
-                                {experiences.total === 1
-                                    ? 'experience'
-                                    : 'experiences'}
-                            </h2>
-                            {!isAuthor && (
-                                <Button asChild size="sm" variant="outline">
-                                    {auth.user ? (
-                                        <a href="#share">
-                                            {ownExperience
-                                                ? 'Edit my experience'
-                                                : 'I tried this'}
-                                        </a>
-                                    ) : (
-                                        <Link
-                                            href={`${base}/experiences/create`}
-                                        >
-                                            I tried this
-                                        </Link>
-                                    )}
-                                </Button>
-                            )}
+                    <ArrowLeft aria-hidden="true" />
+                    Back to the method
+                </Link>
+                <header className="wb-experiences-heading">
+                    <p className="wb-detail-label">After trying the method</p>
+                    <h1>{method.title}</h1>
+                    <p className="wb-experience-topic">
+                        In{' '}
+                        <Link href={`/topics/${topic.slug}`}>
+                            {topic.title}
+                        </Link>
+                    </p>
+                    <div className="wb-experience-heading-footer">
+                        <div className="wb-detail-author">
+                            <MemberAvatar name={method.user.name} />
+                            <p>
+                                Method shared by{' '}
+                                <MemberLink user={method.user} />
+                            </p>
                         </div>
-                        {experiences.data.length === 0 ? (
-                            <div className="bg-muted/20 rounded-2xl border border-dashed p-8 text-center">
-                                <MessageCircleMore
-                                    className="text-primary dark:text-primary mx-auto size-8"
-                                    aria-hidden="true"
-                                />
-                                <h3 className="mt-4 text-lg font-semibold">
-                                    Tried it? Your context matters.
-                                </h3>
-                                <p className="text-muted-foreground mt-2 text-sm leading-6">
-                                    Share what happened, even when it only
-                                    partly worked or did not help. An honest
-                                    limitation can save someone time.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                {experiences.data.map((experience) => (
-                                    <article
-                                        key={experience.id}
-                                        id={`experience-${experience.id}`}
-                                        className="bg-card scroll-mt-36 rounded-2xl border p-5"
-                                    >
-                                        <div className="flex flex-wrap items-center justify-between gap-2">
-                                            <h3 className="text-sm font-semibold [overflow-wrap:anywhere]">
-                                                <MemberLink
-                                                    user={experience.user}
-                                                />
-                                            </h3>
-                                            <span className="bg-secondary text-secondary-foreground dark:bg-secondary dark:text-secondary-foreground rounded-full px-3 py-1 text-xs font-medium">
-                                                {outcomes[experience.outcome]}
-                                            </span>
-                                        </div>
-                                        {experience.updated_at && (
-                                            <p className="text-muted-foreground mt-2 text-xs">
-                                                Last shared{' '}
-                                                <time
-                                                    dateTime={
-                                                        experience.updated_at
-                                                    }
-                                                >
-                                                    {formatDate(
-                                                        experience.updated_at,
-                                                    )}
-                                                </time>
-                                            </p>
-                                        )}
-                                        {experience.tried_on && (
-                                            <p className="text-muted-foreground mt-1 text-xs">
-                                                Tried on{' '}
-                                                <time
-                                                    dateTime={
-                                                        experience.tried_on
-                                                    }
-                                                >
-                                                    {formatDate(
-                                                        experience.tried_on,
-                                                    )}
-                                                </time>
-                                            </p>
-                                        )}
-                                        <p className="mt-4 text-sm leading-7 [overflow-wrap:anywhere] whitespace-pre-wrap">
-                                            {experience.body}
+                        <CopyLinkButton path={`${base}/experiences`} />
+                    </div>
+                </header>
+
+                <div className="wb-experiences-layout">
+                    <div className="min-w-0">
+                        <section
+                            aria-label="Reported outcomes"
+                            className="wb-outcome-summary"
+                        >
+                            {(Object.keys(outcomes) as ExperienceOutcome[]).map(
+                                (outcome) => (
+                                    <div key={outcome}>
+                                        <p className="wb-outcome-count">
+                                            {summary[outcome]}
                                         </p>
-                                        {experience.evidence_url && (
-                                            <a
-                                                href={experience.evidence_url}
-                                                target="_blank"
-                                                rel="noopener noreferrer nofollow ugc"
-                                                className="text-primary dark:text-primary mt-4 inline-flex items-center gap-2 text-sm underline underline-offset-4"
-                                            >
-                                                View shared evidence{' '}
-                                                <ExternalLink
-                                                    className="size-4"
-                                                    aria-hidden="true"
-                                                />
-                                                <span className="sr-only">
-                                                    (opens in a new tab)
-                                                </span>
+                                        <p>{outcomes[outcome]}</p>
+                                    </div>
+                                ),
+                            )}
+                        </section>
+                        <p className="wb-detail-note wb-outcome-note">
+                            Self-reported experiences, not independent
+                            verification. Results depend on context. One
+                            experience per person; updates replace their earlier
+                            entry.
+                        </p>
+
+                        <section aria-labelledby="experiences-heading">
+                            <div className="wb-detail-section-heading">
+                                <div>
+                                    <h2 id="experiences-heading">
+                                        {experiences.total}{' '}
+                                        {experiences.total === 1
+                                            ? 'experience'
+                                            : 'experiences'}
+                                    </h2>
+                                    <p>What happened when people tried it.</p>
+                                </div>
+                                {!isAuthor && (
+                                    <Button asChild size="sm" variant="outline">
+                                        {auth.user ? (
+                                            <a href="#share">
+                                                {ownExperience
+                                                    ? 'Edit my experience'
+                                                    : 'I tried this'}
                                             </a>
+                                        ) : (
+                                            <Link
+                                                href={`${base}/experiences/create`}
+                                            >
+                                                I tried this
+                                            </Link>
                                         )}
-                                    </article>
-                                ))}
+                                    </Button>
+                                )}
                             </div>
-                        )}
-                        {experiences.last_page > 1 && (
-                            <nav
-                                aria-label="Experience pagination"
-                                className="mt-6 flex items-center justify-between gap-3"
-                            >
-                                <Button
-                                    asChild={Boolean(experiences.prev_page_url)}
-                                    variant="outline"
-                                    disabled={!experiences.prev_page_url}
+                            {experiences.data.length === 0 ? (
+                                <div className="wb-detail-empty">
+                                    <h3>Tried it? Your context matters.</h3>
+                                    <p>
+                                        Share what happened, even when it only
+                                        partly worked or did not help. An honest
+                                        limitation can save someone time.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="wb-experience-list">
+                                    {experiences.data.map((experience) => (
+                                        <article
+                                            key={experience.id}
+                                            id={`experience-${experience.id}`}
+                                            className="wb-experience-article"
+                                        >
+                                            <div className="wb-experience-meta">
+                                                <div className="wb-detail-author">
+                                                    <MemberAvatar
+                                                        name={
+                                                            experience.user.name
+                                                        }
+                                                    />
+                                                    <div className="min-w-0">
+                                                        <h3>
+                                                            <MemberLink
+                                                                user={
+                                                                    experience.user
+                                                                }
+                                                            />
+                                                        </h3>
+                                                        {experience.updated_at && (
+                                                            <p className="wb-experience-date">
+                                                                Last shared{' '}
+                                                                <time
+                                                                    dateTime={
+                                                                        experience.updated_at
+                                                                    }
+                                                                >
+                                                                    {formatDate(
+                                                                        experience.updated_at,
+                                                                    )}
+                                                                </time>
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span className="wb-experience-outcome">
+                                                    {
+                                                        outcomes[
+                                                            experience.outcome
+                                                        ]
+                                                    }
+                                                </span>
+                                            </div>
+                                            <p className="wb-detail-body">
+                                                {experience.body}
+                                            </p>
+                                            {experience.tried_on && (
+                                                <p className="wb-experience-tried">
+                                                    Tried on{' '}
+                                                    <time
+                                                        dateTime={
+                                                            experience.tried_on
+                                                        }
+                                                    >
+                                                        {formatDate(
+                                                            experience.tried_on,
+                                                        )}
+                                                    </time>
+                                                </p>
+                                            )}
+                                            {experience.evidence_url && (
+                                                <a
+                                                    href={
+                                                        experience.evidence_url
+                                                    }
+                                                    target="_blank"
+                                                    rel="noopener noreferrer nofollow ugc"
+                                                    className="wb-detail-text-link wb-experience-evidence"
+                                                >
+                                                    View shared evidence
+                                                    <ExternalLink aria-hidden="true" />
+                                                    <span className="sr-only">
+                                                        (opens in a new tab)
+                                                    </span>
+                                                </a>
+                                            )}
+                                        </article>
+                                    ))}
+                                </div>
+                            )}
+                            {experiences.last_page > 1 && (
+                                <nav
+                                    aria-label="Experience pagination"
+                                    className="wb-experience-pagination"
                                 >
-                                    {experiences.prev_page_url ? (
-                                        <Link href={experiences.prev_page_url}>
-                                            Previous
-                                        </Link>
-                                    ) : (
-                                        <span>Previous</span>
-                                    )}
-                                </Button>
-                                <span className="text-muted-foreground text-sm">
-                                    Page {experiences.current_page} of{' '}
-                                    {experiences.last_page}
-                                </span>
-                                <Button
-                                    asChild={Boolean(experiences.next_page_url)}
-                                    variant="outline"
-                                    disabled={!experiences.next_page_url}
-                                >
-                                    {experiences.next_page_url ? (
-                                        <Link href={experiences.next_page_url}>
-                                            Next
-                                        </Link>
-                                    ) : (
-                                        <span>Next</span>
-                                    )}
-                                </Button>
-                            </nav>
-                        )}
-                    </section>
+                                    <Button
+                                        asChild={Boolean(
+                                            experiences.prev_page_url,
+                                        )}
+                                        variant="outline"
+                                        disabled={!experiences.prev_page_url}
+                                    >
+                                        {experiences.prev_page_url ? (
+                                            <Link
+                                                href={experiences.prev_page_url}
+                                            >
+                                                Previous
+                                            </Link>
+                                        ) : (
+                                            <span>Previous</span>
+                                        )}
+                                    </Button>
+                                    <span>
+                                        Page {experiences.current_page} of{' '}
+                                        {experiences.last_page}
+                                    </span>
+                                    <Button
+                                        asChild={Boolean(
+                                            experiences.next_page_url,
+                                        )}
+                                        variant="outline"
+                                        disabled={!experiences.next_page_url}
+                                    >
+                                        {experiences.next_page_url ? (
+                                            <Link
+                                                href={experiences.next_page_url}
+                                            >
+                                                Next
+                                            </Link>
+                                        ) : (
+                                            <span>Next</span>
+                                        )}
+                                    </Button>
+                                </nav>
+                            )}
+                        </section>
+                    </div>
                     <section
                         id="share"
                         tabIndex={-1}
                         aria-labelledby="share-heading"
-                        className="bg-card h-fit min-w-0 scroll-mt-36 rounded-2xl border p-5"
+                        className="wb-experience-share"
                     >
-                        <h2
-                            id="share-heading"
-                            className="text-xl font-semibold"
-                        >
+                        <h2 id="share-heading">
                             {ownExperience
                                 ? 'Update your experience'
                                 : 'Share your experience'}
                         </h2>
-                        <p className="text-muted-foreground mt-2 mb-6 text-sm leading-6">
-                            Tell the next person what to expect, not just
-                            whether you liked the idea.
+                        <p className="wb-experience-share-intro">
+                            What did you try, and how did it go? Your context
+                            helps the next person decide.
                         </p>
                         {!auth.user ? (
                             <Button asChild className="w-full">

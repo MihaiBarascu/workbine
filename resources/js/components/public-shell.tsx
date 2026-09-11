@@ -22,7 +22,10 @@ import '../../css/workbine.css';
 type Props = { children: ReactNode };
 
 export function PublicShell({ children }: Props) {
-    const { auth } = usePage<{ auth: { user: User | null } }>().props;
+    const {
+        props: { auth },
+        url,
+    } = usePage<{ auth: { user: User | null } }>();
 
     return (
         <div className="wb-public flex min-h-screen flex-col">
@@ -31,10 +34,26 @@ export function PublicShell({ children }: Props) {
             </a>
             <header className="wb-topbar">
                 <div className="wb-topbar-inner">
-                    <WorkbineBrand />
-                    <nav aria-label="Main navigation" className="wb-main-nav">
-                        <Link href="/topics" className="wb-community-link">
+                    <div className="wb-brand-group">
+                        <WorkbineBrand />
+                        <Link
+                            href="/topics"
+                            className="wb-explore-link"
+                            aria-current={
+                                url === '/' || url.split('?')[0] === '/topics'
+                                    ? 'page'
+                                    : undefined
+                            }
+                        >
                             Explore
+                        </Link>
+                    </div>
+                    <nav aria-label="Main navigation" className="wb-main-nav">
+                        <Link
+                            href="/topics#field-guide"
+                            className="wb-community-link"
+                        >
+                            Community guide
                         </Link>
                         {auth.user ? (
                             <>
