@@ -82,7 +82,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             type="search"
                             defaultValue={search}
                             maxLength={120}
-                            placeholder="Search topics and ideas"
+                            placeholder="Search topics"
                         />
                         <input type="hidden" name="view" value={view} />
                         <button type="submit">Search</button>
@@ -118,7 +118,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     }
                                     required
                                     maxLength={160}
-                                    placeholder="A topic you know about, or want to explore…"
+                                    placeholder="A topic to share or explore…"
                                 />
                                 <button type="submit">
                                     Start a topic
