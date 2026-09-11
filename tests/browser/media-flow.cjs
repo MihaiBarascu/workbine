@@ -243,8 +243,10 @@ const { chromium } = requireBrowser('playwright');
         await page
             .getByRole('button', { name: 'Remove profile photo', exact: true })
             .click();
+        // Redirects after mutation use the real enabled server configuration.
+        // The removable photo must disappear regardless of the upload switch.
         await page
-            .getByRole('heading', { name: 'Profile photo', exact: true })
+            .getByRole('button', { name: 'Remove profile photo', exact: true })
             .waitFor({ state: 'hidden' });
         await page.unroute(`${root}/settings/profile`);
         await page.goto(memberUrl);
