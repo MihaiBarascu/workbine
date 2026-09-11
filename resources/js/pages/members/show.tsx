@@ -20,6 +20,14 @@ type Contribution = {
     excerpt: string;
     href: string;
     created_at: string | null;
+    saves_count: number | null;
+    feedback: {
+        total: number;
+        worked: number;
+        partly: number;
+        did_not_work: number;
+        url: string;
+    } | null;
     outcome: 'worked' | 'partly' | 'did_not_work' | null;
 };
 type Props = {
@@ -32,9 +40,24 @@ type Props = {
         location: string | null;
         website: string | null;
         joined: string | null;
-        counts: Record<View, number>;
+        counts: Record<View | 'topic_saves', number>;
+        impact: {
+            methods_tried: number;
+            worked: number;
+            partly: number;
+            topic_saves: number;
+        };
+        reputation: {
+            score: number;
+            saves: number;
+            worked: number;
+            partly: number;
+            supporters: number;
+            limited_points: number;
+        };
     };
     view: View;
+    impact: string;
     contributions: {
         data: Contribution[];
         total: number;
@@ -55,9 +78,48 @@ const outcomes = {
     did_not_work: 'Did not work for me',
 };
 
-export default function MemberProfile({ member, view, contributions }: Props) {
-    const { auth } = usePage<{ auth: { user: User | null } }>().props;
+export default function MemberProfile({
+    member,
+    view,
+    impact,
+    contributions,
+}: Props) {
+    const { auth, emailVerificationAvailable } = usePage<{
+        auth: { user: User | null };
+        emailVerificationAvailable: boolean;
+    }>().props;
     const own = auth.user?.id === member.id;
+    const impactCards = [
+        {
+            key: 'tried',
+            value: member.impact.methods_tried,
+            label: 'Methods tried',
+            detail: 'Put into practice by other members',
+            view: 'methods',
+        },
+        {
+            key: 'worked',
+            value: member.impact.worked,
+            label: 'Worked for others',
+            detail: 'Experiences reporting a positive result',
+            view: 'methods',
+        },
+        {
+            key: 'partly',
+            value: member.impact.partly,
+            label: 'Partly worked',
+            detail: 'Useful results with limitations',
+            view: 'methods',
+        },
+        {
+            key: 'saved',
+            value: member.impact.topic_saves,
+            label: 'Topic saves',
+            detail: 'Bookmarks by other members',
+            view: 'topics',
+        },
+    ];
+    const activeImpact = impactCards.find((card) => card.key === impact);
     return (
         <PublicShell>
             <Head title={`${member.name} — Community profile`} />
@@ -133,9 +195,56 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                         </div>
                     </div>
                 </section>
+                <section aria-labelledby="impact-heading" className="my-7">
+                    <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                        <h2
+                            id="impact-heading"
+                            className="text-xl font-semibold"
+                        >
+                            Useful in practice
+                        </h2>
+                        <p className="text-muted-foreground text-sm">
+                            Open a number to explore the contributions behind
+                            it.
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+                        {impactCards.map((card) => (
+                            <Link
+                                key={card.key}
+                                href={`/members/${member.username}?view=${card.view}&impact=${card.key}#contributions`}
+                                aria-label={`${card.label}: ${card.value}`}
+                                aria-current={
+                                    impact === card.key ? 'page' : undefined
+                                }
+                                className={`bg-card focus-visible:ring-ring hover:border-primary flex min-w-0 flex-col rounded-xl border p-5 transition-colors focus-visible:ring-2 ${impact === card.key ? 'border-primary' : ''}`}
+                            >
+                                <span className="text-primary text-3xl font-semibold tabular-nums">
+                                    {card.value}
+                                </span>
+                                <span className="mt-2 flex items-center justify-between gap-2 font-semibold">
+                                    {card.label}
+                                    <ArrowRight
+                                        className="size-4 shrink-0"
+                                        aria-hidden="true"
+                                    />
+                                </span>
+                                <span className="text-muted-foreground mt-1 text-xs leading-5">
+                                    {card.detail}
+                                </span>
+                            </Link>
+                        ))}
+                    </div>
+                    <p className="text-muted-foreground mt-3 text-xs leading-5">
+                        Outcomes are self-reported experiences. One person can
+                        report results on several methods or save several
+                        topics; these are not unique people counts.
+                    </p>
+                </section>
                 <div className="wb-member-grid">
                     <section
-                        className="wb-panel wb-contributions"
+                        id="contributions"
+                        className="wb-panel wb-contributions scroll-mt-6"
                         aria-label="Member contributions"
                     >
                         <nav
@@ -155,6 +264,20 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                                 </Link>
                             ))}
                         </nav>
+                        {activeImpact && (
+                            <div className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-4 text-sm">
+                                <p>
+                                    Showing:{' '}
+                                    <strong>{activeImpact.label}</strong>
+                                </p>
+                                <Link
+                                    href={`/members/${member.username}?view=${view}#contributions`}
+                                    className="text-primary inline-flex min-h-10 items-center font-medium"
+                                >
+                                    Clear impact filter
+                                </Link>
+                            </div>
+                        )}
                         {contributions.data.length ? (
                             contributions.data.map((entry) => (
                                 <article
@@ -174,6 +297,57 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                                         </Link>
                                     </h2>
                                     {entry.excerpt && <p>{entry.excerpt}</p>}
+                                    {entry.feedback && (
+                                        <div className="my-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
+                                            <Link
+                                                href={entry.feedback.url}
+                                                className="text-primary inline-flex min-h-10 items-center"
+                                            >
+                                                {entry.feedback.total}{' '}
+                                                {entry.feedback.total === 1
+                                                    ? 'experience'
+                                                    : 'experiences'}
+                                            </Link>
+                                            {entry.feedback.worked > 0 && (
+                                                <Link
+                                                    href={`${entry.feedback.url}?outcome=worked`}
+                                                    className="text-primary inline-flex min-h-10 items-center font-medium"
+                                                >
+                                                    {entry.feedback.worked}{' '}
+                                                    worked
+                                                </Link>
+                                            )}
+                                            {entry.feedback.partly > 0 && (
+                                                <Link
+                                                    href={`${entry.feedback.url}?outcome=partly`}
+                                                    className="text-primary inline-flex min-h-10 items-center"
+                                                >
+                                                    {entry.feedback.partly}{' '}
+                                                    partly worked
+                                                </Link>
+                                            )}
+                                            {entry.feedback.did_not_work >
+                                                0 && (
+                                                <Link
+                                                    href={`${entry.feedback.url}?outcome=did_not_work`}
+                                                    className="text-muted-foreground inline-flex min-h-10 items-center"
+                                                >
+                                                    {
+                                                        entry.feedback
+                                                            .did_not_work
+                                                    }{' '}
+                                                    did not work
+                                                </Link>
+                                            )}
+                                        </div>
+                                    )}
+                                    {entry.saves_count !== null &&
+                                        entry.saves_count > 0 && (
+                                            <p className="text-muted-foreground text-sm">
+                                                {entry.saves_count} saves from
+                                                other members
+                                            </p>
+                                        )}
                                     <Link
                                         href={entry.href}
                                         className="wb-inline-link"
@@ -189,14 +363,18 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                             <div className="wb-profile-empty">
                                 <BookOpen aria-hidden="true" />
                                 <h2>
-                                    {own
-                                        ? 'Your next contribution starts here'
-                                        : `No ${view} shared yet`}
+                                    {activeImpact
+                                        ? 'No matching contributions yet'
+                                        : own
+                                          ? 'Your next contribution starts here'
+                                          : `No ${view} shared yet`}
                                 </h2>
                                 <p>
-                                    {own
-                                        ? 'Start a topic with your method, open a subject to explore, or add your experience to an existing discussion.'
-                                        : 'When this member shares something, it will appear in this space.'}
+                                    {activeImpact
+                                        ? 'This view will show contributions when members try the methods or save the topics. You can clear the filter to see everything shared.'
+                                        : own
+                                          ? 'Start a topic with your method, open a subject to explore, or add your experience to an existing discussion.'
+                                          : 'When this member shares something, it will appear in this space.'}
                                 </p>
                                 <Button asChild variant="outline">
                                     <Link href="/topics">
@@ -252,6 +430,69 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                         )}
                     </section>
                     <aside className="wb-profile-aside">
+                        <details className="mb-6 border-b pb-5">
+                            <summary className="cursor-pointer text-sm font-semibold">
+                                Reputation details
+                            </summary>
+                            <p className="mt-3">
+                                {member.reputation.score} points from{' '}
+                                {member.reputation.supporters}{' '}
+                                {member.reputation.supporters === 1
+                                    ? 'member with a verified email'
+                                    : 'members with verified emails'}
+                                .
+                            </p>
+                            <dl>
+                                <div>
+                                    <dt>Counted saves</dt>
+                                    <dd>+{member.reputation.saves}</dd>
+                                </div>
+                                <div>
+                                    <dt>Worked ({member.reputation.worked})</dt>
+                                    <dd>+{member.reputation.worked * 5}</dd>
+                                </div>
+                                <div>
+                                    <dt>
+                                        Partly worked (
+                                        {member.reputation.partly})
+                                    </dt>
+                                    <dd>+{member.reputation.partly * 2}</dd>
+                                </div>
+                                {member.reputation.limited_points > 0 && (
+                                    <div>
+                                        <dt>Supporter limit adjustment</dt>
+                                        <dd>
+                                            −{member.reputation.limited_points}
+                                        </dd>
+                                    </div>
+                                )}
+                            </dl>
+                            <p>
+                                One member contributes at most 25 points. Their
+                                strongest outcome per author and topic counts.
+                            </p>
+                            <Link
+                                href="/community/reputation"
+                                className="text-primary inline-flex min-h-10 items-center text-sm font-medium"
+                            >
+                                How reputation works →
+                            </Link>
+                            {own &&
+                                !auth.user?.email_verified_at &&
+                                emailVerificationAvailable && (
+                                    <p>
+                                        Your feedback contributes to others’
+                                        points after you confirm your email in{' '}
+                                        <Link
+                                            href="/settings/profile"
+                                            className="text-primary underline"
+                                        >
+                                            account settings
+                                        </Link>
+                                        .
+                                    </p>
+                                )}
+                        </details>
                         <h2>Shared with the community</h2>
                         <dl>
                             {tabs.map(({ value, label }) => (
@@ -260,10 +501,15 @@ export default function MemberProfile({ member, view, contributions }: Props) {
                                     <dd>{member.counts[value]}</dd>
                                 </div>
                             ))}
+                            <div>
+                                <dt>Topic saves</dt>
+                                <dd>{member.counts.topic_saves}</dd>
+                            </div>
                         </dl>
                         <p>
-                            These are real contributions, not a reputation
-                            score. Methods and outcomes are self-reported.
+                            Topic saves count bookmarks by other members across
+                            these topics. Someone saving two topics counts
+                            twice. Methods and outcomes are self-reported.
                         </p>
                     </aside>
                 </div>

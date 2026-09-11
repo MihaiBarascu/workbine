@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [TopicController::class, 'index'])->name('home');
 Route::get('topics', [TopicController::class, 'index'])->name('topics.index');
+Route::inertia('community/reputation', 'community/reputation')->name('community.reputation');
 Route::get('members/{user}', [MemberController::class, 'redirectFromId'])->whereNumber('user')->name('members.legacy');
 Route::get('members/{username}', [MemberController::class, 'show'])->where('username', '[A-Za-z][A-Za-z0-9-]{2,29}')->name('members.show');
 
@@ -42,3 +43,6 @@ Route::redirect('goals', '/topics', 301);
 Route::redirect('goals/create', '/topics/create', 301);
 
 require __DIR__.'/settings.php';
+require __DIR__.'/contributions.php';
+require __DIR__.'/saved.php';
+require __DIR__.'/reports.php';

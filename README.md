@@ -2,7 +2,7 @@
 
 Workbine is a community-driven platform for discovering how people actually do things in practice.
 
-A topic is a subject such as `Automating product imports for an online store`, not necessarily a question. A person can publish it together with their own method, explaining the steps, context and result, or start with just the topic to invite approaches. Both options use the same creation form. Other people can publish alternative methods, report their own outcomes and share evidence. Reputation remains part of the product direction; thanks, voting and reputation scoring are not implemented.
+A topic is a subject such as `Automating product imports for an online store`, not necessarily a question. A person can publish it together with their own method, explaining the steps, context and result, or start with just the topic to invite approaches. Both options use the same creation form. Other people can publish alternative methods, report their own outcomes and share evidence. Profiles show clickable impact indicators backed by real saves and reported outcomes. A secondary reputation breakdown counts eligible support using explicit limits; thanks, voting and leaderboards are not implemented. See [docs/REPUTATION.md](docs/REPUTATION.md).
 
 ## Core idea
 

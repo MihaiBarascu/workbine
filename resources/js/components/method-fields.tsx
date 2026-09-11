@@ -6,12 +6,18 @@ type Props = {
     errors: Record<string, string>;
     prefix?: '' | 'method_';
     autoFocus?: boolean;
+    initialValues?: {
+        title: string;
+        body: string;
+        source_url: string | null;
+    };
 };
 
 export function MethodFields({
     errors,
     prefix = '',
     autoFocus = false,
+    initialValues,
 }: Props) {
     return (
         <>
@@ -20,6 +26,7 @@ export function MethodFields({
                 <Input
                     id={`${prefix}title`}
                     name={`${prefix}title`}
+                    defaultValue={initialValues?.title}
                     aria-invalid={Boolean(errors[`${prefix}title`])}
                     aria-describedby={
                         errors[`${prefix}title`]
@@ -44,6 +51,7 @@ export function MethodFields({
                 <textarea
                     id={`${prefix}body`}
                     name={`${prefix}body`}
+                    defaultValue={initialValues?.body}
                     aria-invalid={Boolean(errors[`${prefix}body`])}
                     aria-describedby={
                         errors[`${prefix}body`]
@@ -72,6 +80,7 @@ export function MethodFields({
                 <Input
                     id={`${prefix}source_url`}
                     name={`${prefix}source_url`}
+                    defaultValue={initialValues?.source_url ?? ''}
                     aria-invalid={Boolean(errors[`${prefix}source_url`])}
                     aria-describedby={
                         errors[`${prefix}source_url`]

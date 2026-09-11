@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     ArrowUpRight,
+    Bookmark,
     ChevronDown,
     LogOut,
     Settings,
@@ -101,6 +102,20 @@ export function PublicShell({ children }: Props) {
                                             </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem asChild>
+                                            <Link
+                                                href="/saved"
+                                                aria-current={
+                                                    url.split('?')[0] ===
+                                                    '/saved'
+                                                        ? 'page'
+                                                        : undefined
+                                                }
+                                            >
+                                                <Bookmark aria-hidden="true" />
+                                                Saved topics
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
                                             <Link href="/settings/profile">
                                                 <Settings aria-hidden="true" />
                                                 Account settings
@@ -147,6 +162,9 @@ export function PublicShell({ children }: Props) {
                     </p>
                     <div className="flex flex-wrap gap-5">
                         <Link href="/#field-guide">Community guide</Link>
+                        <Link href="/community/reputation">
+                            How reputation works
+                        </Link>
                         <Link href="/topics/create">Start a topic ↗</Link>
                     </div>
                 </div>

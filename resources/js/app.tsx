@@ -15,6 +15,7 @@ void createInertiaApp({
             case name === 'welcome' ||
                 name.startsWith('topics/') ||
                 name.startsWith('experiences/') ||
+                name.startsWith('errors/') ||
                 name.startsWith('members/'):
                 return null;
             case name.startsWith('auth/'):

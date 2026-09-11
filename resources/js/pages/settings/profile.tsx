@@ -243,11 +243,16 @@ export default function Profile({
                                             Your email address is unverified.{' '}
                                             <Link
                                                 href={send()}
+                                                method="post"
                                                 as="button"
                                                 className="underline underline-offset-4"
                                             >
                                                 Send a verification email
                                             </Link>
+                                        </p>
+                                        <p className="text-muted-foreground mt-2">
+                                            Verification is optional. You can
+                                            keep using Workbine without it.
                                         </p>
                                         {status ===
                                             'verification-link-sent' && (

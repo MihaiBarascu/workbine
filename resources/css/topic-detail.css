@@ -342,11 +342,21 @@
     border-radius: 12px;
     background: var(--card);
 }
-.wb-outcome-summary > div {
+.wb-outcome-summary > a {
     padding-inline: 24px;
+    min-width: 0;
+    border-radius: 4px;
 }
-.wb-outcome-summary > div + div {
+.wb-outcome-summary > a + a {
     border-left: 1px solid var(--border);
+}
+.wb-outcome-summary > a:hover,
+.wb-outcome-summary > a[aria-current='page'] {
+    background: var(--secondary);
+}
+.wb-outcome-summary > a:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
 }
 .wb-outcome-summary .wb-outcome-count {
     color: var(--foreground);
@@ -536,7 +546,7 @@
     .wb-outcome-summary {
         padding-block: 18px;
     }
-    .wb-outcome-summary > div {
+    .wb-outcome-summary > a {
         padding-inline: 12px;
     }
     .wb-outcome-summary .wb-outcome-count {

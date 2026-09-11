@@ -25,11 +25,26 @@ Keep PostgreSQL/media recovery, cleanup scheduling, cost/availability monitoring
 and external-service delivery checks in the operational process. Do not publish
 private findings or convert this checklist into unattended work.
 
-## Next useful increments for requested sessions
+## Launch support implemented in this release
 
-- Ownership-based editing of topics/methods, with tests and without unexpectedly erasing experience history.
-- An opt-in follow/save mechanism with clear privacy and delivery behavior; no unsolicited email or hidden tracking.
-- Small content-reporting tools when a safe operational review path exists, not a speculative admin suite.
-- Branded error pages as a separate tested improvement to the framework error responses.
+Owner editing, saved topics with public aggregate counts, clickable profile
+impact/outcome filters, a secondary bounded reputation breakdown, opt-in manual
+content reporting and branded errors are implemented. See [LAUNCH.md](LAUNCH.md)
+and [REPUTATION.md](REPUTATION.md) for acceptance criteria and exact behavior.
+
+The latest owner direction favors meaningful, clickable evidence of usefulness
+on a profile. A numeric score remains secondary. Do not replace these indicators
+with an opaque leaderboard or treat self-reports as independently verified results.
+
+## Next decisions for requested sessions
+
+- Choose public or invitation beta access and approve real contact/operator,
+  privacy and terms content before publishing those pages.
+- Assign report review responsibility before enabling the report interface.
+- Configure and verify transactional delivery before offering email-dependent
+  account flows. Optional confirmation is implemented; enforced verification is
+  a separate decision and must preserve account recovery/deletion access.
+- Revisit recognition for useful experience writers, abuse handling and any
+  earned milestones based on observed community use. Do not reward posting volume.
 
 Follow the environment-selection policy in AGENTS.md and docs/TESTING.md. Read the latest main and existing PRs before changing files. Keep STATUS truthful about actual validation and limitations. Do not claim measured growth or independent usability validation based on UI screenshots.

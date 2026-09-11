@@ -27,6 +27,7 @@ composer ci:check
 DB_CONNECTION=pgsql DB_DATABASE=workbine_test php artisan test --compact
 export DB_CONNECTION=sqlite DB_DATABASE=/tmp/workbine-preview.sqlite
 export MEDIA_ENABLED=true MEDIA_DISK=public
+export COMMUNITY_REPORTS_ENABLED=true APP_DEBUG=false
 touch "$DB_DATABASE"
 php artisan migrate --force --no-interaction
 php tools/seed-preview.php
@@ -44,4 +45,5 @@ node tests/browser/capture-public.cjs
 node tests/browser/community-flow.cjs
 node tests/browser/profile-flow.cjs
 node tests/browser/media-flow.cjs
+node tests/browser/launch-flow.cjs
 printf '\nPASS: local build, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'

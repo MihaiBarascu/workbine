@@ -18,6 +18,7 @@ class VerificationNotificationTest extends TestCase
         parent::setUp();
 
         $this->skipUnlessFortifyHas(Features::emailVerification());
+        config(['community.email_verification_enabled' => true]);
     }
 
     public function test_sends_verification_notification(): void

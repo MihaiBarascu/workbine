@@ -32,7 +32,8 @@ class MediaImage extends Model
     /** @return HasMany<Experience, $this> */
     public function experiences(): HasMany
     {
-        return $this->hasMany(Experience::class, 'evidence_image_id');
+        // Hidden contributions still own their evidence; moderation must not prune it.
+        return $this->hasMany(Experience::class, 'evidence_image_id')->withoutGlobalScopes();
     }
 
     /** @param Builder<self> $query */
