@@ -158,9 +158,9 @@ export default function TopicCreate({ initialTitle }: Props) {
                                                 ? 'first-method-hint include-method-error'
                                                 : 'first-method-hint'
                                         }
-                                        aria-invalid={
-                                            Boolean(errors.include_method)
-                                        }
+                                        aria-invalid={Boolean(
+                                            errors.include_method,
+                                        )}
                                     />
                                     <span>
                                         <span className="wb-method-choice-title">
