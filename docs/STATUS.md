@@ -39,14 +39,17 @@ and member/account page spacing are aligned with the new layout. The neutral
 light/blue palette, dark preference, topic draft and first-method flow remain.
 No backend, database, dependency or infrastructure changes are part of this work.
 
-Application revision `8d13879` passed `bash tools/test-local.sh` with a clean
-working tree: production frontend build, formatting/lint, TypeScript, Pint,
-PHPStan, 115 application tests on each of SQLite and PostgreSQL, 13 Python tests,
-25 public responsive captures and the contribution/profile/authentication browser
-flows. Logs and screenshots: `/tmp/workbine-local-tests.KyHwKt/`. Desktop, mobile,
-method and search-empty captures were visually reviewed. Mobile placeholder text
-was subsequently shortened after review; use the final PR validation record for
-checks on that revision. No GitHub Actions were dispatched.
+Application revision `106d8c95f8749ae22540074fed730be2d8cea325` passed
+`bash tools/test-local.sh`: production frontend build, formatting/lint, TypeScript,
+Pint, PHPStan, 115 application tests (912 assertions) on each of SQLite and
+PostgreSQL, 13 Python tests, 25 public responsive captures and the complete
+contribution/profile/authentication browser flows. The snapshot contained no
+uncommitted application changes. Final logs and 58 screenshots:
+`/tmp/workbine-local-tests.IH2N7x/`. Desktop, tablet, wide/dark, small-phone,
+method, experience, account and search-empty captures were visually reviewed.
+Mobile prompts fit their inputs and the authenticated header stays on one row at
+320px. The subsequent documentation commit only records these results and is
+checked separately for formatting. No GitHub Actions were dispatched.
 
 The expanded capture matrix covers feed widths 320 through 1920px in light/dark,
 search results and empty results, link navigation and keyboard focus. Preview
