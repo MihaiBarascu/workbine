@@ -22,12 +22,13 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title="Log in" />
 
-            <PasskeyVerify />
-
             <div className="flex flex-col gap-6">
-                <Button asChild variant="outline" className="w-full">
-                    <a href="/auth/google">Continue with Google</a>
-                </Button>
+                <div className="grid gap-3">
+                    <Button asChild variant="outline" className="w-full">
+                        <a href="/auth/google">Continue with Google</a>
+                    </Button>
+                    <PasskeyVerify showSeparator={false} />
+                </div>
 
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
@@ -106,9 +107,7 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <div className="text-muted-foreground text-center text-sm">
                                 Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
-                                </TextLink>
+                                <TextLink href={register()}>Sign up</TextLink>
                             </div>
                         </>
                     )}
