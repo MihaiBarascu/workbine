@@ -204,8 +204,8 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         {search && (
                             <p role="status" className="wb-search-state">
                                 {topics.total}{' '}
-                                {topics.total === 1 ? 'topic' : 'topics'} matching
-                                “{search}” ·{' '}
+                                {topics.total === 1 ? 'topic' : 'topics'}{' '}
+                                matching “{search}” ·{' '}
                                 <Link href={`/topics?view=${view}#topics`}>
                                     Clear search
                                 </Link>
@@ -290,13 +290,14 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     className="wb-empty-icon"
                                 />
                                 <h3>
-                                    A small thing you know can help someone else.
+                                    A small thing you know can help someone
+                                    else.
                                 </h3>
                                 <p>
                                     There are no topics yet. Start with an
                                     everyday task, a useful habit, or something
-                                    you’re curious about. You don’t need to be an
-                                    expert.
+                                    you’re curious about. You don’t need to be
+                                    an expert.
                                 </p>
                                 <TopicStarters onChoose={chooseStarter} />
                             </div>
@@ -392,7 +393,9 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             <li>
                                 <span aria-hidden="true">01</span>
                                 <div>
-                                    <strong>Find something you want to do</strong>
+                                    <strong>
+                                        Find something you want to do
+                                    </strong>
                                     <p>
                                         That’s a topic. Start one or explore
                                         what’s here.
@@ -412,7 +415,9 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             <li>
                                 <span aria-hidden="true">03</span>
                                 <div>
-                                    <strong>Tried it? Share what happened</strong>
+                                    <strong>
+                                        Tried it? Share what happened
+                                    </strong>
                                     <p>
                                         What worked, what didn’t, or what you
                                         changed. That’s an experience.
