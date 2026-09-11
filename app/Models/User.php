@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Support\Usernames;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -19,6 +20,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 /**
  * @property int $id
  * @property string $name
+ * @property string $username
  * @property string $email
  * @property string|null $bio
  * @property string|null $location
@@ -39,12 +41,34 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Topic> $topics
  * @property-read Collection<int, Method> $methods
  */
-#[Fillable(['name', 'email', 'google_id', 'avatar', 'password', 'bio', 'location', 'website'])]
+#[Fillable(['name', 'username', 'email', 'google_id', 'avatar', 'password', 'bio', 'location', 'website'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user): void {
+            if ($user->getAttribute('username') === null) {
+                $user->username = Usernames::generate($user->getConnection(), $user->name);
+            }
+        });
+
+        static::retrieved(function (User $user): void {
+            if (array_key_exists('username', $user->getAttributes()) && $user->getAttribute('username') === null) {
+                // Repair users created by an older container during deployment,
+                // while leaving partial selects and historical timestamps alone.
+                $connection = $user->getConnection();
+                $username = Usernames::generate($connection, (string) $user->getAttribute('name'));
+                $query = $connection->table('users')->where('id', $user->id);
+                $updated = (clone $query)->whereNull('username')->update(['username' => $username]);
+                $user->setAttribute('username', $updated ? $username : $query->value('username'));
+                $user->syncOriginalAttribute('username');
+            }
+        });
+    }
 
     /** @return HasMany<Topic, $this> */
     public function topics(): HasMany

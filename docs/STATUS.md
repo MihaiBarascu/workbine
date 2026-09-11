@@ -57,6 +57,30 @@ content is synthetic and stays in disposable local containers. Production had no
 public topics during the initial read-only check; design validation does not
 claim audience growth. Merge and live deployment must be confirmed separately.
 
+## Member usernames - 2026-09-11
+
+Branch `feat/member-usernames` introduces `/members/{username}` and editable
+usernames in Profile settings. The owner explicitly requested the simpler model:
+one current username per account, no alias table, username history or reservations
+of previous names. A released username can be used by someone else; settings
+explain this. Numeric URLs redirect to the current username with HTTP 301 and
+preserve the contribution tab and page. Display-name edits keep the username.
+
+The migration adds a unique, nullable username column and backfills existing
+accounts from public display names, resolving collisions without rewriting
+account timestamps or authentication data. New accounts get a name-based username
+with a random suffix; email addresses are not used as a username fallback.
+The column permits NULL during overlapping application containers; the new model
+repairs such overlap rows on retrieval without changing timestamps. Profile
+updates normalize lowercase, validate syntax/reserved names and availability,
+and handle database uniqueness conflicts as a field error. Public author links,
+profile tabs and copied links all use the current username. Numeric IDs remain
+internal relationship/ownership keys and public profiles still expose only their
+explicit public fields; changing URL format is not a replacement for authorization.
+
+Local checks, visual review, merge and live deployment are pending for this
+branch. No GitHub Actions or infrastructure changes are part of this work.
+
 ## Product capabilities
 
 `Topic -> Methods -> Real experiences -> Evidence -> Reputation`.

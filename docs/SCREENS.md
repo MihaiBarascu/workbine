@@ -16,7 +16,7 @@ synthetic data in the disposable test app and is never added to production.
 
 ## Member and account
 
-Public member profile, Methods / Topics / Experiences tabs, pagination, real counts, blank profile and owner edit action. The profile serializer omits private user data. Private settings: Profile (public introduction and private email clearly separated), Security (password, existing 2FA/passkey controls), Appearance (Light, Dark and System). Account menu includes public profile, settings and functional POST logout. The delete-account dialog retains explicit confirmation.
+Public member profile, Methods / Topics / Experiences tabs, pagination, real counts, blank profile and owner edit action. The profile serializer omits private user data. Private settings: Profile (editable username with public URL preview, public introduction and private email clearly separated), Security (password, existing 2FA/passkey controls), Appearance (Light, Dark and System). Account menu includes public profile, settings and functional POST logout. The delete-account dialog retains explicit confirmation.
 
 ## Authentication
 
@@ -24,6 +24,6 @@ Login and validation error, registration, forgot password, reset password, email
 
 ## Release checks
 
-`tests/browser/profile-flow.cjs` exercises these screens in an isolated local app, including profile persistence, public privacy, escaped bio text, long-name/mobile layout, theme persistence, clipboard fallback, registration, password confirmation and a seeded two-factor recovery flow. Screenshots are internal review evidence, not a ZIP deliverable. Passing a capture command is not visual sign-off.
+`tests/browser/profile-flow.cjs` exercises these screens in an isolated local app, including profile persistence, public privacy, escaped bio text, long-name/mobile layout, theme persistence, clipboard fallback, registration, password confirmation and a seeded two-factor recovery flow. Username checks cover invalid and duplicate values, stable usernames after display-name edits, saved renames, canonical author/profile/tab/copy links, numeric 301 redirects preserving filters and pagination, and a missing previous username. Public and account captures include a 30-character username at 320px. Screenshots are internal review evidence, not a ZIP deliverable. Passing a capture command is not visual sign-off.
 
 Real Google OAuth and hardware biometric/passkey enrollment require real provider/device interaction and are not claimed covered by the synthetic browser test. Existing backend tests remain in force. The application still uses Laravel's standard error responses; a separate error-page redesign is not part of this screen pass.

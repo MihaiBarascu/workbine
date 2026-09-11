@@ -103,6 +103,11 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
                     /^\/topics\/[^/?#]+$/,
                     `${name}: topic title must open its own topic`,
                 );
+                assert.match(
+                    await row.locator('.wb-member-link').getAttribute('href'),
+                    /^\/members\/[a-z][a-z0-9-]{2,29}$/,
+                    `${name}: author links use public usernames`,
+                );
                 for (const link of await row.getByRole('link').all()) {
                     await assertReachable(
                         link,
@@ -252,7 +257,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             await page.close();
         }
 
-        const page = await browser.newPage();
+        const page = await browser.newPage({ colorScheme: 'light' });
         for (const width of [320, 1440]) {
             await page.setViewportSize({ width, height: 1080 });
             await page.goto(`${root}/topics`);
@@ -285,6 +290,27 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
                 await page.locator('main article').first().waitFor();
             }
             console.log(`PASS topic navigation at ${width}px`);
+            const memberLink = page
+                .locator('main article .wb-member-link')
+                .first();
+            const memberPath = await memberLink.getAttribute('href');
+            assert.match(memberPath, /^\/members\/[a-z][a-z0-9-]{2,29}$/);
+            await memberLink.click();
+            await page.waitForURL(root + memberPath);
+            await page.locator('#member-name').waitFor();
+            await page
+                .getByText(`@${memberPath.split('/').at(-1)}`, { exact: true })
+                .waitFor();
+            const name = `member-public-${width}`;
+            await inspectLayout(page, name, width, 'light', false);
+            await page.screenshot({
+                path: `${output}/${name}.png`,
+                fullPage: true,
+                animations: 'disabled',
+            });
+            console.log(
+                `PASS public username profile navigation at ${width}px`,
+            );
         }
         await page.close();
     } finally {

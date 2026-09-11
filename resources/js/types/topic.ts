@@ -8,6 +8,7 @@ export type TopicSummary = {
     user: {
         id: number;
         name: string;
+        username: string;
     };
 };
 
@@ -21,6 +22,7 @@ export type MethodSummary = {
     user: {
         id: number;
         name: string;
+        username: string;
     };
 };
 
@@ -42,7 +44,7 @@ export type ExperienceSummary = {
     tried_on: string | null;
     created_at: string | null;
     updated_at: string | null;
-    user: { id: number; name: string };
+    user: { id: number; name: string; username: string };
 };
 
 export type PaginatedExperiences = {
