@@ -4,7 +4,7 @@ Last updated: 2026-09-11
 
 ## Production and owner direction
 
-Production is `main` -> Dokploy build/migrations -> `https://workbine.com`. The owner authorizes tested feature work and merges, asks for development every three hours, and does not want ZIP deliverables. Do not claim audience growth without real metrics or claim a chat will automatically reopen.
+Production is `main` -> Dokploy build/migrations -> `https://workbine.com`. The owner authorizes tested feature work and merges and does not want ZIP deliverables. On 2026-09-11 the owner explicitly requested stopping the GitHub coding agent and removing its cron. This revokes the earlier request for unattended development every three hours. Do not recreate or restart a scheduled coding agent without a new explicit request. Do not claim audience growth without real metrics or claim a chat will automatically reopen.
 
 Read README.md, AGENTS.md, this file, docs/DESIGN.md and docs/BACKLOG.md before changing anything. Keep the Laravel 13 + React 19 + Inertia 3 + TypeScript monolith. Production uses PostgreSQL; local defaults are SQLite.
 
@@ -20,17 +20,15 @@ The notebook composer carries a draft through the protected creation URL and log
 
 The identity passed all 85 application tests on SQLite and PostgreSQL, frontend build, formatting/lint, TypeScript, Pint, PHPStan and the real Chromium contribution flow. Desktop/mobile and narrow dark-mode captures were reviewed. Deployment must still be checked separately for every release.
 
-## Three-hour continuation
+## Automated development stopped
 
-The configured GitHub Actions workflow is `.github/workflows/continuous-development.yml`, with `17 */3 * * *` in UTC, manual dispatch and an initial main-push trigger for controller changes. See docs/AUTOMATION.md for the exact limits, controls and activation status; docs/AUTODEV_TASKS.json is the reviewed initial task queue.
+The owner requested stopping the agent and removing the cron on 2026-09-11. `.github/workflows/continuous-development.yml` is removed from this revision, including its three-hour schedule, manual-dispatch trigger and controller-change push trigger. No replacement coding schedule is introduced.
 
-The model gets a copied workspace, read-only repository access and restricted file tools. A separate deterministic publisher handles a single feature branch. Full database CI and Chromium checks are reused against the exact candidate SHA before any PR/merge attempt. Stylesheet changes require human visual review. No direct production push, force push, test weakening, authentication change, secret access, fake content or dependency update is permitted by an unattended UI task.
+Do not enable the old Actions PR-creation prerequisite, restore the deleted workflow, rerun historical coding-agent jobs or resume the pending `automation/workbine-continuation` branch on the basis of older instructions. Any new unattended development needs fresh explicit authorization from the owner.
 
-Model access was genuinely verified: pinned GitHub Copilot CLI 1.0.83, model auto, scoped GITHUB_TOKEN and copilot-requests permission returned READY. This consumes the account's applicable Copilot entitlement/usage; it is not unlimited free inference.
+Historical controller code, task/progress files, branches and run logs are retained for audit, not as an active development queue. The ordinary CI, UI preview, read-only production smoke and Dokploy deployment flow are unchanged. No application functionality or production data is removed by this shutdown.
 
-Automatic PR publication was separately tested and rejected with `GitHub Actions is not permitted to create or approve pull requests`. The owner must enable **Settings -> Actions -> General -> Allow GitHub Actions to create and approve pull requests**. Until a complete cycle succeeds, distinguish configured scheduling/code generation from fully automatic release. Do not bypass this policy. Pending branches are reused and publication retried instead of generating duplicates. Conflicts and persistent failed checks require review.
-
-Seven controller unit tests verify scope rejection and basic unsafe-content/size guards. These guards are defense in depth, not a proof that all generated code is correct. A completed queue produces a no-op rather than artificial work. Extend it with reviewed useful tasks. Repository variables can pause the schedule or disable automatic merges.
+See docs/AUTOMATION.md for the shutdown record. Future development is performed only in explicitly requested sessions, not on a timer.
 
 ## Validation and privacy boundaries
 
