@@ -78,8 +78,19 @@ profile tabs and copied links all use the current username. Numeric IDs remain
 internal relationship/ownership keys and public profiles still expose only their
 explicit public fields; changing URL format is not a replacement for authorization.
 
-Local checks, visual review, merge and live deployment are pending for this
-branch. No GitHub Actions or infrastructure changes are part of this work.
+Application revision `5372ea5c52b1fdb7e0ab90d7ce450c750dab8edf` passed
+`bash tools/test-local.sh` with no uncommitted changes: frontend build,
+formatting/lint, TypeScript, Pint, PHPStan, 144 application tests (1091 assertions)
+on each of SQLite and PostgreSQL, 13 Python tests and complete public,
+contribution, profile and authentication browser flows. Tests cover populated
+migration/backfill/rollback, uniqueness races, legacy deployment overlap rows,
+privacy, username validation/renaming/reuse, and numeric redirects preserving
+the tab and page. Logs and 62 screenshots are in
+`/tmp/workbine-local-tests.gntQHu/`. Account and public member captures at desktop
+and 320px, including a maximum-length username and dark appearance, were visually
+reviewed. The following documentation-only commit records these results and is
+formatted separately. Merge and deployment must still be observed; no GitHub
+Actions were dispatched and no infrastructure changes are included.
 
 ## Product capabilities
 
