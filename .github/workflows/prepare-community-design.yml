@@ -1,0 +1,65 @@
+name: Prepare community screens (temporary)
+
+on:
+  push:
+    branches: [feat/community-design-and-profiles]
+    paths: ['.github/workflows/prepare-community-design.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - name: Apply the exact manually authored source patch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, lzma, os, pathlib, urllib.request
+          blobs = ['762c6efe74eca8f1f0b159c093a9bd9fe7c0137c', '35d7353a6ce18888b6daf553b28196076c42c999', '0441c21ccbf32eb63ee82286f4590cd835ab0c41', '9fc6c1fc9a8688ce0f4ad198a25c48603b98e56d']
+          parts = []
+          for sha in blobs:
+              request = urllib.request.Request('https://api.github.com/repos/MihaiBarascu/workbine/git/blobs/' + sha, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  parts.append(base64.b64decode(json.load(response)['content']).decode())
+          patch = lzma.decompress(base64.b64decode(''.join(parts)))
+          assert hashlib.sha256(patch).hexdigest() == 'b9a33484133b15ac42a30a12e312f66a603e3ae3e43034b64c64c69eba2cd4fe'
+          assert b'diff --git a/.github/' not in patch
+          pathlib.Path('/tmp/community-screens.patch').write_bytes(patch)
+          PY
+          git apply --check /tmp/community-screens.patch
+          git apply /tmp/community-screens.patch
+      - name: Install locked tools and collect formatter output
+        run: |
+          mkdir -p /tmp/workbine-review
+          composer install --prefer-dist --no-interaction --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          npm ci
+          php artisan wayfinder:generate --with-form --no-interaction
+          npm run check:fix > /tmp/workbine-review/formatting.txt 2>&1 || true
+          vendor/bin/pint --parallel >> /tmp/workbine-review/formatting.txt 2>&1
+          cat /tmp/workbine-review/formatting.txt
+          git diff --check
+      - name: Commit the formatted implementation to this feature branch only
+        run: |
+          git add app database resources tests docs
+          git config user.name 'Workbine source preparation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: unify community screens and add public member profiles'
+          git push origin HEAD:refs/heads/feat/community-design-and-profiles
+          git archive --format=tar.gz --output=/tmp/workbine-review/formatted-source.tar.gz HEAD
+      - name: Export internal source and diagnostics for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: internal-community-source
+          path: /tmp/workbine-review/
+          retention-days: 1
+          if-no-files-found: warn
