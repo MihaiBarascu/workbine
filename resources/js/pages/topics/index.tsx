@@ -706,7 +706,11 @@ export default function TopicsIndex({
                                         {Number(categoryCounts[key] ?? 0) >
                                             0 && (
                                             <span>
-                                                {categoryCounts[key]} topics
+                                                {categoryCounts[key]}{' '}
+                                                {Number(categoryCounts[key]) ===
+                                                1
+                                                    ? 'topic'
+                                                    : 'topics'}
                                             </span>
                                         )}
                                         <ArrowRight />
