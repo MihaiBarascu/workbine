@@ -1,7 +1,9 @@
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import TextLink from '@/components/text-link';
+import Turnstile from '@/components/turnstile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,9 +14,13 @@ import { request as requestPasswordReset } from '@/routes/password';
 
 type Props = {
     passwordRules: string;
+    turnstileSiteKey: string | null;
 };
 
-export default function Register({ passwordRules }: Props) {
+export default function Register({ passwordRules, turnstileSiteKey }: Props) {
+    const [turnstileToken, setTurnstileToken] = useState('');
+    const [verificationAttempt, setVerificationAttempt] = useState(0);
+
     return (
         <>
             <Head title="Register" />
@@ -39,6 +45,9 @@ export default function Register({ passwordRules }: Props) {
                     {...store.form()}
                     resetOnSuccess={['password', 'password_confirmation']}
                     disableWhileProcessing
+                    onFinish={() =>
+                        setVerificationAttempt((value) => value + 1)
+                    }
                     className="flex flex-col gap-6"
                 >
                     {({ processing, errors }) => (
@@ -119,8 +128,35 @@ export default function Register({ passwordRules }: Props) {
                                     />
                                 </div>
 
+                                {turnstileSiteKey !== null && (
+                                    <div className="grid gap-2">
+                                        <Turnstile
+                                            siteKey={turnstileSiteKey}
+                                            resetKey={verificationAttempt}
+                                            onToken={setTurnstileToken}
+                                        />
+                                        <input
+                                            type="hidden"
+                                            name="cf-turnstile-response"
+                                            value={turnstileToken}
+                                        />
+                                        <InputError
+                                            message={
+                                                errors['cf-turnstile-response']
+                                            }
+                                        />
+                                    </div>
+                                )}
+
+                                <InputError message={errors.request} />
+
                                 <Button
                                     type="submit"
+                                    disabled={
+                                        processing ||
+                                        (turnstileSiteKey !== null &&
+                                            !turnstileToken)
+                                    }
                                     className="mt-2 w-full"
                                     data-test="register-user-button"
                                 >

@@ -39,6 +39,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                                 />
 
                                 <InputError message={errors.email} />
+                                <InputError message={errors.request} />
                             </div>
 
                             <div className="my-6 flex items-center justify-start">

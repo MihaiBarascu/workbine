@@ -35,6 +35,12 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
 
 ## Launch and contribution support
 
+- Email registration supports optional Cloudflare Turnstile, verified in Laravel.
+  Registration and password-reset email requests each allow 10 attempts per minute
+  per visitor IP, using configured trusted proxies. Browser limit errors preserve
+  the form. See [ABUSE-PROTECTION.md](ABUSE-PROTECTION.md) for activation and test
+  boundaries; code availability does not establish live widget or edge settings.
+
 - Members can edit their own topics/methods with stable URLs and stale-editor
   protection. Updates retain experience/evidence history.
 - Topic saves have private lists and identities, public aggregate counts excluding

@@ -17,8 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Only the protocol is forwarded; keep the original Host and client identity.
-        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_PROTO);
+        // Use the visitor IP and protocol only from configured trusted proxies.
+        $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO);
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 

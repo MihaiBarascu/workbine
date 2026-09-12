@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Actions\Fortify\CreateNewUser;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Http\Responses\LogoutResponse;
+use App\Services\Turnstile;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -71,6 +72,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::registerView(fn () => Inertia::render('auth/register', [
             'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'turnstileSiteKey' => Turnstile::enabled() ? (string) config('services.turnstile.site_key') : null,
         ]));
 
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/two-factor-challenge'));
@@ -83,6 +85,25 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureRateLimiting(): void
     {
+        RateLimiter::for('account-requests', function (Request $request) {
+            if (! $request->routeIs('register.store', 'password.email')) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute(10)
+                ->by($request->route()->getName().'|'.$request->ip())
+                ->response(function (Request $request, array $headers) {
+                    $seconds = $headers['Retry-After'];
+                    $message = "Too many attempts. Please try again in {$seconds} seconds.";
+
+                    if ($request->expectsJson()) {
+                        return response()->json(['message' => $message], 429, $headers);
+                    }
+
+                    return back()->withErrors(['request' => $message])->withHeaders($headers);
+                });
+        });
+
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });

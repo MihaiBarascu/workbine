@@ -31,8 +31,9 @@ Correct URL generation and redirect ownership are separate concerns.
 
 - Cloudflare owns SSL/TLS -> Edge Certificates -> Always Use HTTPS.
 - Dokploy supplies `APP_ENV=production` and the public HTTPS `APP_URL`.
-- Laravel trusts only `X-Forwarded-Proto`; forwarded host, port and client IP are
-  not enabled by this change. Secure session cookies follow the HTTPS `APP_URL`
+- Laravel trusts `X-Forwarded-Proto` and `X-Forwarded-For` only from configured
+  trusted proxies. The visitor IP separates account request limits behind the
+  proxy; forwarded host and port remain ignored. Secure session cookies follow the HTTPS `APP_URL`
   unless explicitly overridden with `SESSION_SECURE_COOKIE`.
 - `TRUSTED_PROXIES` accepts comma-separated IPs/CIDRs. Configure it for the actual
   infrastructure network; an empty value disables trust for local development.
@@ -40,6 +41,9 @@ Correct URL generation and redirect ownership are separate concerns.
 - Traefik's HTTP entrypoint must trust forwarded headers only from the intended
   upstream network. Manage changes through Dokploy's supported Traefik settings,
   separately from application deploys.
+- Verify that the upstream preserves the visitor IP and that `TRUSTED_PROXIES`
+  covers the actual intermediary hops before relying on per-IP limits. Do not
+  use `*` or read client-supplied `CF-Connecting-IP` directly in application code.
 
 Proxy trust is a shared infrastructure boundary: attached containers must be
 trusted. Changing that network or attaching additional workloads requires review.
