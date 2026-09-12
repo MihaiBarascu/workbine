@@ -37,3 +37,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Local browser sessions and test reports.
+/.playwright-cli/
+/playwright-report/
+/test-results/

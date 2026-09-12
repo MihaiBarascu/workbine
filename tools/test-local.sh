@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # Snapshot the working tree and run disposable services, never the Dokploy application.
 set -euo pipefail
+case "${1:-}" in
+    '') export WORKBINE_TEST_MODE=full ;;
+    --browser) export WORKBINE_TEST_MODE=browser ;;
+    --browser-server) export WORKBINE_TEST_MODE=browser-server ;;
+    *) echo 'Usage: bash tools/test-local.sh [--browser|--browser-server]' >&2; exit 2 ;;
+esac
 workbine_root=$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)
 workbine_run=$(mktemp -d /tmp/workbine-local-tests.XXXXXX)
 export WORKBINE_TEST_SOURCE="$workbine_run/source.tar"

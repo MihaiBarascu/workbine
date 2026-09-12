@@ -30,6 +30,7 @@ jobs:
     timeout-minutes: 10
     env:
       APP_ENV: testing
+      WORKBINE_BROWSER_PILOT: '1'
       APP_DEBUG: false
       COMMUNITY_REPORTS_ENABLED: true
       APP_URL: http://127.0.0.1:8000
@@ -129,6 +130,11 @@ jobs:
           done
           node tests/browser/moderation-flow.cjs
 
+      - name: Independent browser scenarios
+        run: |
+          npm run types:browser
+          npm run test:browser
+
       - name: Print isolated application diagnostics on failure
         if: failure()
         run: |
@@ -140,6 +146,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: workbine-public-ui-preview
-          path: /tmp/workbine-ui-preview/*.png
+          path: |
+            /tmp/workbine-ui-preview/*.png
+            /tmp/workbine-ui-preview/pilot-baseline/
           if-no-files-found: warn
           retention-days: 7

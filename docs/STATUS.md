@@ -7,6 +7,19 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Browser testing pilot
+
+The independent Playwright Test pilot adds six real scenarios on desktop and
+mobile Chromium, alongside the existing browser scripts. The reviewed suite
+passed 36/36 checks across three repetitions with zero retries. Cosmetic
+variation passed 6/6; three injected browser faults each triggered the expected
+failure. The shared SQLite preview uses one worker after repeated parallel runs
+exposed database lock errors.
+
+Use [BROWSER-PILOT.md](BROWSER-PILOT.md) for commands, coverage boundaries and
+the Luna authoring evaluation. Routine saved test execution makes no model calls;
+this session did not expose Luna token usage, so no cost saving is claimed.
+
 ## Connected community discovery
 
 The updated discovery follows the owner’s globe reference: sidebar navigation,
