@@ -57,7 +57,8 @@ export function CommunitySidebar({
     const [path, query = ''] = url.split('?');
     const discovery = path === '/' || path === '/topics';
     const ownTopics = Boolean(
-        user && path === `/members/${user.username}` &&
+        user &&
+        path === `/members/${user.username}` &&
         new URLSearchParams(query).get('view') === 'topics',
     );
 
@@ -96,13 +97,19 @@ export function CommunitySidebar({
                     <Link
                         href="/topics"
                         onClick={onClose}
-                        aria-current={discovery && !category ? 'page' : undefined}
+                        aria-current={
+                            discovery && !category ? 'page' : undefined
+                        }
                     >
                         <Compass aria-hidden="true" />
                         Explore
                     </Link>
                     <Link
-                        href={user ? `/members/${user.username}?view=topics` : '/login'}
+                        href={
+                            user
+                                ? `/members/${user.username}?view=topics`
+                                : '/login'
+                        }
                         onClick={onClose}
                         aria-current={ownTopics ? 'page' : undefined}
                     >
@@ -120,12 +127,17 @@ export function CommunitySidebar({
                     <Link
                         href="/notifications"
                         onClick={onClose}
-                        aria-current={path === '/notifications' ? 'page' : undefined}
+                        aria-current={
+                            path === '/notifications' ? 'page' : undefined
+                        }
                     >
                         <Bell aria-hidden="true" />
                         Notifications
                         {unread > 0 && (
-                            <span className="wb-sidebar-count" aria-label={`${unread} unread`}>
+                            <span
+                                className="wb-sidebar-count"
+                                aria-label={`${unread} unread`}
+                            >
                                 {unread > 99 ? '99+' : unread}
                             </span>
                         )}
@@ -133,7 +145,9 @@ export function CommunitySidebar({
                     <Link
                         href="/community/guide"
                         onClick={onClose}
-                        aria-current={path === '/community/guide' ? 'page' : undefined}
+                        aria-current={
+                            path === '/community/guide' ? 'page' : undefined
+                        }
                     >
                         <BookOpen aria-hidden="true" />
                         Community guide
@@ -142,7 +156,11 @@ export function CommunitySidebar({
                         <Link
                             href="/settings/profile"
                             onClick={onClose}
-                            aria-current={path.startsWith('/settings/') ? 'page' : undefined}
+                            aria-current={
+                                path.startsWith('/settings/')
+                                    ? 'page'
+                                    : undefined
+                            }
                         >
                             <Settings aria-hidden="true" />
                             Account settings
@@ -153,22 +171,32 @@ export function CommunitySidebar({
                     <>
                         <p className="wb-sidebar-label">Categories</p>
                         <nav aria-label="Categories">
-                            {Object.entries(categories).map(([value, label], i) => {
-                                const Icon = icons[i] ?? BookOpen;
-                                return (
-                                    <Link
-                                        key={value}
-                                        href={`/topics?category=${encodeURIComponent(value)}#topics`}
-                                        preserveState
-                                        onClick={onClose}
-                                        aria-current={discovery && category === value ? 'page' : undefined}
-                                    >
-                                        <Icon aria-hidden="true" />
-                                        {label}
-                                    </Link>
-                                );
-                            })}
-                            <Link href="/topics#topics" preserveState onClick={onClose}>
+                            {Object.entries(categories).map(
+                                ([value, label], i) => {
+                                    const Icon = icons[i] ?? BookOpen;
+                                    return (
+                                        <Link
+                                            key={value}
+                                            href={`/topics?category=${encodeURIComponent(value)}#topics`}
+                                            preserveState
+                                            onClick={onClose}
+                                            aria-current={
+                                                discovery && category === value
+                                                    ? 'page'
+                                                    : undefined
+                                            }
+                                        >
+                                            <Icon aria-hidden="true" />
+                                            {label}
+                                        </Link>
+                                    );
+                                },
+                            )}
+                            <Link
+                                href="/topics#topics"
+                                preserveState
+                                onClick={onClose}
+                            >
                                 <Compass aria-hidden="true" />
                                 All topics
                             </Link>
@@ -177,8 +205,14 @@ export function CommunitySidebar({
                 )}
                 <div className="wb-sidebar-invite">
                     <Sprout aria-hidden="true" />
-                    <strong>Small steps.<br />Big impact.</strong>
-                    <p>Share something you learned. Help someone get started.</p>
+                    <strong>
+                        Small steps.
+                        <br />
+                        Big impact.
+                    </strong>
+                    <p>
+                        Share something you learned. Help someone get started.
+                    </p>
                     <Link href="/topics/create" onClick={onClose}>
                         Create topic <ArrowRight aria-hidden="true" />
                     </Link>
