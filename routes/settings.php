@@ -16,7 +16,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('settings/profile/avatar', [AvatarController::class, 'destroy'])->middleware('throttle:20,1')->name('profile.avatar.destroy');
 });
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('settings/security', [SecurityController::class, 'edit'])

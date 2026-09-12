@@ -32,7 +32,6 @@ class ResendMailTest extends TestCase
             'services.resend.key' => 'test-only-key',
             'mail.from.address' => 'no-reply@mail.example.com',
             'mail.from.name' => 'Workbine',
-            'community.email_verification_enabled' => true,
         ]);
 
         $mailer = Mail::mailer();

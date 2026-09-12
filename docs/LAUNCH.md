@@ -29,13 +29,11 @@ reflect actual product behavior and retention. Do not invent an operator, contac
 address, legal commitments or retention period in the interface.
 
 Password recovery and email verification need end-to-end delivery checks for the
-chosen deployment. Optional manual confirmation is available through
-`COMMUNITY_EMAIL_VERIFICATION_ENABLED=true` after delivery is working. Disabled
-verification is explained honestly and does not claim that a message was sent.
-The User model does not implement MustVerifyEmail; `verified` route middleware
-therefore does not enforce email confirmation. Enforcement is a separate decision
-covering registration, changed-email and unverified recovery/deletion flows. Do not infer
-successful mail delivery from framework configuration or mocked tests.
+chosen deployment. Standard Laravel/Fortify confirmation is automatic at
+email/password registration and after email changes. The `verified` middleware
+protects contributions and saved topics; account management and recovery remain
+accessible. See [EMAIL.md](EMAIL.md). Do not infer successful mail delivery from
+framework configuration or mocked tests.
 
 Reporting defaults off (`COMMUNITY_REPORTS_ENABLED=false`). An assigned reviewer
 must adopt the review procedure before it is enabled. The interface does not

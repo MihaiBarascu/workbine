@@ -27,29 +27,17 @@ class ContributionEditingTest extends TestCase
         $this->patch(route('methods.update', [$topic, $method]), [])->assertRedirect(route('login'));
     }
 
-    public function test_unverified_owners_can_edit_their_own_contributions(): void
+    public function test_unverified_owners_must_confirm_before_editing_existing_contributions(): void
     {
         $user = User::factory()->unverified()->create();
-        $topic = Topic::factory()->create(['user_id' => $user->id]);
-        $method = Method::factory()->create(['user_id' => $user->id, 'topic_id' => $topic->id]);
+        $topic = Topic::factory()->for($user)->create();
+        $method = Method::factory()->for($user)->for($topic)->create();
 
         $this->actingAs($user);
-        $topicRevision = $this->get(route('topics.edit', $topic))->assertOk()->inertiaProps('revision');
-        $methodRevision = $this->get(route('methods.edit', [$topic, $method]))->assertOk()->inertiaProps('revision');
-        $this->patch(route('topics.update', $topic), [
-            'title' => 'A clearer topic from its owner',
-            'description' => $topic->description,
-            'revision' => $topicRevision,
-        ])->assertSessionHasNoErrors()->assertRedirect(route('topics.show', $topic));
-        $this->patch(route('methods.update', [$topic, $method]), [
-            'title' => 'Updated practical method',
-            'body' => $method->body,
-            'revision' => $methodRevision,
-        ])->assertSessionHasNoErrors()->assertRedirect(route('topics.show', $topic).'#method-'.$method->id);
-
-        $this->assertSame('A clearer topic from its owner', $topic->refresh()->title);
-        $this->assertSame('Updated practical method', $method->refresh()->title);
-        $this->assertNull($user->refresh()->email_verified_at);
+        $this->get(route('topics.edit', $topic))->assertRedirect(route('verification.notice'));
+        $this->patch(route('topics.update', $topic), [])->assertRedirect(route('verification.notice'));
+        $this->get(route('methods.edit', [$topic, $method]))->assertRedirect(route('verification.notice'));
+        $this->patch(route('methods.update', [$topic, $method]), [])->assertRedirect(route('verification.notice'));
     }
 
     public function test_members_cannot_open_or_update_another_members_topic(): void

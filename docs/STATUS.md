@@ -49,9 +49,10 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   See [MODERATION.md](MODERATION.md).
 - Branded HTTP errors cover normal and Inertia visits while preserving status,
   retry headers, JSON responses and local debug behavior.
-- Optional email confirmation is controlled by
-  `COMMUNITY_EMAIL_VERIFICATION_ENABLED` (default false). It exposes manual resend
-  once delivery is configured; ordinary contribution access remains unchanged.
+- Standard Laravel/Fortify email confirmation is sent automatically at email/password
+  registration and after an email change. Confirmation is required for contributions
+  and saved topics. Browsing, account settings, recovery and deletion remain available.
+  Google-created accounts already have a verified address and receive no confirmation.
   Google cannot verify an unrelated local email or silently link an unverified
   password account. Password changes revoke database sessions and invalidate
   authenticated sessions that carry the password-hash marker. Recovery of an
@@ -67,8 +68,8 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   [UX-CLARITY.md](UX-CLARITY.md).
 
 [LAUNCH.md](LAUNCH.md) records the remaining product decisions and release gates.
-Reporting and email-verification defaults describe fresh installations, not a
-claim about any deployment's configuration. Contact/policy approval, a review
+Reporting defaults describe fresh installations, not a claim about any
+deployment's configuration. Contact/policy approval, a review
 owner and external-service/recovery checks remain separate from code validation.
 
 ## Working rules for agents

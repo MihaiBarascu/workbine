@@ -67,7 +67,6 @@ class FortifyServiceProvider extends ServiceProvider
 
         Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/verify-email', [
             'status' => $request->session()->get('status'),
-            'verificationAvailable' => (bool) config('community.email_verification_enabled'),
         ]));
 
         Fortify::registerView(fn () => Inertia::render('auth/register', [

@@ -1,3 +1,4 @@
+const verifyAccount = require('./verify-account.cjs');
 // Mutation checks are intentionally limited to the disposable local application.
 const assert = require('node:assert/strict');
 const { createRequire } = require('node:module');
@@ -179,7 +180,8 @@ const { chromium } = requireBrowser('playwright');
             .locator('input[name="password_confirmation"]')
             .fill('local-media-test-password-2026!');
         await page.locator('button[type="submit"]').click();
-        await page.waitForURL(/\/topics$/);
+        await page.waitForURL(/\/email\/verify$/);
+        await verifyAccount(page, 'media-browser@example.test');
         await page.goto(`${root}/settings/profile`);
         const props = await initialProps();
         assert.equal(

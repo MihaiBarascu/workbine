@@ -1,3 +1,4 @@
+const verifyAccount = require('./verify-account.cjs');
 // Mutations run only against the disposable local preview application.
 const assert = require('node:assert/strict');
 const { createRequire } = require('node:module');
@@ -80,7 +81,8 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .locator('input[name="password_confirmation"]')
             .fill(password);
         await page.locator('button[type="submit"]').click();
-        await page.waitForURL(/\/topics$/);
+        await page.waitForURL(/\/email\/verify$/);
+        await verifyAccount(page, email);
 
         await openSaved();
         await page
