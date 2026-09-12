@@ -15,7 +15,13 @@ actions and external-service verification. Three account scenarios authored by
 Luna add actual password change/relogin, account deletion with validation recovery,
 and the existing email-change reverification behavior. The reviewed targeted run
 passed six checks across desktop/mobile; full release evidence belongs to the PR.
-These tests do not redesign account behavior or claim full launch readiness.
+A further Luna-authored journey uses three member sessions on one newly published
+topic, including an inline image, three attributed methods, appreciations/saves,
+cross-member experiences and exact reputation transitions 2 → 9 → 4 → 3.
+The reviewed journey passed desktop/mobile in 23.6 seconds; it keeps methods tried
+distinct from experience totals. The fixture supplies three verified accounts,
+and publication/feedback happen through the UI. These tests do not redesign
+account behavior or claim full launch readiness.
 
 ## Browser testing pilot
 

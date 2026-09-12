@@ -41,7 +41,7 @@ not substitutes for that gate.
 
 ## Independent data and reports
 
-Each test gets two verified synthetic accounts, one topic and one method through
+Each test gets three verified synthetic accounts, one topic and one method through
 `tests/e2e/seed.php`; its unique accounts are removed in teardown. The fixture
 checks application environment, database path, application origin and an explicit
 pilot flag. Each test uses fresh browser contexts. Tests use one worker: repeated two-worker runs exposed SQLite write-lock
@@ -73,18 +73,18 @@ proof that every redesign will require zero maintenance.
 
 ## Coverage inventory
 
-| Flow                                                               | Independent pilot     | Existing browser suite / remaining boundary                              |
-| ------------------------------------------------------------------ | --------------------- | ------------------------------------------------------------------------ |
-| Verified login/logout                                              | Yes                   | Registration/verification and partial reset/2FA checks remain in legacy suite         |
-| Topic-only publication, category, tags                             | Yes                   | Legacy suite retains draft/validation/empty-state cases                  |
-| First method, rich text, inline photo and persisted delivery       | Yes                   | Legacy media suite retains invalid/replaced/deleted uploads              |
-| Second member experience, persistence, recipient notification/open | Yes                   | Legacy suite retains experience edits/removal and notification states    |
-| Search/category, save/unsave and persistence                       | Yes                   | Tag/sort/people/pagination and appreciations remain in legacy suite      |
-| Owner edit plus non-owner denial                                   | Yes                   | Legacy suite retains conflicts and broader contribution permissions      |
-| Moderation and reports                                             | Not migrated          | Existing isolated browser suite; external provider outcomes simulated    |
-| Profile/settings/deletion                                          | Not migrated          | Legacy suite plus account scenarios in `coverage.spec.ts`                 |
-| Google, hardware passkeys, actual inbox and remote storage         | Not attested by pilot | Separate controlled integration/device verification required             |
-| Firefox/WebKit and physical mobile devices                         | Not in pilot          | Next increment after measuring this runner; mobile Chromium is emulation |
+| Flow                                                               | Independent pilot     | Existing browser suite / remaining boundary                                   |
+| ------------------------------------------------------------------ | --------------------- | ----------------------------------------------------------------------------- |
+| Verified login/logout                                              | Yes                   | Registration/verification and partial reset/2FA checks remain in legacy suite |
+| Topic-only publication, category, tags                             | Yes                   | Legacy suite retains draft/validation/empty-state cases                       |
+| First method, rich text, inline photo and persisted delivery       | Yes                   | Legacy media suite retains invalid/replaced/deleted uploads                   |
+| Second member experience, persistence, recipient notification/open | Yes                   | Legacy suite retains experience edits/removal and notification states         |
+| Search/category, save/unsave and persistence                       | Yes                   | Tag/sort/people/pagination and appreciations remain in legacy suite           |
+| Owner edit plus non-owner denial                                   | Yes                   | Legacy suite retains conflicts and broader contribution permissions           |
+| Moderation and reports                                             | Not migrated          | Existing isolated browser suite; external provider outcomes simulated         |
+| Profile/settings/deletion                                          | Not migrated          | Legacy suite plus account scenarios in `coverage.spec.ts`                     |
+| Google, hardware passkeys, actual inbox and remote storage         | Not attested by pilot | Separate controlled integration/device verification required                  |
+| Firefox/WebKit and physical mobile devices                         | Not in pilot          | Next increment after measuring this runner; mobile Chromium is emulation      |
 
 See [BROWSER-FLOWS.md](BROWSER-FLOWS.md) for the action-level inventory and
 additional scenarios beyond the original pilot. The resilience benchmark stays

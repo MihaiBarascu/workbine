@@ -17,11 +17,17 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
     page.setDefaultTimeout(15000);
     let blockScript = true;
     let scriptLoads = 0;
+    let blockedScriptLoads = 0;
+    let successfulScriptLoads = 0;
     await page.route(
         'https://challenges.cloudflare.com/turnstile/v0/api.js*',
         async (route) => {
             scriptLoads++;
-            if (blockScript) return route.abort();
+            if (blockScript) {
+                blockedScriptLoads++;
+                return route.abort();
+            }
+            successfulScriptLoads++;
             return route.fulfill({
                 contentType: 'application/javascript',
                 body: `
@@ -75,6 +81,11 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         blockScript = false;
         await page.getByRole('button', { name: 'Retry verification' }).click();
         await page.waitForFunction(() => !!window.testOptions);
+        assert.equal(successfulScriptLoads, 1);
+        assert.ok(blockedScriptLoads >= 1);
+        // ResizeObserver can request a blocked script twice before retry; once
+        // the API script succeeds, subsequent widget retries must reuse it.
+        const scriptLoadsAfterSuccessfulLoad = scriptLoads;
         await verify();
 
         await page.evaluate(() => window.testOptions['expired-callback']());
@@ -120,8 +131,8 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         assert.equal(await page.evaluate(() => window.testWidgets.size), 0);
         assert.equal(
             scriptLoads,
-            2,
-            'Script reused after the failed load was retried',
+            scriptLoadsAfterSuccessfulLoad,
+            'Script reused after the successful load',
         );
 
         const visitor = await browser.newContext();
