@@ -248,6 +248,10 @@
     }
 }
 @media (max-width: 1050px) {
+    .wb-cosmos-shell {
+        /* A viewport change must not animate the old desktop gutter on mobile. */
+        transition: none;
+    }
     .wb-desktop-sidebar-toggle,
     .wb-shell-home-link {
         display: none;
@@ -255,7 +259,8 @@
     .wb-navigation-toggle {
         display: inline-flex;
     }
-    .wb-community-sidebar {
+    .wb-community-sidebar,
+    .wb-community-sidebar.is-open {
         width: min(288px, calc(100vw - 40px));
         z-index: 61;
     }
