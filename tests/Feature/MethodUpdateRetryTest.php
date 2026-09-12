@@ -16,7 +16,7 @@ class MethodUpdateRetryTest extends TestCase
     public function test_identical_retries_confirm_the_existing_note_without_changing_it(): void
     {
         $method = Method::factory()->create(['protected_at' => now()]);
-        $originalMethod = $method->getAttributes();
+        $originalMethod = $method->refresh()->getAttributes();
         $submissionId = (string) Str::uuid();
         $body = 'I now check the first step before continuing.';
         $url = route('methods.updates.store', [$method->topic, $method]);
@@ -51,14 +51,14 @@ class MethodUpdateRetryTest extends TestCase
     public function test_conflicting_retry_keeps_the_draft_and_requires_a_new_submission_id(): void
     {
         $method = Method::factory()->create(['protected_at' => now()]);
-        $originalMethod = $method->getAttributes();
+        $originalMethod = $method->refresh()->getAttributes();
         $submissionId = (string) Str::uuid();
         $update = MethodUpdate::query()->create([
             'method_id' => $method->id,
             'submission_id' => $submissionId,
             'body' => 'The earlier note that was already published.',
         ]);
-        $originalUpdate = $update->getAttributes();
+        $originalUpdate = $update->refresh()->getAttributes();
         $draft = 'A revised note that must not be silently discarded.';
         $params = [$method->topic, $method];
         $editUrl = route('methods.edit', $params);
@@ -111,7 +111,7 @@ class MethodUpdateRetryTest extends TestCase
             'submission_id' => $submissionId,
             'body' => 'An update belonging to the first method.',
         ]);
-        $originalUpdate = $existing->getAttributes();
+        $originalUpdate = $existing->refresh()->getAttributes();
         $body = 'Different context for a different method.';
 
         $this->actingAs($first->user)
