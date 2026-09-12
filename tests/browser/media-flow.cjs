@@ -391,16 +391,31 @@ const { chromium } = requireBrowser('playwright');
         await methodEditor.fill('Start with a small repeatable action.');
         await methodEditor.press('ControlOrMeta+a');
         await page.getByRole('button', { name: 'Bold', exact: true }).click();
+        // Toolbar commands restore DOM focus on an animation frame. Wait for
+        // that observable state before moving the selection or typing.
+        await page.waitForFunction(
+            () => document.activeElement?.id === 'method_body',
+        );
         await methodEditor.press('ArrowRight');
         await methodEditor.press('Enter');
         await page
             .getByRole('button', { name: 'Numbered steps', exact: true })
             .click();
+        await page.waitForFunction(
+            () => document.activeElement?.id === 'method_body',
+        );
         await page.keyboard.insertText('Show the first action.');
         await page.keyboard.press('Enter');
         await page.keyboard.insertText('Check the result.');
         await page.keyboard.press('Enter');
         await page.keyboard.press('Enter');
+        assert.equal(await methodEditor.locator('ol li').count(), 2);
+        assert.ok(
+            (await methodEditor.innerText()).includes(
+                'Start with a small repeatable action.',
+            ),
+            'Formatting preserves the original paragraph',
+        );
         await page
             .getByRole('button', { name: 'Add link', exact: true })
             .click();
