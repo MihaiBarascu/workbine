@@ -16,7 +16,13 @@ original and receive no reputation; earlier experiences do not evaluate them.
 Removing an experience does not reopen the original editor. Existing response
 editing and reputation recalculation remain available. The migration includes
 hidden responses when preserving existing methods, without a full version archive.
-See [BROWSER-FLOWS.md](BROWSER-FLOWS.md) for coverage and boundaries.
+See [BROWSER-FLOWS.md](BROWSER-FLOWS.md) for coverage and boundaries. The full
+local gate passed on application source `752d983`: build, frontend lint/format and
+TypeScript, Pint, PHPStan, 341 tests / 3708 assertions on each of SQLite and
+PostgreSQL, 13 Python tests, all existing browser scripts and 22 Playwright checks
+across desktop/mobile (1.8 minutes). The protected editor and dated-note captures
+were reviewed. Luna authored the new backend and browser scenarios; saved runs
+make no model calls.
 
 ## Browser flow inventory
 
