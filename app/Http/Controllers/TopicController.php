@@ -22,12 +22,16 @@ use Inertia\Response;
 
 class TopicController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): \Symfony\Component\HttpFoundation\Response
     {
         $view = $request->query('view') === 'unanswered' ? 'unanswered' : 'latest';
         $input = $request->query('q', '');
         $search = is_string($input) ? Str::limit(Str::squish($input), 120, '') : '';
-        $query = Topic::query();
+        $query = Topic::query()->withCover();
+        if ($request->user() !== null) {
+            $query->withExists(['saves as saved' => fn ($query) => $query->where('user_id', $request->user()->getAuthIdentifier())]);
+            Inertia::encryptHistory();
+        }
 
         if ($view === 'unanswered') {
             $query->doesntHave('methods');
@@ -54,11 +58,16 @@ class TopicController extends Controller
             ->appends(['view' => $view, 'q' => $search])
             ->through(fn (Topic $topic): array => $this->serializeTopic($topic));
 
-        return Inertia::render('topics/index', [
+        $response = Inertia::render('topics/index', [
             'topics' => $topics,
             'view' => $view,
             'search' => $search,
-        ]);
+        ])->toResponse($request);
+        if ($request->user() !== null) {
+            $response->headers->set('Cache-Control', 'private, no-store');
+        }
+
+        return $response;
     }
 
     public function create(Request $request): Response
@@ -173,6 +182,8 @@ class TopicController extends Controller
             'title' => $topic->title,
             'slug' => $topic->slug,
             'description' => $topic->description,
+            'saved' => (bool) $topic->getAttribute('saved'),
+            'cover_image' => $topic->relationLoaded('coverImage') ? $topic->coverImage?->publicData() : null,
             'created_at' => $topic->created_at?->toIso8601String(),
             'updated_at' => $topic->updated_at?->toIso8601String(),
             'methods_count' => $topic->methods_count ?? 0,

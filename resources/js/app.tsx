@@ -18,6 +18,7 @@ void createInertiaApp({
                 name.startsWith('errors/') ||
                 name.startsWith('members/') ||
                 name.startsWith('saved/') ||
+                name.startsWith('notifications/') ||
                 name.startsWith('reports/') ||
                 name.startsWith('moderation/') ||
                 name.startsWith('community/'):

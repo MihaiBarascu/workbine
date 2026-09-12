@@ -61,3 +61,14 @@ response on a phone. Methods and responses share a small rich-text toolbar and
 inline photos. Use gentle writing guidance instead of mandatory sections, step
 counts or minimum lengths. Reveal secondary source/date/link controls only when
 needed. Keep validation recoverable and publication explicit.
+
+## Discovery and return visits
+
+Discovery has a restrained pale welcome area, white contribution cards, a working
+search/composer and a compact guide alongside the feed on wide screens. Photos
+are optional and come from members’ visible methods; photo-free topics retain
+the same prominence. Save actions work in each card. Personal topic and save
+shortcuts remain in the account menu on narrow screens. The notification bell
+indicates only real unread contributions addressed to the signed-in member.
+A standalone community guide explains topics, methods and responses without
+introducing additional publishing forms.

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreMethodRequest;
 use App\Http\Requests\UpdateMethodRequest;
+use App\Models\CommunityNotification;
 use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
@@ -85,6 +86,7 @@ class MethodController extends Controller
             ]);
 
             RichText::save($method, $data['body_document'] ?? null);
+            CommunityNotification::forMethod($method);
         });
 
         Inertia::flash('toast', [

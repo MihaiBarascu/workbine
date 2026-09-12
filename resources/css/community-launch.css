@@ -1,0 +1,274 @@
+/* Community discovery and return visits: quiet surfaces, real contributions. */
+.wb-discovery .wb-notebook-masthead {
+    padding: 30px 32px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: linear-gradient(115deg, var(--card), var(--accent));
+    align-items: center;
+}
+.wb-discovery .wb-notebook-masthead .wb-welcome-kicker {
+    margin: 0 0 12px;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+.wb-discovery .wb-notebook-masthead h1 {
+    font-size: clamp(28px, 3vw, 42px);
+}
+.wb-discovery .wb-compose > p {
+    display: block;
+}
+.wb-discovery .wb-search {
+    background: var(--card);
+}
+.wb-discovery .wb-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+}
+.wb-discovery .wb-entry-list {
+    display: grid;
+    gap: 12px;
+    border: 0;
+    background: none;
+    overflow: visible;
+}
+.wb-discovery .wb-entry {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    background: var(--card);
+}
+.wb-entry-content {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-top: 16px;
+}
+.wb-entry-copy {
+    min-width: 0;
+    flex: 1;
+}
+.wb-discovery .wb-entry h3 {
+    margin-top: 0;
+    font-size: 20px;
+}
+.wb-entry-photo {
+    flex: 0 0 156px;
+}
+.wb-entry-photo img {
+    width: 156px;
+    height: 108px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: var(--muted);
+}
+.wb-discovery .wb-feed-save {
+    margin-left: auto;
+    min-height: 40px;
+    box-shadow: none;
+    font-size: 12px;
+}
+.wb-discovery .wb-entry-bottom {
+    gap: 12px;
+}
+.wb-discovery .wb-entry-invite {
+    font-size: 12px;
+}
+.wb-discovery .wb-margin {
+    display: block;
+    align-self: start;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--card);
+}
+.wb-discovery .wb-guide-heading {
+    font-size: 24px;
+}
+.wb-discovery .wb-guide-list li {
+    grid-template-columns: 32px 1fr;
+    gap: 12px;
+}
+.wb-discovery .wb-guide-list li > span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: var(--primary);
+    background: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+}
+.wb-guide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    margin-top: 12px;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+}
+.wb-guide-link svg {
+    width: 15px;
+    height: 15px;
+}
+.wb-guide-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.wb-main-nav > .wb-notifications-link {
+    position: relative;
+    justify-content: center;
+    min-height: 44px;
+    min-width: 44px;
+    border-radius: 8px;
+}
+.wb-notifications-link:hover,
+.wb-notifications-link[aria-current='page'] {
+    background: var(--accent);
+    color: var(--primary);
+}
+.wb-notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--primary);
+    box-shadow: 0 0 0 2px var(--card);
+}
+.wb-notification-list {
+    display: grid;
+    gap: 10px;
+}
+.wb-notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
+    padding: 22px;
+    text-align: left;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+    cursor: pointer;
+}
+.wb-notification-item:hover {
+    border-color: var(--primary);
+}
+.wb-notification-unread {
+    background: color-mix(in srgb, var(--accent) 45%, var(--card));
+    border-left: 3px solid var(--primary);
+    padding-left: 20px;
+}
+.wb-guide-cards {
+    display: grid;
+    gap: 12px;
+}
+.wb-guide-cards section {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--card);
+}
+.wb-guide-cards svg {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    color: var(--primary);
+    margin-top: 2px;
+}
+.wb-guide-cards h2 {
+    font-size: 19px;
+    font-weight: 600;
+}
+.wb-guide-cards p {
+    margin-top: 8px;
+    line-height: 1.8;
+    color: var(--muted-foreground);
+}
+.wb-guide-example {
+    background: var(--accent);
+}
+@media (max-width: 1200px) {
+    .wb-main-nav > .wb-personal-link {
+        display: none;
+    }
+    .wb-discovery .wb-notebook-masthead {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 24px;
+    }
+    .wb-discovery .wb-search {
+        flex: none;
+        width: 100%;
+        max-width: 500px;
+    }
+}
+@media (max-width: 1000px) {
+    .wb-discovery .wb-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-discovery .wb-margin {
+        display: block;
+    }
+}
+@media (max-width: 640px) {
+    .wb-main-nav {
+        gap: 8px;
+    }
+    .wb-main-nav .wb-start-button {
+        display: none;
+    }
+    .wb-discovery .wb-notebook-masthead {
+        padding: 22px 20px;
+        gap: 20px;
+    }
+    .wb-discovery .wb-notebook-masthead h1 {
+        font-size: 30px;
+    }
+    .wb-discovery .wb-entry {
+        padding: 20px;
+    }
+    .wb-entry-content {
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .wb-entry-photo {
+        flex-basis: 80px;
+    }
+    .wb-entry-photo img {
+        width: 80px;
+        height: 80px;
+    }
+    .wb-discovery .wb-entry h3 {
+        font-size: 18px;
+    }
+    .wb-discovery .wb-entry-invite {
+        width: 100%;
+    }
+    .wb-notification-item {
+        padding: 18px;
+        gap: 12px;
+    }
+    .wb-notification-unread {
+        padding-left: 16px;
+    }
+}
+
+.wb-discovery .wb-starters {
+    margin-top: 24px;
+    padding: 24px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+}

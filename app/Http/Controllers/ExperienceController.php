@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreExperienceRequest;
+use App\Models\CommunityNotification;
 use App\Models\Experience;
 use App\Models\MediaImage;
 use App\Models\Method;
@@ -103,6 +104,7 @@ class ExperienceController extends Controller
                     'tried_on' => $data['tried_on'] ?? null,
                 ])->save();
                 RichText::save($experience, $data['body_document'] ?? null);
+                CommunityNotification::forExperience($experience);
                 $previous?->update(['pending_deletion' => true]);
 
                 return $previous;

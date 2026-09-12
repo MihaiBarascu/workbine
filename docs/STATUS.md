@@ -7,6 +7,21 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Community discovery and return visits
+
+Explore uses a compact welcome area, distinct contribution cards and an optional
+photo from a visible published method. Topic cards support private saves directly
+from the feed. My topics opens the member’s existing topic list; no duplicate
+personal dashboard is introduced. `/community/guide` explains the complete flow
+with an explicitly illustrative example.
+
+In-app notifications alert a topic owner to a new method and a method author to
+someone’s first response. Self-contributions and response edits send no alerts.
+Alerts are recipient-only, support read/open actions, and disappear with deleted
+or moderated contributions. They send no email. These product additions do not
+resolve the operator/contact, legal approval, delivery and recovery checks in
+[LAUNCH.md](LAUNCH.md).
+
 ## Shared contribution editor
 
 The shared rich-text editor adds paragraphs, basic formatting, links and inline
@@ -40,7 +55,7 @@ frontend release must be established before another merge. A feature being in
 | Design          | Wider white/neutral-grey/blue layout, shared branded account screens, responsive light and dark interfaces.                                                               |
 | Public profiles | `/members/{username}`, explicit public details and contribution lists/counts with clickable impact filters.                                                               |
 | Usernames       | One current username per member. Old names are released for reuse; legacy numeric links redirect.                                                                         |
-| Images          | Optional profile photos and one image per experience. Production uploads are enabled; R2 delivery and a profile upload/remove/upload flow have been verified.             |
+| Images          | Optional profile photos and inline photos in methods and responses; discovery shows an optional photo from a visible method.                                              |
 | Architecture    | Laravel/React/Inertia monolith with PostgreSQL, Docker deployment and R2 media storage.                                                                                   |
 
 The disabled media default in `.env.example` is for installations awaiting
