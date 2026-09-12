@@ -31,6 +31,7 @@ for (const item of cases) {
     const args = [
         'node_modules/@playwright/test/cli.js',
         'test',
+        'tests/e2e/flows.spec.ts',
         '--project=chromium-desktop',
     ];
     if (item.grep) args.push('--grep', item.grep);

@@ -24,7 +24,8 @@ DB::statement('PRAGMA busy_timeout = 10000');
 DB::transaction(function () use ($argv, $token): void {
     $emails = ["pilot-owner-{$token}@example.test", "pilot-contributor-{$token}@example.test"];
     if (($argv[1] ?? '') === 'cleanup') {
-        User::query()->whereIn('email', $emails)->get()->each->delete();
+        // Email-change scenarios must remain removable even after a failed assertion.
+        User::query()->whereIn('username', ['o-'.$token, 'c-'.$token])->get()->each->delete();
 
         return;
     }

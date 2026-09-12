@@ -7,6 +7,16 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Browser flow inventory
+
+[BROWSER-FLOWS.md](BROWSER-FLOWS.md) maps current user actions to browser and
+backend assertions, separating missing browser coverage from unavailable product
+actions and external-service verification. Three account scenarios authored by
+Luna add actual password change/relogin, account deletion with validation recovery,
+and the existing email-change reverification behavior. The reviewed targeted run
+passed six checks across desktop/mobile; full release evidence belongs to the PR.
+These tests do not redesign account behavior or claim full launch readiness.
+
 ## Browser testing pilot
 
 The independent Playwright Test pilot adds six real scenarios on desktop and
