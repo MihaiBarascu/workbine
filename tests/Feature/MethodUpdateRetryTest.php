@@ -64,19 +64,24 @@ class MethodUpdateRetryTest extends TestCase
         $editUrl = route('methods.edit', $params);
         $url = route('methods.updates.store', $params);
         $message = 'An earlier version of this update was already published. Your current text has not been published. You can use this draft for a new update.';
+        $sessionCookie = config('session.cookie');
 
-        $this->actingAs($method->user)->from($editUrl)
+        $response = $this->actingAs($method->user)->from($editUrl)
             ->post($url, ['submission_id' => $submissionId, 'body' => $draft])
             ->assertRedirect($editUrl)
             ->assertSessionHasErrors(['submission_id' => $message])
             ->assertSessionHasInput('body', $draft)
-            ->assertInertiaFlashMissing('toast');
+            ->assertInertiaFlashMissing('toast')
+            ->assertCookie($sessionCookie);
 
         $this->assertDatabaseCount('method_updates', 1);
         $this->assertSame($originalUpdate, $update->refresh()->getAttributes());
         $this->assertSame($originalMethod, $method->refresh()->getAttributes());
 
-        $editor = $this->get($editUrl)
+        // Carry the response cookie into the redirected GET, like a browser.
+        // Separate feature requests do not maintain a browser cookie jar.
+        $editor = $this->withCookie($sessionCookie, $response->getCookie($sessionCookie)->getValue())
+            ->get($editUrl)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('topics/method-edit')
