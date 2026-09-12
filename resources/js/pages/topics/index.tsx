@@ -79,6 +79,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                         key={`${view}:${search}`}
                         action="/topics#topics"
                         method="get"
+                        options={{ preserveState: true }}
                         disableWhileProcessing
                         role="search"
                         className="wb-search"
@@ -170,6 +171,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                             >
                                 <Link
                                     href={filterUrl('latest')}
+                                    preserveState
                                     aria-current={
                                         unanswered ? undefined : 'page'
                                     }
@@ -179,6 +181,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 </Link>
                                 <Link
                                     href={filterUrl('unanswered')}
+                                    preserveState
                                     aria-current={
                                         unanswered ? 'page' : undefined
                                     }
@@ -206,7 +209,10 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 {topics.total}{' '}
                                 {topics.total === 1 ? 'topic' : 'topics'}{' '}
                                 matching “{search}” ·{' '}
-                                <Link href={`/topics?view=${view}#topics`}>
+                                <Link
+                                    href={`/topics?view=${view}#topics`}
+                                    preserveState
+                                >
                                     Clear search
                                 </Link>
                             </p>
@@ -319,7 +325,10 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 </p>
                                 <div className="flex flex-wrap gap-3">
                                     <Button asChild variant="outline">
-                                        <Link href="/topics#topics">
+                                        <Link
+                                            href="/topics#topics"
+                                            preserveState
+                                        >
                                             Explore all topics
                                         </Link>
                                     </Button>
@@ -350,6 +359,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     {topics.prev_page_url ? (
                                         <Link
                                             href={`${topics.prev_page_url}#topics`}
+                                            preserveState
                                         >
                                             Previous
                                         </Link>
@@ -369,6 +379,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     {topics.next_page_url ? (
                                         <Link
                                             href={`${topics.next_page_url}#topics`}
+                                            preserveState
                                         >
                                             Next
                                         </Link>
