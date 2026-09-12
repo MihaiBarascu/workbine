@@ -2,6 +2,7 @@ import type { UrlMethodPair } from '@inertiajs/core';
 import { router } from '@inertiajs/react';
 import { usePasskeyVerify } from '@laravel/passkeys/react';
 import { KeyRound } from 'lucide-react';
+import { useId } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -16,6 +17,8 @@ type Props = {
     loadingLabel?: string;
     separator?: string;
     showSeparator?: boolean;
+    secondary?: boolean;
+    description?: string;
 };
 
 export default function PasskeyVerify({
@@ -24,7 +27,10 @@ export default function PasskeyVerify({
     loadingLabel,
     separator,
     showSeparator = true,
+    secondary = false,
+    description,
 }: Props = {}) {
+    const descriptionId = useId();
     const { verify, isLoading, error, isSupported } = usePasskeyVerify({
         ...(routes && {
             routes: {
@@ -46,16 +52,25 @@ export default function PasskeyVerify({
             <div className="grid gap-2">
                 <Button
                     type="button"
-                    variant="outline"
+                    variant={secondary ? 'ghost' : 'outline'}
                     className="w-full"
                     onClick={verify}
                     disabled={isLoading}
+                    aria-describedby={description ? descriptionId : undefined}
                 >
                     {isLoading ? <Spinner /> : <KeyRound className="h-4 w-4" />}
                     {isLoading
                         ? (loadingLabel ?? 'Authenticating...')
                         : (label ?? 'Sign in with a passkey')}
                 </Button>
+                {description && (
+                    <p
+                        id={descriptionId}
+                        className="text-muted-foreground text-center text-xs leading-5"
+                    >
+                        {description}
+                    </p>
+                )}
                 {error && (
                     <InputError message={error} className="text-center" />
                 )}
