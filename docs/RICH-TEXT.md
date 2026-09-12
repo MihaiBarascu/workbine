@@ -38,5 +38,10 @@ is not a claim that any particular deployment contains existing contributions.
 Editor state survives validation and toggling the optional first method; durable
 cross-device drafts are not implemented.
 
+A method's rich text and attached photos become permanent after another member's
+first experience. Dated author updates use a separate plain-text field and do not
+replace the original or its images. A different approach uses the existing new
+method editor. See [BROWSER-FLOWS.md](BROWSER-FLOWS.md).
+
 References: [Tiptap React integration](https://tiptap.dev/docs/editor/getting-started/install/react)
 and [image extension](https://tiptap.dev/docs/editor/extensions/nodes/image).

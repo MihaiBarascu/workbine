@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * @property Carbon|null $protected_at
  * @property string|null $hidden_at
  * @property int $id
  * @property int $topic_id
@@ -35,7 +36,7 @@ class Method extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['body_document' => 'array'];
+        return ['body_document' => 'array', 'protected_at' => 'datetime'];
     }
 
     protected static function booted(): void
@@ -56,6 +57,12 @@ class Method extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** @return HasMany<MethodUpdate, $this> */
+    public function updates(): HasMany
+    {
+        return $this->hasMany(MethodUpdate::class)->oldest('id');
     }
 
     /** @return HasMany<Experience, $this> */

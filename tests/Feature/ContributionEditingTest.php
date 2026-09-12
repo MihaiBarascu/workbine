@@ -97,6 +97,7 @@ class ContributionEditingTest extends TestCase
         $method = Method::factory()->create(['topic_id' => $topic->id]);
         $experience = $this->experience($method);
         $originalMethod = $method->refresh()->getAttributes();
+        $originalMethod = $method->refresh()->getAttributes();
         $originalExperience = $experience->refresh()->getAttributes();
         $revision = $this->actingAs($topic->user)->get(route('topics.edit', $topic))->inertiaProps('revision');
         $originalSlug = $topic->slug;
@@ -197,7 +198,7 @@ class ContributionEditingTest extends TestCase
                 ->missing('method.user_id'));
     }
 
-    public function test_method_owner_can_update_content_while_preserving_experiences_and_evidence(): void
+    public function test_tried_method_rejects_rewrites_and_preserves_experiences_and_evidence(): void
     {
         Storage::fake('public');
         $method = Method::factory()->create();
@@ -213,6 +214,7 @@ class ContributionEditingTest extends TestCase
         Storage::disk('public')->put($image->path, 'evidence');
         $experience->evidence_image_id = $image->id;
         $experience->save();
+        $originalMethod = $method->refresh()->getAttributes();
         $originalExperience = $experience->refresh()->getAttributes();
         $revision = $this->actingAs($method->user)->get(route('methods.edit', [$method->topic, $method]))->inertiaProps('revision');
         $this->travel(1)->day();
@@ -225,12 +227,9 @@ class ContributionEditingTest extends TestCase
             'topic_id' => Topic::factory()->create()->id,
             'user_id' => $experience->user_id,
             'experiences' => [],
-        ])->assertSessionHasNoErrors()->assertRedirect(route('topics.show', $method->topic).'#method-'.$method->id);
+        ])->assertSessionHasErrors('revision');
 
-        $method->refresh();
-        $this->assertSame('An improved explanation of the same approach', $method->title);
-        $this->assertSame('Updated steps, with the same original context and result.', $method->body);
-        $this->assertSame('https://example.com/updated-source', $method->source_url);
+        $this->assertSame($originalMethod, $method->refresh()->getAttributes());
         $this->assertSame($method->user_id, $this->app['auth']->id());
         $this->assertSame($originalExperience, $experience->refresh()->getAttributes());
         $this->assertSame($image->id, $experience->evidence_image_id);

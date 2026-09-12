@@ -30,6 +30,14 @@ class Experience extends Model
 {
     protected static function booted(): void
     {
+        static::created(function (Experience $experience): void {
+            // The HTTP publication transaction already holds this method's lock.
+            // Use the base query so protection does not change the content's edit date.
+            Method::withoutGlobalScopes()->whereKey($experience->method_id)
+                ->where('user_id', '!=', $experience->user_id)->whereNull('protected_at')
+                ->toBase()->update(['protected_at' => now()]);
+        });
+
         static::addGlobalScope('visible', function (Builder $query): void {
             $query->whereNull($query->getModel()->qualifyColumn('hidden_at'));
             $query->whereHas('method');

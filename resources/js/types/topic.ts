@@ -37,6 +37,8 @@ export type TopicSummary = {
 };
 
 export type MethodSummary = {
+    protected_at?: string | null;
+    updates?: { id: number; body: string; created_at: string }[];
     id: number;
     title: string;
     body: string;

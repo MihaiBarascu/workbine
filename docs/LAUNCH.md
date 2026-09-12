@@ -10,7 +10,8 @@ Profiles foreground clickable evidence of usefulness; see [REPUTATION.md](REPUTA
 - Discover and search public topics; start one with or without a first method.
 - Sign in and recover access; manage a public profile and private account settings.
 - Publish methods and experiences, including sources and optional evidence images.
-- Edit your own topics and methods without changing links or erasing experiences.
+- Edit your own topics and untried methods without changing their links. A first
+  experience preserves the original method; its author can add dated notes.
   Stale editors must show a conflict rather than overwrite a newer contribution.
 - Save topics to a private, removable list. Saving sends no email or notification
   and does not change the topic's visibility. Visitors can see aggregate saves

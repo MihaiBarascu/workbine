@@ -222,6 +222,58 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                     <p>{method.source_url}</p>
                                                 </div>
                                             )}
+                                            {method.protected_at && (
+                                                <p className="text-muted-foreground mt-4 text-sm">
+                                                    The original method is
+                                                    preserved because someone
+                                                    has tried it.
+                                                </p>
+                                            )}
+                                            {!!method.updates?.length && (
+                                                <section
+                                                    aria-label="Author updates"
+                                                    className="mt-5 space-y-4 border-t pt-5"
+                                                >
+                                                    <h4 className="font-semibold">
+                                                        Updates from the author
+                                                    </h4>
+                                                    <p className="text-muted-foreground text-sm">
+                                                        Separate from the
+                                                        original method. Earlier
+                                                        experiences do not
+                                                        evaluate these updates.
+                                                    </p>
+                                                    <ol className="space-y-4">
+                                                        {method.updates.map(
+                                                            (update) => (
+                                                                <li
+                                                                    key={
+                                                                        update.id
+                                                                    }
+                                                                    id={`method-update-${update.id}`}
+                                                                    className="border-l-2 pl-4"
+                                                                >
+                                                                    <time
+                                                                        dateTime={
+                                                                            update.created_at
+                                                                        }
+                                                                        className="text-muted-foreground text-sm"
+                                                                    >
+                                                                        {formatDate(
+                                                                            update.created_at,
+                                                                        )}
+                                                                    </time>
+                                                                    <p className="mt-2 [overflow-wrap:anywhere] whitespace-pre-wrap">
+                                                                        {
+                                                                            update.body
+                                                                        }
+                                                                    </p>
+                                                                </li>
+                                                            ),
+                                                        )}
+                                                    </ol>
+                                                </section>
+                                            )}
                                             <footer className="wb-method-footer">
                                                 {auth.user?.id ===
                                                     method.user.id && (
@@ -229,7 +281,9 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                         href={`/topics/${topic.slug}/methods/${method.id}/edit`}
                                                     >
                                                         <Pencil aria-hidden="true" />
-                                                        Edit method
+                                                        {method.protected_at
+                                                            ? 'Add an update'
+                                                            : 'Edit method'}
                                                     </Link>
                                                 )}
                                                 <Link

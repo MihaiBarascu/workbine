@@ -59,3 +59,11 @@ separate deployment check, not established by mocked notifications.
 Tests cover ownership, eligible support, caps, changes/removals, visibility,
 filtered pagination, privacy and click-through to reported outcomes. Use the
 [local release gate](TESTING.md) and review the Impact mobile/dark screenshots.
+
+## Dated method updates
+
+After the first experience from another member, original method content is
+preserved. Author notes appear separately with publication dates and no reputation
+points. Existing experiences refer to the preserved original, and changing or
+removing an experience still recalculates the current score. Starting a different
+method does not transfer experiences or endorsements from the original.
