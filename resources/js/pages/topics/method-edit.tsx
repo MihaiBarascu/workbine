@@ -1,6 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import InputError from '@/components/input-error';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,27 @@ type Props = {
     submissionId: string;
 };
 
+function UpdateErrorFocus({
+    processing,
+    error,
+    inputRef,
+}: {
+    processing: boolean;
+    error?: string;
+    inputRef: RefObject<HTMLTextAreaElement | null>;
+}) {
+    useEffect(() => {
+        if (processing || !error) return;
+
+        // onError can precede React removing the form's inert attribute.
+        // Wait for the committed interactive state, not an arbitrary timeout.
+        const frame = requestAnimationFrame(() => inputRef.current?.focus());
+        return () => cancelAnimationFrame(frame);
+    }, [processing, error, inputRef]);
+
+    return null;
+}
+
 export default function MethodEdit({
     topic,
     method,
@@ -33,7 +55,8 @@ export default function MethodEdit({
 }: Props) {
     const [initialRevision] = useState(revision);
     const [initiallyProtected] = useState(Boolean(method.protected_at));
-    const [initialSubmissionId] = useState(submissionId);
+    const [updateSubmissionId, setUpdateSubmissionId] = useState(submissionId);
+    const updateBodyRef = useRef<HTMLTextAreaElement>(null);
     const methodUrl = `/topics/${topic.slug}/methods/${method.id}`;
     const returnUrl = `/topics/${topic.slug}#method-${method.id}`;
 
@@ -87,26 +110,34 @@ export default function MethodEdit({
                         disableWhileProcessing
                         className="wb-panel space-y-5"
                     >
-                        {({ processing, errors }) => (
+                        {({ processing, errors, clearErrors }) => (
                             <>
+                                <UpdateErrorFocus
+                                    processing={processing}
+                                    error={errors.body || errors.submission_id}
+                                    inputRef={updateBodyRef}
+                                />
                                 <input
                                     type="hidden"
                                     name="submission_id"
-                                    value={initialSubmissionId}
+                                    value={updateSubmissionId}
                                 />
                                 <div className="space-y-2">
                                     <Label htmlFor="method-update-body">
                                         Your update
                                     </Label>
                                     <textarea
+                                        ref={updateBodyRef}
                                         className="border-input focus-visible:ring-ring w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2"
                                         id="method-update-body"
                                         name="body"
                                         required
                                         maxLength={5000}
                                         rows={6}
-                                        aria-invalid={Boolean(errors.body)}
-                                        aria-describedby="update-help update-error"
+                                        aria-invalid={Boolean(
+                                            errors.body || errors.submission_id,
+                                        )}
+                                        aria-describedby="update-help update-error update-submission-error"
                                         placeholder="Add a correction, clarification or something you learned later."
                                     />
                                     <p
@@ -121,12 +152,48 @@ export default function MethodEdit({
                                         id="update-error"
                                         message={errors.body}
                                     />
-                                    <InputError
-                                        message={errors.submission_id}
-                                    />
+                                    {errors.submission_id && (
+                                        <div role="alert" className="space-y-3">
+                                            <InputError
+                                                id="update-submission-error"
+                                                message={errors.submission_id}
+                                            />
+                                            <a
+                                                href={returnUrl}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-primary block text-sm underline underline-offset-4"
+                                            >
+                                                View published updates (new tab)
+                                            </a>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="h-auto max-w-full whitespace-normal"
+                                                disabled={processing}
+                                                onClick={() => {
+                                                    setUpdateSubmissionId(
+                                                        submissionId,
+                                                    );
+                                                    clearErrors(
+                                                        'submission_id',
+                                                    );
+                                                    updateBodyRef.current?.focus();
+                                                }}
+                                            >
+                                                Use this draft for a new update
+                                            </Button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex flex-wrap gap-3">
-                                    <Button type="submit" disabled={processing}>
+                                    <Button
+                                        type="submit"
+                                        disabled={
+                                            processing ||
+                                            Boolean(errors.submission_id)
+                                        }
+                                    >
                                         {processing && <Spinner />}Publish
                                         update
                                     </Button>
