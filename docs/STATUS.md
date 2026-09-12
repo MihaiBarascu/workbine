@@ -17,16 +17,16 @@ use the read-only production verification in [TESTING.md](TESTING.md) when the l
 frontend release must be established before another merge. A feature being in
 `main` does not by itself establish that the product is ready to invite users.
 
-| Area            | Current behavior                                                                                                                                              |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Community       | Independent topics, practical methods, real experiences and optional evidence.                                                                                |
+| Area            | Current behavior                                                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Community       | Independent topics, practical methods, real experiences and optional evidence.                                                                                            |
 | Topic creation  | Publish a topic with a first method or invite approaches without one. Context and the first method are explicitly optional, and drafts survive method toggles/validation. |
-| Discovery       | Text search, Needs a method filtering, paginated public content and clearly labelled illustrative starter ideas for an empty/new community.                  |
-| Design          | Wider white/neutral-grey/blue layout, shared branded account screens, responsive light and dark interfaces.                                                   |
-| Public profiles | `/members/{username}`, explicit public details and contribution lists/counts with clickable impact filters.                                                   |
-| Usernames       | One current username per member. Old names are released for reuse; legacy numeric links redirect.                                                             |
-| Images          | Optional profile photos and one image per experience. Production uploads are enabled; R2 delivery and a profile upload/remove/upload flow have been verified. |
-| Architecture    | Laravel/React/Inertia monolith with PostgreSQL, Docker deployment and R2 media storage.                                                                       |
+| Discovery       | Text search, Needs a method filtering, paginated public content and clearly labelled illustrative starter ideas for an empty/new community.                               |
+| Design          | Wider white/neutral-grey/blue layout, shared branded account screens, responsive light and dark interfaces.                                                               |
+| Public profiles | `/members/{username}`, explicit public details and contribution lists/counts with clickable impact filters.                                                               |
+| Usernames       | One current username per member. Old names are released for reuse; legacy numeric links redirect.                                                                         |
+| Images          | Optional profile photos and one image per experience. Production uploads are enabled; R2 delivery and a profile upload/remove/upload flow have been verified.             |
+| Architecture    | Laravel/React/Inertia monolith with PostgreSQL, Docker deployment and R2 media storage.                                                                                   |
 
 The disabled media default in `.env.example` is for installations awaiting
 configuration; it does not describe the existing deployment. Do not recreate a
@@ -173,17 +173,17 @@ belongs in the private handoff and should be confirmed with the owner when absen
 These are completed application releases, not branches awaiting implementation.
 For each release, the recorded gate applies only to the stated source revision.
 
-| Release                       | Result                                                                 | Recorded application validation |
-| ----------------------------- | ---------------------------------------------------------------------- | ------------------------------- |
-| #12, community/account design | Merged; refined by #16/#17/#18.                                        | Historical CI #40 and UI preview #20 on `9a8eddb6ad4f990a336e229f0cad8af1bbab2df1`: 93 application tests, 13 Python tests and 37 screenshots. |
-| #13/#14, HTTPS                | Merged; public HTTPS redirect ownership simplified.                    | See [HTTPS.md](HTTPS.md) and repository history. |
-| #15, topic composer/testing   | Merged; optional first method and the local test workflow are shipped. | See repository history and [TESTING.md](TESTING.md). |
-| #16, wider community layout   | Merged as `707a40d`; deployed.                                         | Local run on `106d8c95f8749ae22540074fed730be2d8cea325`: 115 tests / 912 assertions on each SQLite and PostgreSQL, 13 Python tests, complete browser flows and 58 screenshots. |
-| #17, member usernames         | Merged as `b395f09`; deployed.                                         | Local run on `5372ea5c52b1fdb7e0ab90d7ce450c750dab8edf`: 144 tests / 1091 assertions on each database, 13 Python tests, complete browser flows and 62 screenshots. |
-| #18, images/R2                | Merged as `cfedca2`; deployed.                                         | Local run on `a564866c7c35036830b4b0b01b657a049bcd2cb9`: 166 tests / 1315 assertions on each database, 13 Python tests, existing and media browser flows, 71 screenshots. |
-| #19, public-safe handoff      | Merged as `9ec573f`; documentation-only release.                       | Repository history; no application behavior change claimed. |
-| #20, launch support/impact    | Merged as `23f67d8`.                                                    | Release PR recorded editing, saves, reporting, impact/reputation and security validation; see repository history and [LAUNCH.md](LAUNCH.md). |
-| #21, human-first topic flow   | Merged as `5bfc0d0`.                                                    | CI #49 and Public UI preview #26 on `1aef4c6e6c27cdb8adb415b2fe45f8c8ffa9ee82`: SQLite/PostgreSQL release gates passed; 274 application tests / 2788 assertions in the recorded SQLite job, 13 Python tests, browser flows and 83 screenshots. |
+| Release                       | Result                                                                 | Recorded application validation                                                                                                                                                                                                                |
+| ----------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| #12, community/account design | Merged; refined by #16/#17/#18.                                        | Historical CI #40 and UI preview #20 on `9a8eddb6ad4f990a336e229f0cad8af1bbab2df1`: 93 application tests, 13 Python tests and 37 screenshots.                                                                                                  |
+| #13/#14, HTTPS                | Merged; public HTTPS redirect ownership simplified.                    | See [HTTPS.md](HTTPS.md) and repository history.                                                                                                                                                                                               |
+| #15, topic composer/testing   | Merged; optional first method and the local test workflow are shipped. | See repository history and [TESTING.md](TESTING.md).                                                                                                                                                                                           |
+| #16, wider community layout   | Merged as `707a40d`; deployed.                                         | Local run on `106d8c95f8749ae22540074fed730be2d8cea325`: 115 tests / 912 assertions on each SQLite and PostgreSQL, 13 Python tests, complete browser flows and 58 screenshots.                                                                 |
+| #17, member usernames         | Merged as `b395f09`; deployed.                                         | Local run on `5372ea5c52b1fdb7e0ab90d7ce450c750dab8edf`: 144 tests / 1091 assertions on each database, 13 Python tests, complete browser flows and 62 screenshots.                                                                             |
+| #18, images/R2                | Merged as `cfedca2`; deployed.                                         | Local run on `a564866c7c35036830b4b0b01b657a049bcd2cb9`: 166 tests / 1315 assertions on each database, 13 Python tests, existing and media browser flows, 71 screenshots.                                                                      |
+| #19, public-safe handoff      | Merged as `9ec573f`; documentation-only release.                       | Repository history; no application behavior change claimed.                                                                                                                                                                                    |
+| #20, launch support/impact    | Merged as `23f67d8`.                                                   | Release PR recorded editing, saves, reporting, impact/reputation and security validation; see repository history and [LAUNCH.md](LAUNCH.md).                                                                                                   |
+| #21, human-first topic flow   | Merged as `5bfc0d0`.                                                   | CI #49 and Public UI preview #26 on `1aef4c6e6c27cdb8adb415b2fe45f8c8ffa9ee82`: SQLite/PostgreSQL release gates passed; 274 application tests / 2788 assertions in the recorded SQLite job, 13 Python tests, browser flows and 83 screenshots. |
 
 The listed local application runs passed the production frontend build,
 formatting/lint, TypeScript, Pint, PHPStan and application suites. The #18
