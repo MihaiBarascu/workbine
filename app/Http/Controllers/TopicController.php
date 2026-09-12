@@ -197,7 +197,7 @@ class TopicController extends Controller
         $topic->setAttribute('liked', $request->user() !== null && $topic->likes()->where('user_id', $request->user()->getAuthIdentifier())->exists());
 
         $methods = $topic->methods()
-            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage'])
+            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'updates'])
             ->withCount('experiences')
             ->latest()
             ->orderByDesc('id')
@@ -249,6 +249,10 @@ class TopicController extends Controller
             'title' => $method->title,
             'body' => $method->body,
             'body_document' => $method->body_document,
+            'protected_at' => $method->protected_at?->toIso8601String(),
+            'updates' => $method->updates->map(fn ($update) => [
+                'id' => $update->id, 'body' => $update->body, 'created_at' => $update->created_at?->toIso8601String(),
+            ])->all(),
             'source_url' => $method->source_url,
             'created_at' => $method->created_at?->toIso8601String(),
             'updated_at' => $method->updated_at?->toIso8601String(),

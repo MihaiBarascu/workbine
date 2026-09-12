@@ -11,11 +11,13 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ContentModeration;
 use App\Services\ImageUploads;
+use App\Support\ContributionRevision;
 use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Throwable;
@@ -52,6 +54,7 @@ class ExperienceController extends Controller
             'method' => [
                 'id' => $method->id,
                 'title' => $method->title,
+                'revision' => ContributionRevision::token($method),
                 'user' => ['id' => $method->user->id, 'name' => $method->user->name, 'username' => $method->user->username, 'avatar_url' => $method->user->avatarUrl()],
             ],
             'experiences' => $experiences,
@@ -88,6 +91,11 @@ class ExperienceController extends Controller
             $previous = DB::transaction(function () use ($user, $method, $request, $data, $image): ?MediaImage {
                 // Serializes creation, replacement and quota reservations for one member.
                 User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+                // Same lock as method editing: publication and rewriting cannot cross.
+                $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
+                if (isset($data['method_revision']) && ! hash_equals(ContributionRevision::token($current), $data['method_revision'])) {
+                    throw ValidationException::withMessages(['method_revision' => __('The method changed while you were writing. Review the method before sharing your result.')]);
+                }
                 $experience = Experience::withoutGlobalScopes()->lockForUpdate()->firstOrNew(['method_id' => $method->id, 'user_id' => $user->id]);
                 abort_if($experience->hidden_at !== null, 403);
                 $previous = null;

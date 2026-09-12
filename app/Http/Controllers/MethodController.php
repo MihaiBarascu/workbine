@@ -6,6 +6,7 @@ use App\Http\Requests\StoreMethodRequest;
 use App\Http\Requests\UpdateMethodRequest;
 use App\Models\CommunityNotification;
 use App\Models\Method;
+use App\Models\MethodUpdate;
 use App\Models\Topic;
 use App\Models\User;
 use App\Services\ContentModeration;
@@ -15,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -27,7 +29,8 @@ class MethodController extends Controller
 
         return Inertia::render('topics/method-edit', [
             'topic' => $topic->only(['id', 'title', 'slug']),
-            'method' => $method->only(['id', 'title', 'body', 'body_document', 'source_url']),
+            'method' => $method->only(['id', 'title', 'body', 'body_document', 'source_url', 'protected_at']),
+            'submissionId' => (string) Str::uuid(),
             'revision' => ContributionRevision::token($method),
         ]);
     }
@@ -39,6 +42,10 @@ class MethodController extends Controller
 
         DB::transaction(function () use ($method, $data): void {
             $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
+
+            if ($current->protected_at !== null) {
+                throw ValidationException::withMessages(['revision' => __('Someone has tried this method. The original is preserved; add a dated update instead.')]);
+            }
 
             if (! hash_equals(ContributionRevision::token($current), $data['revision'])) {
                 throw ValidationException::withMessages([
@@ -55,6 +62,29 @@ class MethodController extends Controller
         });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Method updated.')]);
+
+        return redirect()->to(route('topics.show', $topic).'#method-'.$method->id);
+    }
+
+    public function addUpdate(Request $request, Topic $topic, Method $method): RedirectResponse
+    {
+        abort_unless($request->user()?->getAuthIdentifier() === $method->user_id, 403);
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:5000'],
+            'submission_id' => ['required', 'uuid'],
+        ]);
+        app(ContentModeration::class)->text($request->user(), ['body' => $data['body']], 'method:update:'.$method->id, 'body');
+        DB::transaction(function () use ($method, $data): void {
+            $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
+            if ($current->protected_at === null) {
+                throw ValidationException::withMessages(['body' => __('This method can still be edited. Edit the original before it receives an experience.')]);
+            }
+            MethodUpdate::query()->firstOrCreate(
+                ['method_id' => $current->id, 'submission_id' => $data['submission_id']],
+                ['body' => $data['body']],
+            );
+        });
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Update added.')]);
 
         return redirect()->to(route('topics.show', $topic).'#method-'.$method->id);
     }

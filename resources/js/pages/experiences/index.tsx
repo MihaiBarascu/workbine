@@ -21,6 +21,7 @@ type Props = {
     method: {
         id: number;
         title: string;
+        revision: string;
         user: PublicMember;
     };
     experiences: PaginatedExperiences;
@@ -423,6 +424,7 @@ export default function ExperiencesIndex({
                             </div>
                         ) : (
                             <ExperienceForm
+                                methodRevision={method.revision}
                                 action={`${base}/experience`}
                                 experience={ownExperience}
                             />

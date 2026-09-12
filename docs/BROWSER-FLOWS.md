@@ -56,19 +56,29 @@ moderation visibility and changes to verification eligibility retain their backe
 checks in [ReputationTest.php](../tests/Feature/ReputationTest.php); this one journey
 does not attest all reputation permutations or external provider behavior.
 
-## Product integrity gap identified during review
+## Preserving tried methods
 
-Experiences currently reference a method ID, not an immutable revision of its
-content. Editing a method can therefore leave earlier positive outcomes beside
-materially changed instructions. The edit-conflict token prevents overwriting a
-concurrent edit; it is not a historical revision record. Current passing tests do
-not resolve this trust problem.
+A method's first experience from another member permanently preserves its title,
+rich text, attached photos and source. Deleting or hiding that experience, or
+removing its author account, does not reopen editing. Before that point, normal
+editing and stale-editor protection remain available. Authors of preserved methods
+can append dated plain-text notes (up to 5,000 characters), or share a different
+approach as a new method. Notes cannot be rewritten through the application and
+carry no reputation points. Earlier experiences do not endorse those notes.
 
-Experience authors can change their own result, and current-record reputation
+[tests/e2e/method-preservation.spec.ts](../tests/e2e/method-preservation.spec.ts)
+exercises the original photo/source, a stale editor crossing the first response,
+a dated note, access control, response removal and reputation on desktop/mobile.
+[tests/Feature/MethodPreservationTest.php](../tests/Feature/MethodPreservationTest.php)
+covers server enforcement, permanent preservation, duplicate submissions,
+validation, migration backfill and unchanged reputation semantics.
+
+The browser submits the method content token with an experience; a stale token
+requires reviewing the current method before retrying. This is conflict detection,
+not a version archive. Backfill preserves current methods with existing responses,
+including hidden ones; it cannot reconstruct earlier edits or deleted responses.
+Experience authors can still change their own result, and current-record reputation
 recalculates accordingly. Experiences themselves do not receive review scores.
-Before launch, define how method revisions retain the context of earlier
-experiences (or a simpler restriction on replacing already-tried instructions).
-No version-history product behavior was added by this testing change.
 
 ## Highest-priority remaining browser gaps
 

@@ -1,4 +1,5 @@
 import { RichTextEditor } from '@/components/rich-text-editor';
+import { useState } from 'react';
 import { Form, usePage } from '@inertiajs/react';
 import {
     ImageUploadField,
@@ -12,11 +13,13 @@ import type { ExperienceSummary } from '@/types';
 
 type Props = {
     action: string;
+    methodRevision: string;
     experience: ExperienceSummary | null;
 };
 
-export function ExperienceForm({ action, experience }: Props) {
+export function ExperienceForm({ action, experience, methodRevision }: Props) {
     const { media } = usePage().props;
+    const [initialMethodRevision] = useState(methodRevision);
     return (
         <div className="space-y-5">
             <Form
@@ -29,6 +32,26 @@ export function ExperienceForm({ action, experience }: Props) {
                 {({ errors, processing, progress }) => (
                     <>
                         <input type="hidden" name="_method" value="put" />
+                        <input
+                            type="hidden"
+                            name="method_revision"
+                            value={initialMethodRevision}
+                        />
+                        {errors.method_revision && (
+                            <div role="alert">
+                                <InputError message={errors.method_revision} />
+                                <a
+                                    href={action.replace(
+                                        /\/experience$/,
+                                        '/experiences',
+                                    )}
+                                    className="text-primary text-sm underline"
+                                >
+                                    Copy your response and reload before trying
+                                    again
+                                </a>
+                            </div>
+                        )}
                         <div className="grid gap-2">
                             <Label htmlFor="outcome">
                                 What was your result?

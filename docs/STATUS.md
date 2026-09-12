@@ -1,11 +1,22 @@
 # Workbine status
 
-Last updated: 2026-09-12.
+Last updated: 2026-09-13.
 
 This is a public repository. This handoff records product behavior, completed
 releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
+
+## Preserving tried methods
+
+The first experience from another member permanently preserves a method's original
+title, explanation, photos and source. Authors can then add dated plain-text notes
+or publish a different approach as a new method. Notes are separate from the
+original and receive no reputation; earlier experiences do not evaluate them.
+Removing an experience does not reopen the original editor. Existing response
+editing and reputation recalculation remain available. The migration includes
+hidden responses when preserving existing methods, without a full version archive.
+See [BROWSER-FLOWS.md](BROWSER-FLOWS.md) for coverage and boundaries.
 
 ## Browser flow inventory
 

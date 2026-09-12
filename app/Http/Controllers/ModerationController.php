@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ContentReport;
 use App\Models\Experience;
+use App\Models\Method;
 use App\Models\ModerationReview;
 use App\Models\User;
 use App\Support\ReportTargets;
@@ -71,6 +72,9 @@ class ModerationController extends Controller
             $item = ContentReport::query()->findOrFail($id);
             $target = ReportTargets::find($item->target_type, $item->target_id, true);
             $text = $target?->only(['title', 'description', 'body', 'source_url', 'evidence_url']) ?? [];
+            if ($target instanceof Method) {
+                $text['dated_updates'] = $target->updates->map(fn ($update) => $update->created_at?->toIso8601String().': '.$update->body)->implode("\n\n");
+            }
             $author = $target === null ? null : User::query()->find($target->user_id);
             $image = $target instanceof Experience ? $target->evidenceImage?->url() : null;
             $reasons = [$item->reason];
@@ -161,6 +165,7 @@ class ModerationController extends Controller
         return match (true) {
             $context === 'topic:new' => 'New topic',
             str_starts_with($context, 'topic:') => 'Topic edit',
+            str_starts_with($context, 'method:update:') => 'Dated method update',
             str_starts_with($context, 'method:new:') => 'New method',
             str_starts_with($context, 'method:') => 'Method edit',
             str_starts_with($context, 'experience:') => 'Experience',

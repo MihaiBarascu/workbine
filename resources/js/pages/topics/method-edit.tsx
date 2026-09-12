@@ -2,6 +2,8 @@ import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import { RichTextContent } from '@/components/rich-text-content';
+import { Label } from '@/components/ui/label';
 import { MethodFields } from '@/components/method-fields';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
@@ -12,15 +14,133 @@ type Props = {
     topic: Pick<TopicSummary, 'id' | 'title' | 'slug'>;
     method: Pick<
         MethodSummary,
-        'id' | 'title' | 'body' | 'body_document' | 'source_url'
+        | 'id'
+        | 'title'
+        | 'body'
+        | 'body_document'
+        | 'source_url'
+        | 'protected_at'
     >;
     revision: string;
+    submissionId: string;
 };
 
-export default function MethodEdit({ topic, method, revision }: Props) {
+export default function MethodEdit({
+    topic,
+    method,
+    revision,
+    submissionId,
+}: Props) {
     const [initialRevision] = useState(revision);
+    const [initiallyProtected] = useState(Boolean(method.protected_at));
+    const [initialSubmissionId] = useState(submissionId);
     const methodUrl = `/topics/${topic.slug}/methods/${method.id}`;
     const returnUrl = `/topics/${topic.slug}#method-${method.id}`;
+
+    if (initiallyProtected) {
+        return (
+            <PublicShell>
+                <Head title={`Add an update - ${method.title}`} />
+                <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+                    <Button asChild variant="ghost" className="mb-6 -ml-3">
+                        <Link href={returnUrl}>
+                            <ArrowLeft aria-hidden="true" />
+                            Back to method
+                        </Link>
+                    </Button>
+                    <h1 className="text-3xl font-semibold">Add an update</h1>
+                    <p className="text-muted-foreground mt-4 leading-7">
+                        Someone has tried this method, so the original
+                        explanation, photos and sources are preserved. Add a
+                        dated note below. Earlier experiences do not evaluate
+                        your update.
+                    </p>
+                    <p className="mt-3 text-sm">
+                        Trying a different approach?{' '}
+                        <Link
+                            href={`/topics/${topic.slug}/methods/create`}
+                            className="text-primary underline underline-offset-4"
+                        >
+                            Share a new method
+                        </Link>
+                        .
+                    </p>
+                    <details className="wb-panel my-6">
+                        <summary className="cursor-pointer font-medium">
+                            Original method: {method.title}
+                        </summary>
+                        <div className="mt-4">
+                            <RichTextContent
+                                document={method.body_document}
+                                text={method.body}
+                            />
+                        </div>
+                        {method.source_url && (
+                            <p className="mt-3 text-sm break-words">
+                                Original source: {method.source_url}
+                            </p>
+                        )}
+                    </details>
+                    <Form
+                        action={`${methodUrl}/updates`}
+                        method="post"
+                        disableWhileProcessing
+                        className="wb-panel space-y-5"
+                    >
+                        {({ processing, errors }) => (
+                            <>
+                                <input
+                                    type="hidden"
+                                    name="submission_id"
+                                    value={initialSubmissionId}
+                                />
+                                <div className="space-y-2">
+                                    <Label htmlFor="method-update-body">
+                                        Your update
+                                    </Label>
+                                    <textarea
+                                        className="border-input focus-visible:ring-ring w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2"
+                                        id="method-update-body"
+                                        name="body"
+                                        required
+                                        maxLength={5000}
+                                        rows={6}
+                                        aria-invalid={Boolean(errors.body)}
+                                        aria-describedby="update-help update-error"
+                                        placeholder="Add a correction, clarification or something you learned later."
+                                    />
+                                    <p
+                                        id="update-help"
+                                        className="text-muted-foreground text-sm"
+                                    >
+                                        This note will be dated and published
+                                        separately. Published updates cannot be
+                                        rewritten.
+                                    </p>
+                                    <InputError
+                                        id="update-error"
+                                        message={errors.body}
+                                    />
+                                    <InputError
+                                        message={errors.submission_id}
+                                    />
+                                </div>
+                                <div className="flex flex-wrap gap-3">
+                                    <Button type="submit" disabled={processing}>
+                                        {processing && <Spinner />}Publish
+                                        update
+                                    </Button>
+                                    <Button asChild variant="ghost">
+                                        <Link href={returnUrl}>Cancel</Link>
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </Form>
+                </main>
+            </PublicShell>
+        );
+    }
 
     return (
         <PublicShell>
@@ -44,9 +164,9 @@ export default function MethodEdit({ topic, method, revision }: Props) {
                         </span>
                     </p>
                     <p className="text-muted-foreground mt-2 max-w-2xl text-base leading-7">
-                        Add clearer steps, correct details or update the source.
-                        If you tried a different approach, share it as a new
-                        method so existing experiences keep their context.
+                        You can edit this method until another member shares an
+                        experience. After that, the original stays preserved and
+                        you can add dated updates.
                     </p>
                 </div>
 
@@ -80,8 +200,8 @@ export default function MethodEdit({ topic, method, revision }: Props) {
                                 autoFocus
                             />
                             <p className="text-muted-foreground text-sm leading-6">
-                                Experiences and evidence remain attached. The
-                                method will show when it was last updated.
+                                Once someone has tried this method, you can add
+                                updates but cannot rewrite the original.
                             </p>
                             <div className="flex flex-wrap items-center gap-3 pt-2">
                                 <Button
