@@ -46,4 +46,13 @@ node tests/browser/community-flow.cjs
 node tests/browser/profile-flow.cjs
 node tests/browser/media-flow.cjs
 node tests/browser/launch-flow.cjs
+php -S 127.0.0.1:8001 -t public tests/browser/turnstile-router.php > /artifacts/turnstile-server.log 2>&1 &
+for attempt in {1..30}; do
+    if curl --fail --silent http://127.0.0.1:8001/up > /dev/null; then
+        break
+    fi
+    sleep 1
+done
+node tests/browser/turnstile-flow.cjs
+node tests/browser/turnstile-widget.cjs
 printf '\nPASS: local build, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'

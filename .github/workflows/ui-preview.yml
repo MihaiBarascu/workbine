@@ -102,6 +102,18 @@ jobs:
           node tests/browser/profile-flow.cjs
           node tests/browser/media-flow.cjs
 
+      - name: Exercise registration verification and capture the test widget
+        run: |
+          php -S 127.0.0.1:8001 -t public tests/browser/turnstile-router.php > /tmp/workbine-turnstile-server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8001/up > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          node tests/browser/turnstile-flow.cjs
+          node tests/browser/turnstile-widget.cjs
+
       - name: Print isolated application diagnostics on failure
         if: failure()
         run: |
