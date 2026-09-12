@@ -22,10 +22,13 @@ php artisan key:generate
 npm ci
 php artisan wayfinder:generate --with-form --no-interaction
 npm run build
+if [[ "${WORKBINE_TEST_MODE:-full}" == full ]]; then
 python3 -m unittest discover -s tools -p test_autodev.py -v
 composer ci:check
 DB_CONNECTION=pgsql DB_DATABASE=workbine_test php artisan test --compact
+fi
 export DB_CONNECTION=sqlite DB_DATABASE=/tmp/workbine-preview.sqlite
+export WORKBINE_BROWSER_PILOT=1
 export MEDIA_ENABLED=true MEDIA_DISK=public
 export COMMUNITY_REPORTS_ENABLED=true APP_DEBUG=false
 touch "$DB_DATABASE"
@@ -41,6 +44,16 @@ for attempt in {1..30}; do
 done
 curl --fail --silent http://127.0.0.1:8000/up > /dev/null
 mkdir -p /tmp/workbine-ui-preview
+if [[ "${WORKBINE_TEST_MODE:-full}" == browser-server ]]; then
+    node tools/browser-cli-config.cjs
+    echo 'READY: isolated browser server. Use docker exec for Playwright; stop with Ctrl-C.'
+    tail -f /dev/null
+fi
+npm run types:browser
+if [[ "${WORKBINE_TEST_MODE:-full}" == browser ]]; then
+    npm run test:browser
+    exit
+fi
 node tests/browser/capture-public.cjs
 node tests/browser/community-flow.cjs
 node tests/browser/profile-flow.cjs
@@ -64,4 +77,5 @@ for attempt in {1..30}; do
     sleep 1
 done
 node tests/browser/moderation-flow.cjs
+npm run test:browser
 printf '\nPASS: local build, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'

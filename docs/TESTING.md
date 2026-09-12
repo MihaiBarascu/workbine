@@ -39,6 +39,13 @@ checks after fixes. Review screenshots for UI changes. Merge the tested branch
 normally; Dokploy automatically deploys `main`. Observe the live result without
 starting a second deployment.
 
+## Independent browser pilot
+
+Use `bash tools/test-local.sh --browser` for a targeted run or `--browser-server`
+for an isolated session that stays open during test maintenance. These modes do
+not replace the full release gate. See [BROWSER-PILOT.md](BROWSER-PILOT.md) for
+scenario coverage, reports, fault checks and the Luna evaluation.
+
 ## GPT Web without a local runner
 
 ### Workflow dispatch

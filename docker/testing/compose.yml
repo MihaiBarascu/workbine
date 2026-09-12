@@ -23,6 +23,7 @@ services:
                 condition: service_healthy
         environment:
             APP_ENV: testing
+            WORKBINE_TEST_MODE: '${WORKBINE_TEST_MODE:-full}'
             APP_URL: http://127.0.0.1:8000
             DB_CONNECTION: sqlite
             DB_DATABASE: ':memory:'
