@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
+import { request as requestPasswordReset } from '@/routes/password';
 
 type Props = {
     passwordRules: string;
@@ -71,6 +72,21 @@ export default function Register({ passwordRules }: Props) {
                                         placeholder="email@example.com"
                                     />
                                     <InputError message={errors.email} />
+                                    {errors.email && (
+                                        <p className="text-muted-foreground text-sm">
+                                            Already used this address?{' '}
+                                            <TextLink href={login()}>
+                                                Log in
+                                            </TextLink>{' '}
+                                            or{' '}
+                                            <TextLink
+                                                href={requestPasswordReset()}
+                                            >
+                                                reset your password
+                                            </TextLink>{' '}
+                                            to recover access.
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="grid gap-2">
@@ -111,6 +127,10 @@ export default function Register({ passwordRules }: Props) {
                                     {processing && <Spinner />}
                                     Create account
                                 </Button>
+                                <p className="text-muted-foreground text-sm">
+                                    We’ll email you a confirmation link before
+                                    you can publish or save topics.
+                                </p>
                             </div>
 
                             <div className="text-muted-foreground text-center text-sm">

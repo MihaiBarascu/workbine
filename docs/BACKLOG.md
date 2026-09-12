@@ -62,8 +62,8 @@ with an opaque leaderboard or treat self-reports as independently verified resul
   privacy and terms content before publishing those pages.
 - Assign report review responsibility before enabling the report interface.
 - Configure and verify transactional delivery before offering email-dependent
-  account flows. Optional confirmation is implemented; enforced verification is
-  a separate decision and must preserve account recovery/deletion access.
+  account flows. Standard confirmation protects contributions and saved topics;
+  account recovery and deletion remain accessible.
 - Revisit recognition for useful experience writers, abuse handling and any
   earned milestones based on observed community use. Do not reward posting volume.
 - Prefer small observed usability or reliability obstacles over speculative

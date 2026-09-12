@@ -1,3 +1,4 @@
+const verifyAccount = require('./verify-account.cjs');
 // Only the disposable CI application. Never point these mutation tests at production.
 const assert = require('node:assert/strict');
 const { createRequire } = require('node:module');
@@ -408,11 +409,33 @@ const { chromium } = requireBrowser('playwright');
         await page
             .locator('input[name="password_confirmation"]')
             .fill('safe-preview-only-password-27!');
+        await page
+            .locator('input[name="email"]')
+            .fill('preview-contributor@example.test');
         await page.locator('button[type="submit"]').click();
-        await page.waitForURL(/\/topics$/);
+        await page
+            .getByRole('link', { name: 'reset your password', exact: true })
+            .waitFor();
+        await inspect('register-existing-email');
+        await page
+            .locator('input[name="email"]')
+            .fill('new-member@example.test');
+        await page.locator('button[type="submit"]').click();
+        await page.waitForURL(/\/email\/verify$/);
         await page.goto(`${root}/email/verify`);
         await page.locator('.wb-auth-form').waitFor();
         await inspect('verify-email-desktop');
+        await page.setViewportSize({ width: 375, height: 812 });
+        await inspect('verify-email-mobile');
+        await page
+            .getByRole('button', { name: 'Resend verification email' })
+            .click();
+        await page
+            .getByRole('status')
+            .filter({ hasText: 'A new verification link' })
+            .waitFor();
+        await verifyAccount(page, 'new-member@example.test');
+        console.log('PASS registration, resend and signed email confirmation');
         await page.goto(`${root}/settings/profile`);
         const newMember = (await initialProps()).auth.user;
         assert.match(newMember.username, /^[a-z][a-z0-9-]{2,29}$/);

@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Middleware\EnsureEmailVerificationAvailable;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Support\ErrorPages;
@@ -27,7 +26,6 @@ return Application::configure(basePath: dirname(__DIR__))
             AuthenticateSession::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
-            EnsureEmailVerificationAvailable::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
     })

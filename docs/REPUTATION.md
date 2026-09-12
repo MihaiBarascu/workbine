@@ -49,7 +49,8 @@ needs a separate, evidence-based design decision.
 
 ## Verification and acceptance
 
-Manual email confirmation is optional configuration after actual delivery works.
+Email confirmation is required before new contributions and saves. Existing
+activity still uses current verification status when calculating reputation.
 Google verification applies only to the provider's matching verified email.
 A local unverified account cannot be silently linked and trusted through Google;
 the existing account must first be recovered/confirmed. Actual mail delivery is a

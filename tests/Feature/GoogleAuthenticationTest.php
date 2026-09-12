@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Tests\TestCase;
@@ -21,6 +22,7 @@ class GoogleAuthenticationTest extends TestCase
 
     public function test_google_callback_creates_and_authenticates_user(): void
     {
+        Notification::fake();
         Socialite::fake('google', SocialiteUser::fake([
             'id' => 'google-123',
             'name' => 'Workbine User',
@@ -37,6 +39,8 @@ class GoogleAuthenticationTest extends TestCase
             'google_id' => 'google-123',
         ]);
         $this->assertTrue(User::query()->where('email', 'user@example.com')->firstOrFail()->hasVerifiedEmail());
+        Notification::assertNothingSent();
+        $this->get(route('topics.create'))->assertOk();
     }
 
     public function test_google_callback_links_existing_user_by_verified_email(): void

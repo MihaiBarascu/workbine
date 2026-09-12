@@ -22,7 +22,7 @@ class ProfileController extends Controller
     public function edit(Request $request): Response
     {
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => (bool) config('community.email_verification_enabled'),
+            'mustVerifyEmail' => true,
             'status' => $request->session()->get('status'),
         ]);
     }
@@ -35,7 +35,9 @@ class ProfileController extends Controller
         $user = $request->user();
         $user->fill($request->validated());
 
-        if ($user->isDirty('email')) {
+        $emailChanged = $user->isDirty('email');
+
+        if ($emailChanged) {
             $user->email_verified_at = null;
         }
 
@@ -47,6 +49,11 @@ class ProfileController extends Controller
             }
 
             throw ValidationException::withMessages(['username' => __('This username is already taken.')]);
+        }
+
+        if ($emailChanged) {
+            $user->sendEmailVerificationNotification();
+            $request->session()->flash('status', 'verification-link-sent');
         }
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);

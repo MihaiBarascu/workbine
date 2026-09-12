@@ -84,9 +84,8 @@ export default function MemberProfile({
     impact,
     contributions,
 }: Props) {
-    const { auth, emailVerificationAvailable } = usePage<{
+    const { auth } = usePage<{
         auth: { user: User | null };
-        emailVerificationAvailable: boolean;
     }>().props;
     const own = auth.user?.id === member.id;
     const impactCards = [
@@ -477,21 +476,19 @@ export default function MemberProfile({
                             >
                                 How reputation works →
                             </Link>
-                            {own &&
-                                !auth.user?.email_verified_at &&
-                                emailVerificationAvailable && (
-                                    <p>
-                                        Your feedback contributes to others’
-                                        points after you confirm your email in{' '}
-                                        <Link
-                                            href="/settings/profile"
-                                            className="text-primary underline"
-                                        >
-                                            account settings
-                                        </Link>
-                                        .
-                                    </p>
-                                )}
+                            {own && !auth.user?.email_verified_at && (
+                                <p>
+                                    Your feedback contributes to others’ points
+                                    after you confirm your email in{' '}
+                                    <Link
+                                        href="/settings/profile"
+                                        className="text-primary underline"
+                                    >
+                                        account settings
+                                    </Link>
+                                    .
+                                </p>
+                            )}
                         </details>
                         <h2>Shared with the community</h2>
                         <dl>
