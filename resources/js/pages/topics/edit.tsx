@@ -2,6 +2,7 @@ import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import { TopicClassification } from '@/components/topic-classification';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,11 +11,15 @@ import { Spinner } from '@/components/ui/spinner';
 import type { TopicSummary } from '@/types';
 
 type Props = {
-    topic: Pick<TopicSummary, 'id' | 'title' | 'slug' | 'description'>;
+    topic: Pick<
+        TopicSummary,
+        'id' | 'title' | 'slug' | 'description' | 'category' | 'tags'
+    >;
     revision: string;
+    categories: Record<string, string>;
 };
 
-export default function TopicEdit({ topic, revision }: Props) {
+export default function TopicEdit({ topic, revision, categories }: Props) {
     const [initialRevision] = useState(revision);
     const topicUrl = `/topics/${topic.slug}`;
 
@@ -109,6 +114,12 @@ export default function TopicEdit({ topic, revision }: Props) {
                                     message={errors.description}
                                 />
                             </div>
+                            <TopicClassification
+                                categories={categories}
+                                category={topic.category}
+                                tags={topic.tags}
+                                errors={errors}
+                            />
                             <p className="text-muted-foreground text-sm leading-6">
                                 The topic link stays the same. Existing methods
                                 and experiences remain attached.

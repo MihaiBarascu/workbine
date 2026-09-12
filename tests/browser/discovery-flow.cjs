@@ -35,6 +35,10 @@ const verifyAccount = require('./verify-account.cjs');
         await page.setViewportSize({ width, height: 900 });
         await page.emulateMedia({ colorScheme });
         await page.evaluate(() => document.fonts.ready);
+        await page.waitForFunction(
+            () => document.querySelectorAll('[data-sonner-toast]').length === 0,
+        );
+        await page.evaluate(() => window.scrollTo(0, 0));
         assert.equal(
             await page.locator('.wb-topbar').count(),
             1,
@@ -70,6 +74,8 @@ const verifyAccount = require('./verify-account.cjs');
         await capture(owner, 'notifications-empty-mobile', 375);
         await owner.goto(`${root}/topics/create`);
         await owner.locator('#title').fill('Making a little room for learning');
+        await owner.locator('#category').selectOption('ai');
+        await owner.locator('#tags').fill('practice, habits');
         await owner
             .getByRole('button', { name: 'Publish topic', exact: true })
             .click();
@@ -215,6 +221,125 @@ const verifyAccount = require('./verify-account.cjs');
                 exact: true,
             })
             .waitFor();
+        await contributor.goto(`${root}/topics?category=ai`);
+        const learningCard = contributor
+            .locator('main article')
+            .filter({ hasText: 'Making a little room for learning' });
+        await learningCard
+            .getByRole('link', { name: 'AI in Practice', exact: true })
+            .waitFor();
+        assert.equal(
+            await learningCard
+                .locator('.wb-entry-photo')
+                .getByText('AI in Practice', { exact: true })
+                .count(),
+            0,
+            'No labels over photos',
+        );
+        await learningCard
+            .getByRole('button', { name: 'Appreciate topic', exact: true })
+            .click();
+        await learningCard
+            .getByRole('button', { name: 'Remove appreciation', exact: true })
+            .waitFor();
+        await contributor.reload();
+        await learningCard
+            .getByRole('button', { name: 'Remove appreciation', exact: true })
+            .click();
+        await learningCard
+            .getByRole('button', { name: 'Appreciate topic', exact: true })
+            .waitFor();
+        await contributor
+            .getByLabel('Filter by tag', { exact: true })
+            .selectOption('practice');
+        await contributor.waitForURL(/tag=practice/);
+        await learningCard.waitFor();
+        await contributor
+            .getByLabel('Sort topics', { exact: true })
+            .selectOption('oldest');
+        await contributor.waitForURL(/sort=oldest/);
+        await contributor
+            .getByRole('link', { name: 'Trending', exact: true })
+            .click();
+        await contributor
+            .getByText(
+                'Based on methods shared and topics saved in the last 14 days.',
+                { exact: true },
+            )
+            .waitFor();
+        await contributor
+            .getByRole('link', { name: 'Most saved', exact: true })
+            .click();
+        await contributor
+            .getByRole('button', { name: 'Hide community guide', exact: true })
+            .click();
+        await contributor
+            .getByRole('button', { name: 'Show guide', exact: true })
+            .waitFor();
+        await contributor.reload();
+        await contributor
+            .getByRole('button', { name: 'Show guide', exact: true })
+            .click();
+        await contributor
+            .getByRole('button', { name: 'Hide community guide', exact: true })
+            .waitFor();
+        await contributor.keyboard.press('ControlOrMeta+k');
+        assert.equal(
+            await contributor
+                .locator('#topic-search')
+                .evaluate((input) => document.activeElement === input),
+            true,
+        );
+        await contributor
+            .getByLabel('Search in', { exact: true })
+            .selectOption('people');
+        await contributor
+            .locator('#topic-search')
+            .fill('Discovery Topic Author');
+        await contributor
+            .getByRole('button', { name: 'Search', exact: true })
+            .click();
+        await contributor
+            .locator('.wb-person-card')
+            .filter({ hasText: 'Discovery Topic Author' })
+            .waitFor();
+        await capture(contributor, 'people-search-desktop', 1440);
+        await contributor.goto(`${root}/topics`);
+        await contributor.setViewportSize({ width: 375, height: 900 });
+        await contributor
+            .getByRole('button', { name: 'Open navigation', exact: true })
+            .click();
+        await contributor
+            .getByRole('navigation', { name: 'Categories', exact: true })
+            .getByRole('link', { name: 'AI in Practice', exact: true })
+            .click();
+        await contributor.waitForURL(/category=ai/);
+        assert.equal(
+            await contributor
+                .getByRole('navigation', { name: 'Categories', exact: true })
+                .isVisible(),
+            false,
+        );
+        await contributor.emulateMedia({ reducedMotion: 'reduce' });
+        await capture(contributor, 'connected-reduced-motion-mobile', 375);
+        assert.equal(
+            await contributor.locator('.wb-universe canvas').isVisible(),
+            false,
+        );
+        await contributor.emulateMedia({ reducedMotion: 'no-preference' });
+        await contributor.setViewportSize({ width: 1440, height: 900 });
+        await contributor.mouse.move(1100, 160);
+        await contributor.waitForFunction(
+            () =>
+                Math.abs(
+                    parseFloat(
+                        document
+                            .querySelector('.wb-universe')
+                            .style.getPropertyValue('--universe-x'),
+                    ),
+                ) > 0.1,
+        );
+        await capture(contributor, 'connected-pointer-desktop', 1440);
         assert.deepEqual(errors, []);
         console.log(
             'PASS real feed photo and save, method/response notifications, read/open actions, My topics and responsive community guide',

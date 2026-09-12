@@ -3,9 +3,16 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { PublicMember } from '@/types';
 
-export function WorkbineBrand() {
+export function WorkbineBrand({
+    onNavigate,
+}: { onNavigate?: () => void } = {}) {
     return (
-        <Link href="/" className="wb-wordmark" aria-label="Workbine home">
+        <Link
+            href="/"
+            className="wb-wordmark"
+            aria-label="Workbine home"
+            onClick={onNavigate}
+        >
             <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
                 <path
                     d="M3 7L9 25L16 9L23 25L29 7M5 16H27"

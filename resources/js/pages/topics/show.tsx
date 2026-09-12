@@ -10,6 +10,7 @@ import {
     Plus,
 } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
+import { LikeTopicButton } from '@/components/topic-card';
 import { CopyLinkButton } from '@/components/copy-link-button';
 import { PublicShell } from '@/components/public-shell';
 import { ReportLink } from '@/components/report-link';
@@ -89,6 +90,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                     path={`/topics/${topic.slug}`}
                                 />
                                 <ReportLink type="topic" id={topic.id} />
+                                <LikeTopicButton topic={topic} />
                                 <SaveTopicButton
                                     topicSlug={topic.slug}
                                     saved={saved}

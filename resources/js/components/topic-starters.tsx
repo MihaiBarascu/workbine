@@ -1,9 +1,18 @@
 import { ArrowRight } from 'lucide-react';
 
 const starters = [
-    { category: 'Learning', title: 'Making time to learn after work' },
-    { category: 'Side projects', title: 'Keeping a small project moving' },
-    { category: 'Everyday work', title: 'Making a weekly task take less time' },
+    {
+        category: 'AI in Practice',
+        title: 'Finding the first client for an AI service',
+    },
+    {
+        category: 'Automation & Agents',
+        title: 'Automating weekly reports for a client',
+    },
+    {
+        category: 'Freelancing & Services',
+        title: 'Pricing my first freelance project',
+    },
 ];
 
 type Props = {

@@ -7,6 +7,25 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Connected community discovery
+
+The updated discovery follows the owner’s globe reference: sidebar navigation,
+original generated artwork, pointer lighting/parallax, compact cards, and a
+hideable guide. Categories remain plain text beside titles. **Create topic** opens
+the form without publishing. Topics can have optional categories and tags when
+created or edited; filtering, recent-activity/most-saved views, reversible appreciations and public
+name/username search are implemented. Appreciations do not alter reputation.
+See [CONNECTED-DESIGN.md](CONNECTED-DESIGN.md) for precise semantics and the asset.
+
+The disposable local gate passed on application source `46f6f3e`: frontend build,
+formatting/lint, TypeScript, Pint, PHPStan, 332 tests / 3614 assertions on each of
+SQLite and PostgreSQL, 13 Python tests and complete browser flows. Desktop, tablet,
+mobile, dark appearance, photo cards and pointer/reduced-motion captures were
+reviewed. The final browser recovery-code selector was corrected before its flow
+ran; all tracked source file hashes matched the commit inside the test container.
+A subsequent category-count singular/plural copy fix received frontend checks
+and a fresh production build. No production fixture data was created.
+
 ## Community discovery and return visits
 
 Explore uses a compact welcome area, distinct contribution cards and an optional

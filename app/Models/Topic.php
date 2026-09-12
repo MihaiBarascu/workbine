@@ -13,6 +13,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
+ * @property string|null $category
+ * @property int|null $likes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TopicTag> $tags
  * @property string|null $hidden_at
  * @property-read MediaImage|null $coverImage
  * @property int $id
@@ -27,7 +30,7 @@ use Illuminate\Support\Collection;
  * @property-read User $user
  * @property-read Collection<int, Method> $methods
  */
-#[Fillable(['user_id', 'title', 'slug', 'description'])]
+#[Fillable(['user_id', 'title', 'slug', 'description', 'category'])]
 class Topic extends Model
 {
     /** @use HasFactory<TopicFactory> */
@@ -83,6 +86,18 @@ class Topic extends Model
                 ->where('media_images.pending_deletion', false)->orderBy('media_images.id')->limit(1),
             'cover_image_id'
         )->with('coverImage');
+    }
+
+    /** @return HasMany<TopicTag, $this> */
+    public function tags(): HasMany
+    {
+        return $this->hasMany(TopicTag::class)->orderBy('id');
+    }
+
+    /** @return HasMany<TopicLike, $this> */
+    public function likes(): HasMany
+    {
+        return $this->hasMany(TopicLike::class);
     }
 
     public function getRouteKeyName(): string

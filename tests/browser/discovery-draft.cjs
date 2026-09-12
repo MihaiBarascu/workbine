@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 async function exerciseDiscoveryDraft(page, root, output) {
     assert.equal(new URL(root).origin, 'http://127.0.0.1:8000');
     const ownTitle = 'Learning after work';
-    const idea = 'Making time to learn after work';
+    const idea = 'Finding the first client for an AI service';
     const writes = [];
     const recordRequest = (request) => {
         if (
@@ -188,7 +188,7 @@ async function exerciseDiscoveryDraft(page, root, output) {
         await page.getByRole('button', { name: 'Undo', exact: true }).click();
         await draftIs(ownTitle);
         await page
-            .getByRole('button', { name: 'Continue', exact: true })
+            .getByRole('button', { name: 'Create topic', exact: true })
             .click();
         await page.waitForURL(/\/topics\/create\?/);
         assert.equal(await page.locator('#title').inputValue(), ownTitle);

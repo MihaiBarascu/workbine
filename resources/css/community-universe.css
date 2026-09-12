@@ -1,0 +1,1185 @@
+/* Connected knowledge: atmospheric artwork, quiet reading surfaces, functional navigation. */
+.wb-cosmos-shell {
+    --community-sidebar: 224px;
+    position: relative;
+    isolation: isolate;
+    background: #f5f8fd;
+    padding-left: var(--community-sidebar);
+}
+.dark .wb-cosmos-shell {
+    background: #141c29;
+}
+.wb-universe {
+    position: absolute;
+    z-index: -1;
+    inset: 0 0 auto var(--community-sidebar);
+    height: min(850px, 75vw);
+    min-height: 550px;
+    overflow: hidden;
+    pointer-events: none;
+}
+.wb-universe > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    transform: translate3d(var(--universe-x, 0px), var(--universe-y, 0px), 0)
+        scale(1.025);
+}
+.wb-universe canvas,
+.wb-universe-fade {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.wb-universe-fade {
+    background: linear-gradient(
+        180deg,
+        rgb(242 247 255 / 8%) 0%,
+        rgb(245 248 253 / 8%) 38%,
+        #f5f8fd 94%
+    );
+}
+.dark .wb-universe img {
+    filter: brightness(0.55) saturate(0.85);
+}
+.dark .wb-universe-fade {
+    background: linear-gradient(
+        180deg,
+        rgb(20 28 41 / 15%),
+        rgb(20 28 41 / 20%) 35%,
+        #141c29 94%
+    );
+}
+.wb-community-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--community-sidebar);
+    z-index: 45;
+    padding: 24px 16px;
+    overflow-y: auto;
+    background: rgb(250 252 255 / 96%);
+    border-right: 1px solid rgb(221 230 241 / 60%);
+}
+.dark .wb-community-sidebar {
+    background: #192230;
+    border-color: #2e3b50;
+}
+.wb-sidebar-brand {
+    min-height: 42px;
+    margin: 0 12px 31px;
+}
+.wb-sidebar-brand .wb-wordmark {
+    font-size: 26px;
+    gap: 8px;
+}
+.wb-community-sidebar nav {
+    display: grid;
+    gap: 5px;
+}
+.wb-community-sidebar nav a {
+    display: flex;
+    align-items: center;
+    min-height: 43px;
+    padding: 9px 13px;
+    gap: 14px;
+    border-radius: 9px;
+    color: #526784;
+    font-size: 13px;
+    transition:
+        background 150ms ease,
+        color 150ms ease;
+}
+.dark .wb-community-sidebar nav a {
+    color: #b4c2d7;
+}
+.wb-community-sidebar nav a:hover,
+.wb-community-sidebar nav a[aria-current='page'] {
+    background: #e8f0ff;
+    color: #2455d9;
+}
+.dark .wb-community-sidebar nav a:hover,
+.dark .wb-community-sidebar nav a[aria-current='page'] {
+    background: #283c5f;
+    color: #c0d2ff;
+}
+.wb-community-sidebar nav svg {
+    width: 19px;
+    height: 19px;
+    stroke-width: 1.6;
+    flex-shrink: 0;
+}
+.wb-sidebar-label {
+    margin: 32px 16px 12px;
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--muted-foreground);
+    font-weight: 600;
+}
+.wb-sidebar-count {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--primary);
+}
+.wb-sidebar-invite {
+    margin-top: 28px;
+    padding: 20px 16px 16px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e9f1ff, #f3f8fc);
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    gap: 10px;
+}
+.dark .wb-sidebar-invite {
+    background: #22324a;
+}
+.wb-sidebar-invite > svg {
+    width: 31px;
+    height: 37px;
+    color: #557662;
+}
+.wb-sidebar-invite strong {
+    font-size: 14px;
+    line-height: 1.5;
+}
+.wb-sidebar-invite p {
+    grid-column: 1 / -1;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.7;
+}
+.wb-sidebar-invite a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    grid-column: 1 / -1;
+    min-height: 42px;
+    background: #1e2b3d;
+    color: white;
+    border-radius: 8px;
+    margin-top: 4px;
+    font-size: 12px;
+}
+.wb-sidebar-invite a svg {
+    width: 15px;
+    height: 15px;
+}
+.wb-cosmos-shell .wb-topbar {
+    background: rgb(248 251 255 / 65%);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgb(230 238 250 / 35%);
+}
+.dark .wb-cosmos-shell .wb-topbar {
+    background: rgb(20 28 41 / 78%);
+    border-color: #27354b;
+}
+.wb-cosmos-shell .wb-topbar-inner {
+    min-height: 76px;
+    padding: 14px 30px;
+    max-width: none;
+}
+.wb-cosmos-shell .wb-brand-group,
+.wb-cosmos-shell .wb-main-nav > .wb-community-link,
+.wb-cosmos-shell .wb-personal-link,
+.wb-cosmos-shell .wb-main-nav .wb-start-button {
+    display: none;
+}
+.wb-cosmos-shell .wb-main-nav {
+    margin-left: auto;
+    gap: 18px;
+}
+.wb-universe-search {
+    min-width: 0;
+    width: min(540px, 70%);
+}
+.wb-cosmos-shell .wb-search {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    min-height: 42px;
+    box-shadow: 0 2px 8px rgb(59 86 126 / 3%);
+    background: rgb(255 255 255 / 87%);
+    border-color: #d4dfed;
+}
+.dark .wb-cosmos-shell .wb-search {
+    background: #1e2c41;
+    border-color: #40536e;
+}
+.wb-cosmos-shell .wb-search input {
+    font-size: 13px;
+    min-width: 0;
+}
+.wb-search select {
+    font-size: 11px;
+    max-width: 74px;
+    padding: 4px;
+    color: var(--muted-foreground);
+    background: transparent;
+    border-left: 1px solid var(--border);
+}
+.wb-search select option {
+    background: var(--card);
+    color: var(--foreground);
+}
+.wb-navigation-toggle,
+.wb-sidebar-close,
+.wb-sidebar-shade {
+    display: none;
+}
+.wb-cosmos-shell .wb-notebook {
+    max-width: 1720px;
+    width: 100%;
+    padding: 26px 30px 60px;
+}
+.wb-cosmos-shell .wb-discovery .wb-notebook-masthead {
+    position: relative;
+    min-height: 166px;
+    margin: 0 0 18px;
+    padding: 17px 0 24px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    display: flex;
+    align-items: flex-start;
+}
+.wb-cosmos-shell .wb-notebook-masthead > div:first-child {
+    position: relative;
+    z-index: 2;
+    max-width: 63%;
+}
+.wb-cosmos-shell .wb-discovery .wb-notebook-masthead h1 {
+    font-size: clamp(30px, 3vw, 46px);
+    font-weight: 650;
+    letter-spacing: -0.045em;
+    line-height: 1.13;
+}
+.wb-cosmos-shell .wb-discovery .wb-notebook-masthead .wb-welcome-kicker {
+    color: #506888;
+    margin-bottom: 13px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+}
+.dark .wb-cosmos-shell .wb-discovery .wb-notebook-masthead .wb-welcome-kicker {
+    color: #b2c8eb;
+}
+.wb-cosmos-shell .wb-notebook-masthead p {
+    font-size: 20px;
+    color: #57708f;
+    margin-top: 12px;
+}
+.dark .wb-cosmos-shell .wb-notebook-masthead p {
+    color: #c2d3ea;
+}
+.wb-globe-links {
+    position: absolute;
+    top: -5px;
+    right: 2%;
+    width: 31%;
+    height: 145px;
+}
+.wb-globe-links a {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 15px;
+    border-radius: 28px;
+    border: 1px solid rgb(255 255 255 / 85%);
+    background: rgb(255 255 255 / 80%);
+    box-shadow: 0 6px 24px rgb(37 75 121 / 10%);
+    font-size: 12px;
+    color: #22344b;
+    backdrop-filter: blur(8px);
+    transition:
+        transform 180ms ease,
+        box-shadow 180ms ease;
+}
+.wb-globe-links a:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgb(37 75 121 / 20%);
+}
+.wb-globe-links a:nth-child(1) {
+    left: 0;
+    top: 0;
+}
+.wb-globe-links a:nth-child(2) {
+    right: 0;
+    top: 28px;
+}
+.wb-globe-links a:nth-child(3) {
+    left: 6%;
+    top: 78px;
+}
+.wb-globe-links svg {
+    width: 16px;
+    height: 16px;
+    color: #3562bc;
+}
+.wb-globe-links > span {
+    position: absolute;
+    right: 0;
+    bottom: -5px;
+    font-size: 12px;
+    color: #ffffff;
+    text-shadow: 0 1px 5px #243d59;
+    line-height: 1.4;
+}
+.dark .wb-globe-links > span {
+    color: #d0e1fc;
+}
+.wb-cosmos-shell .wb-discovery .wb-layout {
+    grid-template-columns: minmax(0, 1fr) 288px;
+    gap: 20px;
+}
+.wb-cosmos-shell .wb-compose {
+    padding: 19px 21px 16px;
+    background: rgb(255 255 255 / 91%);
+    border-color: #e3eaf5;
+    box-shadow: 0 3px 14px rgb(48 75 112 / 4%);
+}
+.dark .wb-cosmos-shell .wb-compose {
+    background: rgb(29 40 57 / 96%);
+    border-color: #34445e;
+}
+.wb-cosmos-shell .wb-compose-heading {
+    margin-bottom: 12px;
+}
+.wb-cosmos-shell .wb-compose-heading label {
+    font-size: 14px;
+    font-weight: 550;
+}
+.wb-cosmos-shell .wb-compose-row {
+    gap: 9px;
+}
+.wb-cosmos-shell .wb-compose-row input {
+    min-height: 42px;
+    font-size: 13px;
+    background: rgb(248 250 255 / 70%);
+    padding: 10px 13px;
+}
+.dark .wb-cosmos-shell .wb-compose-row input {
+    background: #192437;
+}
+.wb-cosmos-shell .wb-compose-row button {
+    min-height: 42px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 550;
+    background: #1e2b3d;
+    color: white;
+    white-space: nowrap;
+}
+.wb-cosmos-shell .wb-compose-row button:hover {
+    background: #304966;
+}
+.wb-cosmos-shell .wb-compose > p {
+    font-size: 11px;
+    margin-top: 9px;
+    line-height: 1.7;
+}
+.wb-cosmos-shell .wb-feed-toolbar {
+    border: 0;
+    margin-top: 22px;
+    gap: 8px;
+    align-items: center;
+}
+.wb-cosmos-shell .wb-feed-nav {
+    gap: 7px;
+    flex-wrap: wrap;
+}
+.wb-cosmos-shell .wb-feed-nav a {
+    border: 1px solid #dfe7f2;
+    background: rgb(255 255 255 / 75%);
+    border-radius: 9px;
+    padding: 9px 11px;
+    min-height: 40px;
+    font-size: 11px;
+    font-weight: 500;
+    gap: 7px;
+}
+.wb-cosmos-shell .wb-feed-nav a::after {
+    display: none;
+}
+.wb-cosmos-shell .wb-feed-nav a[aria-current='page'] {
+    background: #1e2b3d;
+    border-color: #1e2b3d;
+    color: white;
+}
+.dark .wb-cosmos-shell .wb-feed-nav a {
+    background: #24344b;
+    border-color: #40516b;
+    color: #d7e4f6;
+}
+.dark .wb-cosmos-shell .wb-feed-nav a[aria-current='page'] {
+    background: #aec8fa;
+    color: #142238;
+}
+.wb-cosmos-shell .wb-topic-count {
+    font-size: 11px;
+}
+.wb-discovery-filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 14px;
+}
+.wb-discovery-filters select {
+    min-height: 36px;
+    max-width: 180px;
+    padding: 7px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    font-size: 11px;
+}
+.wb-discovery-filters button,
+.wb-filter-context {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--primary);
+    min-height: 36px;
+}
+.wb-ranking-note {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    margin: 4px 0 14px;
+}
+.wb-cosmos-shell .wb-discovery .wb-entry-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+.wb-cosmos-shell .wb-discovery .wb-topic-card {
+    padding: 13px 14px 9px;
+    border-color: #e4ebf5;
+    box-shadow: 0 3px 15px rgb(30 65 110 / 3%);
+    min-width: 0;
+    transition:
+        border-color 180ms ease,
+        box-shadow 180ms ease,
+        transform 180ms ease;
+    display: flex;
+    flex-direction: column;
+}
+.wb-cosmos-shell .wb-topic-card:hover {
+    border-color: #c5d5ec;
+    box-shadow: 0 8px 25px rgb(40 76 126 / 9%);
+    transform: translateY(-2px);
+}
+.dark .wb-cosmos-shell .wb-discovery .wb-topic-card {
+    background: #1e293b;
+    border-color: #34445e;
+}
+.wb-card-content {
+    display: flex;
+    gap: 13px;
+    align-items: flex-start;
+    flex: 1;
+}
+.wb-cosmos-shell .wb-entry-photo {
+    flex: 0 0 108px;
+}
+.wb-cosmos-shell .wb-entry-photo img {
+    width: 108px;
+    height: 135px;
+    border-radius: 7px;
+    object-fit: cover;
+}
+.wb-card-copy {
+    min-width: 0;
+    flex: 1;
+}
+.wb-card-category {
+    display: inline-block;
+    color: #577699;
+    font-size: 10px;
+    margin: 0 0 6px;
+    font-weight: 550;
+}
+.dark .wb-card-category {
+    color: #b6c8e5;
+}
+.wb-card-category:hover,
+.wb-card-tags a:hover {
+    text-decoration: underline;
+}
+.wb-cosmos-shell .wb-discovery .wb-topic-card h3 {
+    font-size: 15px;
+    line-height: 1.45;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+}
+.wb-cosmos-shell .wb-topic-card .wb-entry-description {
+    font-size: 11px;
+    line-height: 1.8;
+    margin-top: 9px;
+    -webkit-line-clamp: 3;
+}
+.wb-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 9px;
+    margin-top: 8px;
+}
+.wb-card-tags a {
+    font-size: 10px;
+    color: var(--muted-foreground);
+    overflow-wrap: anywhere;
+}
+.wb-card-author {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    margin-top: 13px;
+    font-size: 10px;
+    color: var(--muted-foreground);
+}
+.wb-card-author .wb-member-link {
+    font-size: 11px;
+    gap: 7px;
+    min-width: 0;
+}
+.wb-card-author .wb-avatar {
+    width: 23px;
+    height: 23px;
+    font-size: 8px;
+}
+.wb-card-author time::before {
+    content: '·';
+    margin-right: 7px;
+}
+.wb-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+    border-top: 1px solid var(--border);
+    padding-top: 3px;
+}
+.wb-topic-appreciation,
+.wb-card-methods,
+.wb-card-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 38px;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted-foreground);
+}
+button.wb-topic-appreciation,
+.wb-card-more {
+    cursor: pointer;
+}
+.wb-topic-appreciation.is-liked {
+    color: #d04b69;
+}
+.wb-topic-appreciation svg,
+.wb-card-methods svg,
+.wb-card-more svg {
+    width: 16px;
+    height: 16px;
+}
+.wb-card-first-method {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--primary);
+    margin-right: auto;
+}
+.wb-card-first-method svg {
+    width: 12px;
+    height: 12px;
+}
+.wb-card-actions .wb-save-compact {
+    margin-left: auto;
+    border: 0;
+    padding: 7px;
+    min-width: 34px;
+    height: 38px;
+    box-shadow: none;
+    background: transparent;
+    color: var(--muted-foreground);
+}
+.wb-save-compact[aria-pressed='true'] {
+    color: var(--primary);
+}
+.wb-cosmos-shell .wb-discovery .wb-margin {
+    background: none;
+    border: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.wb-connected-guide,
+.wb-category-overview,
+.wb-cosmos-shell .wb-starters {
+    position: relative;
+    padding: 23px 21px;
+    background: rgb(255 255 255 / 93%);
+    border: 1px solid rgb(255 255 255 / 90%);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgb(53 88 130 / 4%);
+}
+.dark .wb-connected-guide,
+.dark .wb-category-overview,
+.dark .wb-cosmos-shell .wb-starters {
+    background: #1e293b;
+    border-color: #34445e;
+}
+.wb-guide-close {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: var(--muted-foreground);
+    cursor: pointer;
+}
+.wb-guide-close:hover {
+    background: var(--accent);
+}
+.wb-guide-close svg {
+    width: 16px;
+    height: 16px;
+}
+.wb-cosmos-shell .wb-kicker {
+    font-size: 9px;
+}
+.wb-cosmos-shell .wb-discovery .wb-guide-heading {
+    font-size: 23px;
+    line-height: 1.35;
+    margin-top: 14px;
+}
+.wb-cosmos-shell .wb-guide-list {
+    gap: 22px;
+    margin-top: 25px;
+}
+.wb-cosmos-shell .wb-discovery .wb-guide-list li {
+    grid-template-columns: 20px 1fr;
+    gap: 12px;
+}
+.wb-cosmos-shell .wb-discovery .wb-guide-list li > span {
+    background: none;
+    width: 20px;
+    height: 24px;
+    color: #69809f;
+    font-size: 11px;
+    font-weight: 500;
+}
+.wb-cosmos-shell .wb-guide-list strong {
+    font-size: 12px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+.wb-cosmos-shell .wb-guide-list p {
+    font-size: 11px;
+    line-height: 1.8;
+    margin-top: 7px;
+}
+.wb-cosmos-shell .wb-worked-example {
+    margin-top: 18px;
+    padding-top: 16px;
+}
+.wb-cosmos-shell .wb-worked-example summary {
+    font-size: 12px;
+}
+.wb-cosmos-shell .wb-guide-link {
+    font-size: 11px;
+    margin-top: 2px;
+}
+.wb-cosmos-shell .wb-discovery .wb-starters {
+    margin: 0;
+    padding: 20px;
+    order: 3;
+}
+.wb-cosmos-shell .wb-starters h3 {
+    font-size: 13px;
+}
+.wb-cosmos-shell .wb-starter-category {
+    font-size: 10px;
+}
+.wb-cosmos-shell .wb-starter-title {
+    font-size: 12px;
+}
+.wb-cosmos-shell .wb-starter-options button {
+    padding: 11px 13px;
+    min-height: 56px;
+}
+.wb-category-overview h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+.wb-category-overview h2 svg {
+    width: 17px;
+    height: 17px;
+    color: #dc684c;
+}
+.wb-category-overview > p {
+    font-size: 11px;
+    color: var(--muted-foreground);
+    margin: 8px 0 12px;
+}
+.wb-category-overview > a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 34px;
+    font-size: 11px;
+    color: #536d8b;
+}
+.dark .wb-category-overview > a {
+    color: #b4c7e1;
+}
+.wb-category-overview > a > span:nth-child(2) {
+    font-size: 10px;
+    margin-left: auto;
+    color: var(--muted-foreground);
+}
+.wb-category-overview > a svg {
+    margin-left: auto;
+    width: 12px;
+    height: 12px;
+}
+.wb-cosmos-shell .wb-first-topic {
+    padding: 27px;
+    background: rgb(255 255 255 / 95%);
+}
+.dark .wb-cosmos-shell .wb-first-topic {
+    background: #1e293b;
+}
+.wb-cosmos-shell .wb-first-topic h3 {
+    font-size: 22px;
+    max-width: 24ch;
+}
+.wb-cosmos-shell .wb-first-topic > p {
+    font-size: 13px;
+    max-width: 62ch;
+    line-height: 1.8;
+}
+.wb-cosmos-shell .wb-first-topic .wb-topic-starters {
+    max-width: none;
+}
+.wb-cosmos-shell .wb-first-topic .wb-starter-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.wb-cosmos-shell .wb-first-topic .wb-starter-options button {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+    background: #f7faff;
+    min-height: 115px;
+}
+.dark .wb-cosmos-shell .wb-first-topic .wb-starter-options button {
+    background: #253550;
+}
+.wb-cosmos-shell .wb-empty-icon {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 16px;
+    color: #5b79a5;
+}
+.wb-cosmos-shell .wb-footer {
+    position: relative;
+    border-color: rgb(204 218 239 / 55%);
+}
+.wb-cosmos-shell .wb-footer-inner {
+    padding-inline: 30px;
+}
+.wb-category-select {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 12px;
+    border: 1px solid var(--input);
+    border-radius: 6px;
+    background: var(--background);
+    font-size: 14px;
+}
+.wb-people-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 13px;
+}
+.wb-people-results > .wb-ranking-note,
+.wb-people-results > .wb-empty,
+.wb-people-results > nav {
+    grid-column: 1 / -1;
+}
+.wb-person-card {
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+}
+.wb-person-card p,
+.wb-person-card > span {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    display: block;
+    margin-top: 10px;
+}
+.wb-person-card > a:last-child {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-size: 12px;
+    margin-top: 18px;
+}
+.wb-person-card > a svg {
+    width: 14px;
+    height: 14px;
+}
+@media (min-width: 1750px) {
+    .wb-cosmos-shell {
+        --community-sidebar: 244px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 24px;
+    }
+    .wb-cosmos-shell .wb-entry-photo {
+        flex-basis: 135px;
+    }
+    .wb-cosmos-shell .wb-entry-photo img {
+        width: 135px;
+        height: 145px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-topic-card h3 {
+        font-size: 17px;
+    }
+    .wb-cosmos-shell .wb-topic-card .wb-entry-description {
+        font-size: 12px;
+    }
+}
+@media (max-width: 1300px) {
+    .wb-cosmos-shell {
+        --community-sidebar: 200px;
+    }
+    .wb-cosmos-shell .wb-notebook {
+        padding-inline: 22px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-layout {
+        grid-template-columns: minmax(0, 1fr) 250px;
+        gap: 16px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-entry-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-globe-links {
+        width: 32%;
+    }
+    .wb-globe-links > span {
+        display: none;
+    }
+    .wb-sidebar-brand {
+        margin-inline: 7px;
+    }
+    .wb-sidebar-brand .wb-wordmark {
+        font-size: 23px;
+    }
+    .wb-community-sidebar {
+        padding-inline: 12px;
+    }
+    .wb-community-sidebar nav a {
+        font-size: 12px;
+        gap: 10px;
+    }
+}
+@media (max-width: 1050px) {
+    .wb-cosmos-shell .wb-brand-group {
+        display: flex;
+    }
+    .wb-cosmos-shell .wb-brand-group .wb-explore-link {
+        display: none;
+    }
+    .wb-cosmos-shell {
+        padding-left: 0;
+    }
+    .wb-universe {
+        left: 0;
+        height: 700px;
+    }
+    .wb-community-sidebar {
+        display: none;
+        width: 240px;
+        box-shadow: 15px 0 50px rgb(20 40 70 / 18%);
+    }
+    .wb-community-sidebar.is-open {
+        display: block;
+    }
+    .wb-sidebar-shade {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 44;
+        background: rgb(15 28 48 / 35%);
+    }
+    .wb-sidebar-close {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        top: 27px;
+        right: 12px;
+    }
+    .wb-sidebar-close svg {
+        width: 17px;
+    }
+    .wb-navigation-toggle {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+    .wb-cosmos-shell .wb-topbar-inner {
+        padding-inline: 18px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .wb-cosmos-shell .wb-universe-search {
+        max-width: none;
+        width: 100%;
+        order: 5;
+    }
+    .wb-cosmos-shell .wb-notebook {
+        padding-top: 25px;
+    }
+}
+@media (max-width: 760px) {
+    .wb-cosmos-shell .wb-topbar-inner {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 10px 14px 12px;
+    }
+    .wb-cosmos-shell .wb-brand-group {
+        display: flex;
+        margin-right: auto;
+    }
+    .wb-cosmos-shell .wb-wordmark {
+        font-size: 23px;
+    }
+    .wb-cosmos-shell .wb-main-nav {
+        gap: 7px;
+        margin: 0;
+    }
+    .wb-cosmos-shell .wb-main-nav > a {
+        font-size: 12px;
+    }
+    .wb-cosmos-shell .wb-universe-search {
+        order: 5;
+        width: 100%;
+        max-width: none;
+    }
+    .wb-cosmos-shell .wb-search {
+        min-height: 39px;
+    }
+    .wb-cosmos-shell .wb-search input {
+        font-size: 16px;
+    }
+    .wb-cosmos-shell .wb-search button {
+        padding-inline: 8px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-cosmos-shell .wb-notebook {
+        padding: 18px 16px 40px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-notebook-masthead {
+        min-height: 160px;
+        padding: 14px 0;
+    }
+    .wb-cosmos-shell .wb-notebook-masthead > div:first-child {
+        max-width: 70%;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-notebook-masthead h1 {
+        font-size: 33px;
+        max-width: 16ch;
+    }
+    .wb-cosmos-shell .wb-notebook-masthead p {
+        font-size: 15px;
+        max-width: 26ch;
+    }
+    .wb-globe-links {
+        right: 0;
+        top: 25px;
+        height: 110px;
+        width: 26%;
+    }
+    .wb-globe-links a {
+        font-size: 10px;
+        padding: 7px 10px;
+        gap: 4px;
+    }
+    .wb-globe-links a:nth-child(1) {
+        left: auto;
+        right: 0;
+    }
+    .wb-globe-links a:nth-child(2) {
+        top: 48px;
+    }
+    .wb-globe-links a:nth-child(3) {
+        display: none;
+    }
+    .wb-globe-links svg {
+        width: 13px;
+        height: 13px;
+    }
+    .wb-cosmos-shell .wb-compose {
+        padding: 16px;
+    }
+    .wb-cosmos-shell .wb-compose-heading label {
+        font-size: 13px;
+    }
+    .wb-cosmos-shell .wb-compose-row input {
+        font-size: 16px;
+    }
+    .wb-cosmos-shell .wb-compose-row button {
+        width: 100%;
+        font-size: 13px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-entry-list {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-cosmos-shell .wb-discovery .wb-topic-card h3 {
+        font-size: 17px;
+    }
+    .wb-cosmos-shell .wb-topic-card .wb-entry-description {
+        font-size: 12px;
+    }
+    .wb-cosmos-shell .wb-entry-photo {
+        flex-basis: 100px;
+    }
+    .wb-cosmos-shell .wb-entry-photo img {
+        width: 100px;
+        height: 122px;
+    }
+    .wb-cosmos-shell .wb-first-topic {
+        padding: 22px;
+    }
+    .wb-cosmos-shell .wb-first-topic .wb-starter-options {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-cosmos-shell .wb-first-topic .wb-starter-options button {
+        min-height: 65px;
+        flex-direction: row;
+    }
+    .wb-cosmos-shell .wb-feed-nav {
+        gap: 6px;
+    }
+    .wb-cosmos-shell .wb-feed-nav a {
+        font-size: 10px;
+        min-height: 40px;
+        padding: 8px;
+    }
+    .wb-cosmos-shell .wb-feed-nav svg {
+        width: 13px;
+        height: 13px;
+    }
+    .wb-cosmos-shell .wb-topic-count {
+        display: none;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-margin {
+        margin-top: 4px;
+    }
+    .wb-cosmos-shell .wb-footer-inner {
+        padding-inline: 18px;
+    }
+    .wb-people-results {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .wb-topic-appreciation,
+    .wb-card-methods,
+    .wb-card-more,
+    .wb-card-actions .wb-save-compact {
+        min-height: 44px;
+        min-width: 36px;
+    }
+}
+@media (max-width: 380px) {
+    .wb-cosmos-shell .wb-brand-group {
+        max-width: 118px;
+    }
+    .wb-cosmos-shell .wb-wordmark {
+        font-size: 20px;
+        gap: 5px;
+    }
+    .wb-cosmos-shell .wb-wordmark svg {
+        width: 20px;
+    }
+    .wb-cosmos-shell .wb-main-nav {
+        gap: 5px;
+    }
+    .wb-cosmos-shell .wb-main-nav [data-slot='button'] {
+        padding-inline: 8px;
+        font-size: 10px;
+    }
+    .wb-cosmos-shell .wb-discovery .wb-notebook-masthead h1 {
+        font-size: 28px;
+    }
+    .wb-cosmos-shell .wb-entry-photo {
+        flex-basis: 82px;
+    }
+    .wb-cosmos-shell .wb-entry-photo img {
+        width: 82px;
+        height: 110px;
+    }
+    .wb-card-first-method {
+        max-width: 78px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wb-universe > img,
+    .wb-cosmos-shell .wb-topic-card,
+    .wb-globe-links a {
+        transition: none;
+        transform: none;
+    }
+    .wb-universe canvas {
+        display: none;
+    }
+}
+.wb-card-options {
+    position: relative;
+}
+.wb-card-options > summary {
+    list-style: none;
+}
+.wb-card-options > summary::-webkit-details-marker {
+    display: none;
+}
+.wb-card-options-panel {
+    position: absolute;
+    right: 0;
+    top: 40px;
+    z-index: 20;
+    width: 240px;
+    padding: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 35px rgb(25 45 75 / 15%);
+}
