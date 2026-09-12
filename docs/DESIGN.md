@@ -1,6 +1,16 @@
 # Workbine interface direction
 
-## Latest owner decision - 2026-09-11
+## Current owner decision — 2026-09-12
+
+The latest owner reference explicitly requests a left navigation rail, a luminous
+earth/network backdrop, pointer-responsive light and compact cards. This replaces
+the earlier restrictions on decorative backgrounds and left navigation below.
+Categories must stay off photos. The creation action is **Create topic**, distinct
+from search. See [CONNECTED-DESIGN.md](CONNECTED-DESIGN.md) for the asset, visual
+system, interactions and actual discovery controls. Existing account security,
+public/private boundaries and honest empty states remain required.
+
+## Earlier owner decision - 2026-09-11
 
 The owner explicitly rejected the green/olive/teal palette and requested a much lighter, cleaner interface. This supersedes the previous notebook palette. Use white surfaces, a nearly white neutral canvas, graphite text and a restrained blue accent. Do not reintroduce forest green, terracotta, tinted page backgrounds, decorative gradients or large marketing-hero statements.
 

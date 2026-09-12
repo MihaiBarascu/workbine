@@ -4,16 +4,19 @@ import { useState } from 'react';
 import { FormErrorSummary } from '@/components/form-error-summary';
 import InputError from '@/components/input-error';
 import { MethodFields } from '@/components/method-fields';
+import { TopicClassification } from '@/components/topic-classification';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 
-type Props = { initialTitle: string };
+type Props = { initialTitle: string; categories: Record<string, string> };
 
 const fieldLabels = {
     title: 'Topic title',
+    category: 'Category',
+    tags: 'Tags',
     description: 'A little context',
     include_method: 'Add my method too',
     method_title: 'Method title',
@@ -21,7 +24,7 @@ const fieldLabels = {
     method_source_url: 'Source link',
 };
 
-export default function TopicCreate({ initialTitle }: Props) {
+export default function TopicCreate({ initialTitle, categories }: Props) {
     const [includeMethod, setIncludeMethod] = useState(false);
     const [errorAttempt, setErrorAttempt] = useState(0);
 
@@ -75,7 +78,7 @@ export default function TopicCreate({ initialTitle }: Props) {
                                             ? 'title-hint title-error'
                                             : 'title-hint'
                                     }
-                                    placeholder="For example: Making time to learn after work"
+                                    placeholder="For example: Finding the first client for an AI service"
                                 />
                                 <p
                                     id="title-hint"
@@ -125,6 +128,10 @@ export default function TopicCreate({ initialTitle }: Props) {
                                 />
                             </div>
 
+                            <TopicClassification
+                                categories={categories}
+                                errors={errors}
+                            />
                             <section
                                 className="space-y-5"
                                 aria-labelledby="first-method-heading"

@@ -75,7 +75,17 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
                 width,
             );
         }
-        if (width >= 768) {
+        if (feed && width >= 768 && width <= 1050) {
+            await page
+                .getByRole('button', { name: 'Open navigation', exact: true })
+                .click();
+            await assertReachable(
+                page.getByRole('link', { name: 'Explore', exact: true }),
+                `${name}: drawer Explore`,
+                width,
+            );
+            await page.keyboard.press('Escape');
+        } else if (width >= 768) {
             await assertReachable(
                 page.getByRole('link', { name: 'Explore', exact: true }),
                 `${name}: Explore`,
@@ -87,8 +97,8 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             if (width >= 1440) {
                 const bounds = await page.locator('#topics').boundingBox();
                 assert.ok(
-                    bounds && bounds.width >= 900,
-                    `${name}: desktop feed must use at least 900px of available width (actual ${bounds?.width}px)`,
+                    bounds && bounds.width >= 620,
+                    `${name}: desktop feed must use at least 620px of available width (actual ${bounds?.width}px)`,
                 );
             }
             for (const row of await page.locator('main article').all()) {
@@ -109,6 +119,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
                     `${name}: author links use public usernames`,
                 );
                 for (const link of await row.getByRole('link').all()) {
+                    if (!(await link.isVisible())) continue;
                     await assertReachable(
                         link,
                         `${name}: topic row link ${await link.innerText()}`,

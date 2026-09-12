@@ -5,7 +5,7 @@ const { exerciseDiscoveryDraft } = require('./discovery-draft.cjs');
 async function exerciseTopicClarity(page, root, output) {
     assert.equal(new URL(root).origin, 'http://127.0.0.1:8000');
     await exerciseDiscoveryDraft(page, root, output);
-    const idea = 'Making time to learn after work';
+    const idea = 'Finding the first client for an AI service';
     const ownTitle = 'My own topic title, before choosing an idea';
 
     async function layoutFits() {
@@ -64,7 +64,9 @@ async function exerciseTopicClarity(page, root, output) {
         .getByText('Illustration only, not a community post.', { exact: true })
         .waitFor();
     await layoutFits();
-    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page
+        .getByRole('button', { name: 'Create topic', exact: true })
+        .click();
     await page.waitForURL(/\/topics\/create\?/);
     assert.equal(
         await page.locator('#title').inputValue(),

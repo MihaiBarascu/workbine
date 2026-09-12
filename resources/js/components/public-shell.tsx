@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
+    Menu,
     Bookmark,
     Bell,
     BookOpen,
@@ -9,7 +10,9 @@ import {
     Settings,
     UserRound,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { CommunityUniverse } from '@/components/community-universe';
+import { CommunitySidebar } from '@/components/community-sidebar';
 import { MemberAvatar, WorkbineBrand } from '@/components/community';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,10 +26,18 @@ import type { User } from '@/types';
 import '../../css/workbine.css';
 import '../../css/community-clarity.css';
 import '../../css/community-launch.css';
+import '../../css/community-universe.css';
 
-type Props = { children: ReactNode };
+type Props = {
+    children: ReactNode;
+    discovery?: {
+        categories: Record<string, string>;
+        category: string;
+        search: ReactNode;
+    };
+};
 
-export function PublicShell({ children }: Props) {
+export function PublicShell({ children, discovery }: Props) {
     const {
         props: { auth, canModerate, unreadNotifications },
         url,
@@ -35,15 +46,83 @@ export function PublicShell({ children }: Props) {
         canModerate: boolean;
         unreadNotifications: number;
     }>();
+    const [navigationOpen, setNavigationOpen] = useState(false);
+    useEffect(() => {
+        if (!navigationOpen) return;
+        const menu = document.getElementById('community-navigation');
+        const previousFocus =
+            document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const focusable = () =>
+            Array.from(
+                menu?.querySelectorAll<HTMLElement>('a[href], button') ?? [],
+            ).filter((element) => element.offsetParent !== null);
+        focusable()[0]?.focus();
+        const close = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') setNavigationOpen(false);
+            if (event.key === 'Tab') {
+                const items = focusable();
+                const first = items[0];
+                const last = items.at(-1);
+                if (event.shiftKey && document.activeElement === first) {
+                    event.preventDefault();
+                    last?.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                    event.preventDefault();
+                    first?.focus();
+                }
+            }
+        };
+        const desktop = window.matchMedia('(min-width: 1051px)');
+        const resized = () => {
+            if (desktop.matches) setNavigationOpen(false);
+        };
+        desktop.addEventListener('change', resized);
+        window.addEventListener('keydown', close);
+        return () => {
+            window.removeEventListener('keydown', close);
+            desktop.removeEventListener('change', resized);
+            document.body.style.overflow = previousOverflow;
+            previousFocus?.focus();
+        };
+    }, [navigationOpen]);
     const composingTopic = url.split('?')[0] === '/topics/create';
 
     return (
-        <div className="wb-public flex min-h-screen flex-col">
+        <div
+            className={`wb-public flex min-h-screen flex-col ${discovery ? 'wb-cosmos-shell' : ''}`}
+        >
             <a href="#main-content" className="wb-skip">
                 Skip to content
             </a>
+            {discovery && (
+                <>
+                    <CommunityUniverse />
+                    <CommunitySidebar
+                        categories={discovery.categories}
+                        category={discovery.category}
+                        open={navigationOpen}
+                        onClose={() => setNavigationOpen(false)}
+                    />
+                </>
+            )}
+
             <header className="wb-topbar">
                 <div className="wb-topbar-inner">
+                    {discovery && (
+                        <button
+                            className="wb-navigation-toggle"
+                            aria-label="Open navigation"
+                            aria-expanded={navigationOpen}
+                            aria-controls="community-navigation"
+                            onClick={() => setNavigationOpen(!navigationOpen)}
+                        >
+                            <Menu />
+                        </button>
+                    )}
                     <div className="wb-brand-group">
                         <WorkbineBrand />
                         <Link
@@ -58,6 +137,11 @@ export function PublicShell({ children }: Props) {
                             Explore
                         </Link>
                     </div>
+                    {discovery && (
+                        <div className="wb-universe-search">
+                            {discovery.search}
+                        </div>
+                    )}
                     <nav aria-label="Main navigation" className="wb-main-nav">
                         <Link
                             href="/community/guide"

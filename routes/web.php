@@ -7,6 +7,7 @@ use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MethodController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\TopicLikeController;
 use App\Http\Middleware\ThrottleImageUploads;
 use Illuminate\Support\Facades\Route;
 use Inertia\Middleware\EncryptHistory;
@@ -60,3 +61,8 @@ require __DIR__.'/saved.php';
 require __DIR__.'/reports.php';
 
 require __DIR__.'/moderation.php';
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::put('topics/{topic}/like', [TopicLikeController::class, 'store'])->middleware('throttle:60,1')->name('topics.like');
+    Route::delete('topics/{topic}/like', [TopicLikeController::class, 'destroy'])->middleware('throttle:60,1')->name('topics.unlike');
+});

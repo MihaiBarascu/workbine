@@ -27,6 +27,10 @@ export type TopicSummary = {
     updated_at: string | null;
     methods_count: number;
     saves_count: number;
+    category?: string | null;
+    tags?: string[];
+    likes_count?: number;
+    liked?: boolean;
     saved?: boolean;
     cover_image?: SharedImage | null;
     user: PublicMember;

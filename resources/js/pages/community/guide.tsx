@@ -13,9 +13,9 @@ export default function CommunityGuide() {
                     Something you’ve learned could help someone else.
                 </h1>
                 <p className="text-muted-foreground mt-5 text-lg leading-8">
-                    You don’t need to be an expert. Start with something you
-                    want to do, share a way that helped you, or tell someone
-                    what happened when you tried theirs.
+                    Share practical ways to earn through useful work: AI,
+                    services, products and businesses. Explain what you did,
+                    what it cost, and what actually happened.
                 </p>
                 <div className="my-8 flex flex-wrap gap-3">
                     <Button asChild>
@@ -73,17 +73,30 @@ export default function CommunityGuide() {
                         A simple example · illustration only
                     </p>
                     <h2 className="mt-3 text-xl font-semibold">
-                        Making time to learn after work
+                        Finding the first client for an AI service
                     </h2>
                     <p className="mt-4 leading-7">
-                        <strong>A method:</strong> “I put my phone away after
-                        dinner and practise one small thing for 15 minutes.
-                        Picking the exercise beforehand helps me get started.”
+                        <strong>A method:</strong> “I spoke to four local shops
+                        about a repeated task, showed a demo using sample data,
+                        and offered one small paid pilot with a clear scope.”
                     </p>
                     <p className="mt-3 leading-7">
-                        <strong>A response:</strong> “I tried this for a week.
-                        Short sessions were easier to fit in, but I moved them
-                        to the morning because my evenings are unpredictable.”
+                        <strong>A response:</strong> “One shop agreed to a
+                        pilot. Setup took longer than expected. I would include
+                        that time in the next quote and offer ongoing support
+                        separately.”
+                    </p>
+                </section>
+                <section className="mt-9 space-y-3 leading-7">
+                    <h2 className="text-xl font-semibold">
+                        Explain the work behind the result
+                    </h2>
+                    <p>
+                        Say what you sold, who needed it, how you found the
+                        client, and the time and money involved. Distinguish
+                        revenue from profit. If you share numbers, explain the
+                        period and context. Describe setbacks and limitations;
+                        income claims alone are not a method.
                     </p>
                 </section>
                 <section className="mt-9 space-y-3 leading-7">

@@ -237,7 +237,7 @@ const { chromium } = browserRequire('playwright');
             .locator('#new-topic')
             .fill('Automating product imports for an online store');
         await page
-            .getByRole('button', { name: 'Continue', exact: true })
+            .getByRole('button', { name: 'Create topic', exact: true })
             .click();
         await page.waitForURL(/\/topics\/create\?/);
         assert.equal(

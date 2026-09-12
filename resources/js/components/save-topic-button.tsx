@@ -7,6 +7,7 @@ type Props = {
     saved: boolean;
     authenticated: boolean;
     className?: string;
+    compact?: boolean;
 };
 
 export function SaveTopicButton({
@@ -14,16 +15,23 @@ export function SaveTopicButton({
     saved,
     authenticated,
     className,
+    compact = false,
 }: Props) {
     const form = useForm({});
     const action = `/topics/${topicSlug}/saved`;
 
     if (!authenticated) {
         return (
-            <Button asChild variant="outline" className={className}>
+            <Button
+                asChild
+                variant="outline"
+                className={`${className ?? ''} ${compact ? 'wb-save-compact' : ''}`}
+            >
                 <Link href={`/topics/${topicSlug}/save`}>
                     <Bookmark aria-hidden="true" />
-                    Log in to save
+                    <span className={compact ? 'sr-only' : undefined}>
+                        Log in to save
+                    </span>
                 </Link>
             </Button>
         );
@@ -33,7 +41,7 @@ export function SaveTopicButton({
         <Button
             type="button"
             variant="outline"
-            className={className}
+            className={`${className ?? ''} ${compact ? 'wb-save-compact' : ''}`}
             aria-pressed={saved}
             aria-label={saved ? 'Remove saved topic' : 'Save topic'}
             disabled={form.processing}
@@ -50,13 +58,15 @@ export function SaveTopicButton({
             ) : (
                 <Bookmark aria-hidden="true" />
             )}
-            {form.processing
-                ? saved
-                    ? 'Removing…'
-                    : 'Saving…'
-                : saved
-                  ? 'Saved'
-                  : 'Save topic'}
+            <span className={compact ? 'sr-only' : undefined}>
+                {form.processing
+                    ? saved
+                        ? 'Removing…'
+                        : 'Saving…'
+                    : saved
+                      ? 'Saved'
+                      : 'Save topic'}
+            </span>
         </Button>
     );
 }

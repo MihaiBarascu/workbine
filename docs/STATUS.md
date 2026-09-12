@@ -7,6 +7,16 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Connected community discovery
+
+The updated discovery follows the owner’s globe reference: sidebar navigation,
+original generated artwork, pointer lighting/parallax, compact cards, and a
+hideable guide. Categories remain plain text beside titles. **Create topic** opens
+the form without publishing. Optional categories/tags can be created and edited;
+filtering, recent-activity/most-saved views, reversible appreciations and public
+name/username search are implemented. Appreciations do not alter reputation.
+See [CONNECTED-DESIGN.md](CONNECTED-DESIGN.md) for precise semantics and the asset.
+
 ## Community discovery and return visits
 
 Explore uses a compact welcome area, distinct contribution cards and an optional
