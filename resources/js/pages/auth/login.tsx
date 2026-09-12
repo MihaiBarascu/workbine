@@ -27,7 +27,6 @@ export default function Login({ status, canResetPassword }: Props) {
                     <Button asChild variant="outline" className="w-full">
                         <a href="/auth/google">Continue with Google</a>
                     </Button>
-                    <PasskeyVerify showSeparator={false} />
                 </div>
 
                 <div className="relative">
@@ -112,6 +111,11 @@ export default function Login({ status, canResetPassword }: Props) {
                         </>
                     )}
                 </Form>
+                <PasskeyVerify
+                    showSeparator={false}
+                    secondary
+                    description="If you’ve already set up a passkey for your account."
+                />
             </div>
 
             {status && (
