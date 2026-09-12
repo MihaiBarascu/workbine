@@ -35,7 +35,11 @@ class TopicController extends Controller
             $pattern = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($search)).'%';
             $query->where(fn ($query) => $query
                 ->whereRaw("LOWER(title) LIKE ? ESCAPE '!'", [$pattern])
-                ->orWhereRaw("LOWER(description) LIKE ? ESCAPE '!'", [$pattern]));
+                ->orWhereRaw("LOWER(description) LIKE ? ESCAPE '!'", [$pattern])
+                ->orWhereHas('methods', fn ($methods) => $methods
+                    ->where(fn ($methods) => $methods
+                        ->whereRaw("LOWER(methods.title) LIKE ? ESCAPE '!'", [$pattern])
+                        ->orWhereRaw("LOWER(methods.body) LIKE ? ESCAPE '!'", [$pattern]))));
         }
 
         $topics = $query
