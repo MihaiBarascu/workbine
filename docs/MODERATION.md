@@ -52,10 +52,16 @@ upload limits remain, plus 30 provider calls/minute per member or guest IP and
   same context. It does not automatically publish, overwrite a newer edit, waive
   normal permissions or bypass a publishing suspension. Changed submissions need
   another check. Approvals expire with their review record.
-- Provider failures, malformed responses, missing keys and exhausted limits
-  leave the contribution unpublished and show a retry message. They do not create
-  misleading violation records. Browser form preservation is not a server draft
-  backup; refreshing or leaving the page can discard unsaved changes/files.
+- Provider failures (including provider rate limits), malformed responses and
+  missing keys send signed-in members' text/images to the existing private review
+  list. These records have no violation categories and explicitly say automatic
+  checking was unavailable. Nothing publishes until human approval and exact
+  resubmission. The existing 20-record/member cap, retention and deduplication apply.
+  Local application throttles still ask members to retry rather than adding reviews.
+  Registration has no member account to attach a review to, so it still asks for a
+  retry on an outage; Google sign-in retains its neutral-name fallback.
+  Browser form preservation is not a server draft backup; refreshing or leaving
+  the page can discard unsaved changes/files.
 
 ## Review policy
 
@@ -121,7 +127,7 @@ private pages use encrypted Inertia history and private/no-store responses.
 A private image endpoint checks administrator access on every request.
 
 Review records expire after 30 days and are removed on the next moderation list
-visit or flagged submission. `php artisan moderation:prune` is also available for
+visit or held submission. `php artisan moderation:prune` is also available for
 an existing maintenance schedule; this release does not create a new scheduled
 job. Account deletion cascades to review records. Do not publish private review
 screenshots or copy real flagged material to public logs, issues or test assets.

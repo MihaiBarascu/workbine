@@ -63,7 +63,9 @@ class ModerationController extends Controller
             $text = $payload['text'] ?? [];
             $author = User::query()->find($item->user_id);
             $image = isset($payload['image']) ? route('moderation.image', $id, false) : null;
-            $reasons = $item->categories;
+            $reasons = $item->categories === []
+                ? [__('Automatic checking unavailable — manual review required. No violation has been determined.')]
+                : $item->categories;
             $hidden = false;
         } else {
             $item = ContentReport::query()->findOrFail($id);
