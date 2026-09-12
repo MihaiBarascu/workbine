@@ -57,6 +57,9 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   authenticated sessions that carry the password-hash marker. Recovery of an
   unverified account also removes previously enrolled login credentials; verified
   accounts retain their additional authentication factors.
+- The Resend SDK is included for transactional email delivery. See
+  [EMAIL.md](EMAIL.md) for runtime configuration and delivery verification;
+  provider credentials and inbox delivery must be checked separately.
 - Discovery now uses a non-publishing Continue step, explains what happens next,
   and separates illustrative starter ideas from real community activity. Topic
   context and a first method remain optional, method drafts survive toggling and
