@@ -86,7 +86,11 @@ export default function MethodEdit({
                         action={`${methodUrl}/updates`}
                         method="post"
                         disableWhileProcessing
-                        onError={() => updateBodyRef.current?.focus()}
+                        onError={() => {
+                            requestAnimationFrame(() =>
+                                updateBodyRef.current?.focus(),
+                            );
+                        }}
                         className="wb-panel space-y-5"
                     >
                         {({ processing, errors, clearErrors }) => (
@@ -143,6 +147,7 @@ export default function MethodEdit({
                                             <Button
                                                 type="button"
                                                 variant="outline"
+                                                className="h-auto max-w-full whitespace-normal"
                                                 disabled={processing}
                                                 onClick={() => {
                                                     setUpdateSubmissionId(
