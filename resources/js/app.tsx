@@ -19,6 +19,7 @@ void createInertiaApp({
                 name.startsWith('members/') ||
                 name.startsWith('saved/') ||
                 name.startsWith('reports/') ||
+                name.startsWith('moderation/') ||
                 name.startsWith('community/'):
                 return null;
             case name.startsWith('auth/'):

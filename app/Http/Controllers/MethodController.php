@@ -7,9 +7,11 @@ use App\Http\Requests\UpdateMethodRequest;
 use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
+use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -31,6 +33,7 @@ class MethodController extends Controller
     public function update(UpdateMethodRequest $request, Topic $topic, Method $method): RedirectResponse
     {
         $data = $request->validated();
+        app(ContentModeration::class)->text($request->user(), Arr::only($data, ['title', 'body', 'source_url']), 'method:'.$method->id, 'body');
 
         DB::transaction(function () use ($method, $data): void {
             $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
@@ -69,6 +72,7 @@ class MethodController extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
+        app(ContentModeration::class)->text($user, Arr::only($data, ['title', 'body', 'source_url']), 'method:new:'.$topic->id, 'body');
 
         $topic->methods()->create([
             'user_id' => $user->id,

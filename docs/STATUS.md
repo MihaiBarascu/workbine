@@ -49,10 +49,12 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
 - Profile impact links filter contributions, and outcome links lead to the
   underlying experiences. Filtered lists keep full summary counts and the
   member's own experience available independently of pagination.
-- Reports can be enabled after a reviewer adopts the private console queue.
-  Manual hiding/restoration preserves history and hides descendants from public
-  pages. Existing public image URLs require separate removal when necessary.
-  See [MODERATION.md](MODERATION.md).
+- Optional OpenAI moderation checks public text and processed images before
+  publication. Held submissions and community reports share a private Moderation
+  page for configured verified administrators. Human decisions, exact-content
+  resubmission and manual publishing suspension reuse the monolith. Existing public
+  image URLs require separate removal when necessary. Activation and live provider
+  access are separate from code availability. See [MODERATION.md](MODERATION.md).
 - Branded HTTP errors cover normal and Inertia visits while preserving status,
   retry headers, JSON responses and local debug behavior.
 - Standard Laravel/Fortify email confirmation is sent automatically at email/password

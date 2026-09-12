@@ -75,6 +75,8 @@ class ImageUploads
         } finally {
             $lock->release();
         }
+        app(ContentModeration::class)->image($user, $contents, $field);
+
         $image = DB::transaction(function () use ($user, $contents, $width, $height, $field): MediaImage {
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             // Reservations and objects waiting for deletion also consume the quota.

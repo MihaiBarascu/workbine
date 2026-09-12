@@ -41,6 +41,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'canModerate' => $user?->can('moderate') ?? false,
             'reportsEnabled' => (bool) config('community.reports_enabled'),
             'auth' => [
                 'user' => $user === null ? null : [...$user->toArray(), 'avatar_url' => $user->avatarUrl()],

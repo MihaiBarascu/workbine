@@ -8,9 +8,11 @@ use App\Models\MediaImage;
 use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
+use App\Services\ContentModeration;
 use App\Services\ImageUploads;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -76,6 +78,7 @@ class ExperienceController extends Controller
         $data = $request->validated();
         abort_if(Experience::withoutGlobalScopes()->where('method_id', $method->id)
             ->where('user_id', $user->id)->whereNotNull('hidden_at')->exists(), 403);
+        app(ContentModeration::class)->text($user, Arr::only($data, ['body', 'evidence_url']), 'experience:'.$method->id, 'body');
 
         $image = $request->hasFile('evidence_image') ? $uploads->store($user, $request->file('evidence_image'), 'evidence_image') : null;
 

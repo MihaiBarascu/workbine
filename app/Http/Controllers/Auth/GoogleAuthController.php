@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\ContentModeration;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
@@ -68,8 +70,15 @@ class GoogleAuthController extends Controller
                     ?? (strcasecmp($user->email, $email) === 0 ? now() : null),
             ])->save();
         } else {
+            $name = $googleUser->getName() ?: 'Member';
+            try {
+                app(ContentModeration::class)->text(null, ['name' => $name], 'registration', 'name');
+            } catch (ValidationException) {
+                // Keep Google sign-in available without publishing an unchecked provider name.
+                $name = 'Member';
+            }
             $user = new User([
-                'name' => $googleUser->getName() ?: 'Member',
+                'name' => $name,
                 'email' => $email,
                 'google_id' => $googleId,
                 'avatar' => $googleUser->getAvatar(),

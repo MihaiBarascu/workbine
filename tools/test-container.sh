@@ -55,4 +55,12 @@ for attempt in {1..30}; do
 done
 node tests/browser/turnstile-flow.cjs
 node tests/browser/turnstile-widget.cjs
+php -S 127.0.0.1:8002 -t public tests/browser/moderation-router.php > /artifacts/moderation-server.log 2>&1 &
+for attempt in {1..30}; do
+    if curl --fail --silent http://127.0.0.1:8002/up > /dev/null; then
+        break
+    fi
+    sleep 1
+done
+node tests/browser/moderation-flow.cjs
 printf '\nPASS: local build, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'
