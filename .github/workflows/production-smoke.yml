@@ -1,28 +1,65 @@
 name: Production read-only smoke
 
-# Explicit invocation only; never consume Actions minutes for ordinary pushes/PRs.
+# Explicit invocation only. Remote sessions may request the check by adding the
+# verify-production label to a same-repository PR; ordinary pushes/PRs do nothing.
 on:
   workflow_dispatch:
+  pull_request:
+    types: [labeled]
 
 permissions:
   contents: read
 
 concurrency:
-  group: production-smoke-${{ github.ref }}
+  group: production-smoke-${{ github.event.pull_request.number || github.ref }}-${{ github.event.label.name || 'manual' }}
   cancel-in-progress: true
 
 jobs:
   public-release:
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.label.name == 'verify-production' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     env:
-      DEPLOY_COMMIT: ${{ github.sha }}
+      EXPECTED_SOURCE: ${{ github.event.pull_request.base.sha || github.sha }}
     steps:
-      - name: Checkout the tested public-response parser
+      - name: Checkout the release source to verify
         uses: actions/checkout@v7
         with:
+          ref: ${{ github.event.pull_request.base.sha || github.sha }}
           persist-credentials: false
-      - name: Wait for the public release without writing production data
+
+      - name: Record expected source
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+          printf 'Expected release source: `%s`\n' "$EXPECTED_SOURCE" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build the production frontend fingerprint
+        run: |
+          docker build --tag workbine-release-fingerprint .
+          container_id="$(docker create workbine-release-fingerprint)"
+          trap 'docker rm -f "$container_id" >/dev/null 2>&1 || true' EXIT
+          docker cp "$container_id:/var/www/html/public/build/manifest.json" /tmp/expected-manifest.json
+          python3 - <<'PY'
+          import json
+          import os
+
+          with open('/tmp/expected-manifest.json', encoding='utf-8') as manifest_file:
+              manifest = json.load(manifest_file)
+
+          entry = manifest.get('resources/js/app.tsx')
+          if not isinstance(entry, dict) or not isinstance(entry.get('file'), str):
+              raise SystemExit('Production build manifest is missing the application entry asset')
+
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env_file:
+              env_file.write('EXPECTED_ENTRY_ASSET=' + entry['file'] + '\n')
+
+          print('Expected frontend entry:', entry['file'])
+          PY
+
+      - name: Verify the live release without writing production data
         run: |
           python3 - <<'PY'
           import json
@@ -34,21 +71,48 @@ jobs:
           from tools.inertia_page import parse_page
 
           base = 'https://workbine.com'
-          query = 'workbine-deploy-' + os.environ['DEPLOY_COMMIT']
+          expected_source = os.environ['EXPECTED_SOURCE']
+          expected_entry = os.environ['EXPECTED_ENTRY_ASSET']
+          query = 'workbine-deploy-' + expected_source
           headers = {
-              'User-Agent': 'Workbine-Deployment-Smoke/1.0',
+              'User-Agent': 'Workbine-Deployment-Smoke/2.0',
               'Accept': 'text/html, application/xhtml+xml',
               'Cache-Control': 'no-cache',
           }
           stage = 'health'
 
-          def read_page(path):
+          with open('/tmp/expected-manifest.json', encoding='utf-8') as manifest_file:
+              expected_manifest = json.load(manifest_file)
+
+          def request_bytes(path, accept=None):
               global stage
               stage = path
-              request = urllib.request.Request(base + path, headers=headers)
+              request_headers = dict(headers)
+              if accept:
+                  request_headers['Accept'] = accept
+              request = urllib.request.Request(base + path, headers=request_headers)
               with urllib.request.urlopen(request, timeout=15) as response:
                   assert response.status == 200, 'Public route did not return HTTP 200'
-                  return parse_page(response.read(4000000).decode('utf-8'))
+                  return response.read(4000000), response.headers.get_content_charset() or 'utf-8'
+
+          def read_page(path):
+              content, charset = request_bytes(path)
+              return parse_page(content.decode(charset))
+
+          def confirm_frontend_fingerprint():
+              try:
+                  content, charset = request_bytes('/build/manifest.json', 'application/json')
+                  live_manifest = json.loads(content.decode(charset))
+                  assert live_manifest == expected_manifest, 'Live Vite manifest does not match the expected production build'
+                  return 'full Vite manifest'
+              except urllib.error.HTTPError as error:
+                  if error.code != 404:
+                      raise
+
+              content, charset = request_bytes('/', 'text/html, application/xhtml+xml')
+              html = content.decode(charset)
+              assert expected_entry in html, 'Live HTML does not reference the expected application entry asset'
+              return 'application entry asset'
 
           last_error = ''
           for attempt in range(1, 25):
@@ -57,9 +121,13 @@ jobs:
                   health_request = urllib.request.Request(base + '/up', headers=headers)
                   with urllib.request.urlopen(health_request, timeout=15) as response:
                       assert response.status == 200, 'Health endpoint did not return HTTP 200'
-                  result = read_page('/topics?q=' + query)
+
+                  fingerprint = confirm_frontend_fingerprint()
+
+                  result = read_page('/topics?q=' + urllib.parse.quote(query, safe=''))
                   assert result.get('component') == 'topics/index', 'Unexpected public page'
-                  assert result.get('props', {}).get('search') == query, 'Search release is not visible yet'
+                  assert result.get('props', {}).get('search') == query, 'Search behavior is not visible yet'
+
                   listing = read_page('/topics')
                   topics = listing.get('props', {}).get('topics', {}).get('data', [])
                   topic_pages_checked = 0
@@ -74,24 +142,38 @@ jobs:
                           experience = read_page('/topics/' + urllib.parse.quote(topics[0]['slug'], safe='') + '/methods/' + str(method['id']) + '/experiences')
                           assert experience.get('component') == 'experiences/index', 'Public experiences page failed'
                           experience_pages_checked += 1
+
                   coverage = {
+                      'expected_source': expected_source,
+                      'frontend_fingerprint': fingerprint,
+                      'expected_entry_asset': expected_entry,
                       'health': 'HTTP 200',
-                      'search_release': 'confirmed',
+                      'search_behavior': 'confirmed',
                       'public_listing': 'confirmed',
                       'topic_pages_checked': topic_pages_checked,
                       'experience_pages_checked': experience_pages_checked,
                       'public_topic_total': listing.get('props', {}).get('topics', {}).get('total'),
                   }
-                  message = 'PASS: live health, initial-visit search payload and public listing. No production content was created.'
+                  message = 'PASS: live frontend build fingerprint, health, search behavior and public listing. No production content was created.'
                   print(message)
                   print(json.dumps(coverage))
-                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-                      summary.write('## Production read-only smoke\n' + message + '\n\n```json\n' + json.dumps(coverage, indent=2) + '\n```\n\nZero sampled topic/experience pages is not coverage of those flows. No authenticated Google session is tested. This checks public feature availability, not an exact deployed commit fingerprint. A PR-triggered run tests the monitor against the current live deployment, not the proposed application code.\n')
+                  with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+                      summary.write(
+                          '## Production read-only smoke\n'
+                          + message
+                          + '\n\n```json\n'
+                          + json.dumps(coverage, indent=2)
+                          + '\n```\n\n'
+                          + 'The frontend fingerprint is built from the same Dockerfile used for production and compared with the public Vite manifest when available, with the application entry asset as a 404 fallback. '
+                          + 'It verifies the shipped frontend build for the expected source, but it does not prove runtime environment values, external providers, or a backend-only revision whose frontend build is unchanged. '
+                          + 'Zero sampled topic/experience pages is not coverage of those flows. No authenticated Google session is tested.\n'
+                      )
                   break
               except urllib.error.HTTPError as error:
                   last_error = f'{stage}: HTTP {error.code}; cf-mitigated={error.headers.get("cf-mitigated", "not present")}'
               except Exception as error:
                   last_error = f'{stage}: {type(error).__name__}: {error}'
+
               print(f'Attempt {attempt}/24: {last_error}', flush=True)
               if attempt < 24:
                   time.sleep(10)
