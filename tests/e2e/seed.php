@@ -22,9 +22,11 @@ if (! preg_match('/^[a-f0-9]{20}$/D', $token)) {
 }
 DB::statement('PRAGMA busy_timeout = 10000');
 DB::transaction(function () use ($argv, $token): void {
-    $emails = ["pilot-owner-{$token}@example.test", "pilot-contributor-{$token}@example.test"];
+    $roles = ['owner', 'contributor', 'reviewer'];
+    $emails = array_map(fn ($role) => "pilot-{$role}-{$token}@example.test", $roles);
     if (($argv[1] ?? '') === 'cleanup') {
-        User::query()->whereIn('email', $emails)->get()->each->delete();
+        // Email-change scenarios must remain removable even after a failed assertion.
+        User::query()->whereIn('username', ['o-'.$token, 'c-'.$token, 'r-'.$token])->get()->each->delete();
 
         return;
     }
@@ -33,7 +35,7 @@ DB::transaction(function () use ($argv, $token): void {
     }
     $password = 'local-pilot-password!';
     $actors = [];
-    foreach (['owner', 'contributor'] as $i => $role) {
+    foreach ($roles as $i => $role) {
         $user = User::factory()->create([
             'name' => ucfirst($role).' '.$token,
             'username' => substr($role, 0, 1).'-'.$token,

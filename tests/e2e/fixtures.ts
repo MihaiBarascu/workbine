@@ -14,6 +14,7 @@ export type Actors = {
     token: string;
     owner: Actor;
     contributor: Actor;
+    reviewer: Actor;
     topic: { id: number; title: string; slug: string };
     method: { id: number; title: string };
 };
