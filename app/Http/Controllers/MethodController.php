@@ -74,17 +74,28 @@ class MethodController extends Controller
             'submission_id' => ['required', 'uuid'],
         ]);
         app(ContentModeration::class)->text($request->user(), ['body' => $data['body']], 'method:update:'.$method->id, 'body');
-        DB::transaction(function () use ($method, $data): void {
+        $created = DB::transaction(function () use ($method, $data): bool {
             $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
             if ($current->protected_at === null) {
                 throw ValidationException::withMessages(['body' => __('This method can still be edited. Edit the original before it receives an experience.')]);
             }
-            MethodUpdate::query()->firstOrCreate(
+            $update = MethodUpdate::query()->firstOrCreate(
                 ['method_id' => $current->id, 'submission_id' => $data['submission_id']],
                 ['body' => $data['body']],
             );
+
+            if ($update->body !== $data['body']) {
+                throw ValidationException::withMessages([
+                    'submission_id' => __('An earlier version of this update was already published. Your current text has not been published. You can use this draft for a new update.'),
+                ]);
+            }
+
+            return $update->wasRecentlyCreated;
         });
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Update added.')]);
+        Inertia::flash('toast', [
+            'type' => 'success',
+            'message' => $created ? __('Update added.') : __('This update was already published.'),
+        ]);
 
         return redirect()->to(route('topics.show', $topic).'#method-'.$method->id);
     }
