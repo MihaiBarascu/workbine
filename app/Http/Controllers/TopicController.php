@@ -10,6 +10,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -84,12 +85,13 @@ class TopicController extends Controller
             ]);
 
             if ($request->boolean('include_method')) {
-                $topic->methods()->create([
+                $method = $topic->methods()->create([
                     'user_id' => $user->id,
                     'title' => $data['method_title'],
                     'body' => $data['method_body'],
                     'source_url' => $data['method_source_url'] ?? null,
                 ]);
+                RichText::save($method, $data['method_body_document'] ?? null, 'method_body');
             }
 
             return $topic;
@@ -191,6 +193,7 @@ class TopicController extends Controller
             'id' => $method->id,
             'title' => $method->title,
             'body' => $method->body,
+            'body_document' => $method->body_document,
             'source_url' => $method->source_url,
             'created_at' => $method->created_at?->toIso8601String(),
             'updated_at' => $method->updated_at?->toIso8601String(),

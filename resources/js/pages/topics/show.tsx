@@ -1,3 +1,4 @@
+import { RichTextContent } from '@/components/rich-text-content';
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowDown,
@@ -199,9 +200,10 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                             >
                                                 {method.title}
                                             </h3>
-                                            <p className="wb-detail-body">
-                                                {method.body}
-                                            </p>
+                                            <RichTextContent
+                                                document={method.body_document}
+                                                text={method.body}
+                                            />
                                             {method.source_url && (
                                                 <div className="wb-method-source">
                                                     <a

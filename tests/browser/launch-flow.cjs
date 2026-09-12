@@ -104,7 +104,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .locator('input[name="method_title"]')
             .fill('Try one complete member journey');
         await page
-            .locator('textarea[name="method_body"]')
+            .locator('#method_body')
             .fill(
                 'I use a separate test account, complete one contribution and write down the result before checking the next journey.',
             );
@@ -220,7 +220,13 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await page
             .locator('input[name="title"]')
             .fill('Repeat the complete member journey weekly');
-        await page.locator('textarea[name="body"]').fill(updatedBody);
+        await page.locator('[contenteditable="true"]').fill(updatedBody);
+        await page
+            .locator('details')
+            .filter({ hasText: 'Add a source' })
+            .evaluate((node) => {
+                node.open = true;
+            });
         await page
             .locator('input[name="source_url"]')
             .fill('ftp://example.com/checklist');
@@ -229,10 +235,16 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .click();
         await page.locator('#source_url-error').waitFor();
         assert.equal(
-            await page.locator('textarea[name="body"]').inputValue(),
+            await page.locator('[contenteditable="true"]').innerText(),
             updatedBody,
             'Validation preserves the edited method',
         );
+        await page
+            .locator('details')
+            .filter({ hasText: 'Add a source' })
+            .evaluate((node) => {
+                node.open = true;
+            });
         await page
             .locator('input[name="source_url"]')
             .fill('https://example.com/checklist');
@@ -391,12 +403,12 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .locator('select[name="outcome"]')
             .selectOption('worked');
         await supporterPage
-            .locator('textarea[name="body"]')
+            .locator('[contenteditable="true"]')
             .fill(
                 'I repeated the complete checklist in a separate preview account and the weekly review worked for this small project.',
             );
         await supporterPage
-            .getByRole('button', { name: 'Publish my experience', exact: true })
+            .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
         await supporterPage
             .getByRole('heading', { name: '1 experience', exact: true })
@@ -492,12 +504,12 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .locator('select[name="outcome"]')
             .selectOption('partly');
         await supporterPage
-            .locator('textarea[name="body"]')
+            .locator('[contenteditable="true"]')
             .fill(
                 'After a second trial it only partly worked: the weekly review needed more time when several tasks changed together.',
             );
         await supporterPage
-            .getByRole('button', { name: 'Update my experience', exact: true })
+            .getByRole('button', { name: 'Update my response', exact: true })
             .click();
         await supporterPage
             .locator('main article')
@@ -517,7 +529,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await supporterPage.goto(impactExperienceUrl);
         supporterPage.once('dialog', (dialog) => dialog.accept());
         await supporterPage
-            .getByRole('button', { name: 'Remove my experience', exact: true })
+            .getByRole('button', { name: 'Remove my response', exact: true })
             .click();
         await supporterPage
             .getByRole('heading', { name: '0 experiences', exact: true })

@@ -1,3 +1,5 @@
+import { RichTextEditor } from '@/components/rich-text-editor';
+import type { RichTextNode } from '@/components/rich-text-content';
 import InputError from '@/components/input-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +11,7 @@ type Props = {
     initialValues?: {
         title: string;
         body: string;
+        body_document?: RichTextNode | null;
         source_url: string | null;
     };
 };
@@ -56,7 +59,9 @@ export function MethodFields({
             </div>
 
             <div className="grid gap-2">
-                <Label htmlFor={`${prefix}body`}>How you do it</Label>
+                <Label id={`${prefix}body-label`} htmlFor={`${prefix}body`}>
+                    How you do it
+                </Label>
                 <p
                     id={`${prefix}body-hint`}
                     className="text-muted-foreground text-sm leading-6"
@@ -64,63 +69,60 @@ export function MethodFields({
                     Share the steps you took and what happened. Write as if you
                     were explaining it to a friend.
                 </p>
-                <textarea
+                <RichTextEditor
                     id={`${prefix}body`}
                     name={`${prefix}body`}
-                    defaultValue={initialValues?.body}
-                    aria-invalid={Boolean(errors[`${prefix}body`])}
-                    aria-describedby={describedBy('body')}
-                    required
-                    rows={8}
-                    maxLength={10000}
-                    placeholder="Here’s what I do…"
-                    className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive min-h-48 w-full rounded-md border px-3 py-2 text-sm leading-6 shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                    initialText={initialValues?.body}
+                    initialDocument={initialValues?.body_document}
+                    invalid={Boolean(errors[`${prefix}body`])}
+                    describedBy={describedBy('body')}
+                    placeholder="Explain what you did and what happened. Add photos wherever they help."
                 />
                 <InputError
                     id={`${prefix}body-error`}
                     message={errors[`${prefix}body`]}
                 />
-                <details className="wb-writing-help">
-                    <summary>Need a little guidance?</summary>
-                    <ul>
-                        <li>When is this useful, and what do you need?</li>
-                        <li>What should someone do first, then next?</li>
-                        <li>
-                            What worked, what didn’t, and what would you change?
-                        </li>
-                    </ul>
-                </details>
             </div>
 
-            <div className="grid gap-2">
-                <Label htmlFor={`${prefix}source_url`}>
-                    Source link{' '}
-                    <span className="text-muted-foreground font-normal">
-                        (optional)
-                    </span>
-                </Label>
-                <Input
-                    id={`${prefix}source_url`}
-                    name={`${prefix}source_url`}
-                    defaultValue={initialValues?.source_url ?? ''}
-                    aria-invalid={Boolean(errors[`${prefix}source_url`])}
-                    aria-describedby={describedBy('source_url')}
-                    type="url"
-                    maxLength={2048}
-                    placeholder="https://…"
-                />
-                <p
-                    id={`${prefix}source_url-hint`}
-                    className="text-muted-foreground text-sm leading-6"
-                >
-                    Learned this from someone else? Credit the original source
-                    with an http:// or https:// link.
-                </p>
-                <InputError
-                    id={`${prefix}source_url-error`}
-                    message={errors[`${prefix}source_url`]}
-                />
-            </div>
+            <details
+                className="wb-writing-help"
+                open={
+                    initialValues?.source_url || errors[`${prefix}source_url`]
+                        ? true
+                        : undefined
+                }
+            >
+                <summary>Add a source</summary>
+                <div className="mt-3 grid gap-2">
+                    <Label htmlFor={`${prefix}source_url`}>
+                        Source link{' '}
+                        <span className="text-muted-foreground font-normal">
+                            (optional)
+                        </span>
+                    </Label>
+                    <Input
+                        id={`${prefix}source_url`}
+                        name={`${prefix}source_url`}
+                        defaultValue={initialValues?.source_url ?? ''}
+                        aria-invalid={Boolean(errors[`${prefix}source_url`])}
+                        aria-describedby={describedBy('source_url')}
+                        type="url"
+                        maxLength={2048}
+                        placeholder="https://…"
+                    />
+                    <p
+                        id={`${prefix}source_url-hint`}
+                        className="text-muted-foreground text-sm leading-6"
+                    >
+                        Learned this from someone else? Credit the original
+                        source with an http:// or https:// link.
+                    </p>
+                    <InputError
+                        id={`${prefix}source_url-error`}
+                        message={errors[`${prefix}source_url`]}
+                    />
+                </div>
+            </details>
         </>
     );
 }

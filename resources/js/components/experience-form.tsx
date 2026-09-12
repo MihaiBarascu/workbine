@@ -1,3 +1,4 @@
+import { RichTextEditor } from '@/components/rich-text-editor';
 import { Form, usePage } from '@inertiajs/react';
 import {
     ImageUploadField,
@@ -56,86 +57,103 @@ export function ExperienceForm({ action, experience }: Props) {
                             />
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="experience-body">
-                                Your context and experience
+                            <Label
+                                id="experience-body-label"
+                                htmlFor="experience-body"
+                            >
+                                How did it go?
                             </Label>
-                            <textarea
+                            <RichTextEditor
                                 id="experience-body"
                                 name="body"
-                                required
-                                minLength={20}
+                                initialText={experience?.body}
+                                initialDocument={experience?.body_document}
+                                invalid={Boolean(errors.body)}
+                                describedBy="experience-body-error"
                                 maxLength={5000}
-                                rows={7}
-                                defaultValue={experience?.body ?? ''}
-                                aria-invalid={Boolean(errors.body)}
-                                aria-describedby="experience-body-help experience-body-error"
-                                placeholder="What did you try, in what situation, and what happened? What would you change?"
-                                className="border-input bg-background focus-visible:ring-ring w-full rounded-md border px-3 py-2 text-sm leading-6 focus-visible:ring-2"
+                                placeholder="How did it go for you? Explain what worked or what you changed."
                             />
-                            <p
-                                id="experience-body-help"
-                                className="text-muted-foreground text-xs leading-5"
-                            >
-                                Specific details help more than a vote. Include
-                                limitations and things that did not work.
-                            </p>
                             <InputError
                                 id="experience-body-error"
                                 message={errors.body}
                             />
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="tried-on">
-                                When did you try it? (optional)
-                            </Label>
-                            <Input
-                                id="tried-on"
-                                name="tried_on"
-                                type="date"
-                                max={new Date().toISOString().slice(0, 10)}
-                                defaultValue={experience?.tried_on ?? ''}
-                                aria-invalid={Boolean(errors.tried_on)}
-                                aria-describedby="tried-on-error"
-                            />
-                            <InputError
-                                id="tried-on-error"
-                                message={errors.tried_on}
-                            />
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="evidence-url">
-                                Evidence link (optional)
-                            </Label>
-                            <Input
-                                id="evidence-url"
-                                name="evidence_url"
-                                type="url"
-                                maxLength={2048}
-                                defaultValue={experience?.evidence_url ?? ''}
-                                placeholder="https://..."
-                                aria-invalid={Boolean(errors.evidence_url)}
-                                aria-describedby="evidence-url-error"
-                            />
-                            <InputError
-                                id="evidence-url-error"
-                                message={errors.evidence_url}
-                            />
-                        </div>
-                        {(media?.enabled || experience?.evidence_image) && (
-                            <ImageUploadField
-                                key={String(media?.enabled)}
-                                name="evidence_image"
-                                label="Evidence photo (optional)"
-                                currentImage={experience?.evidence_image?.url}
-                                maxUploadMb={media.maxUploadMb}
-                                error={
-                                    errors.evidence_image ??
-                                    errors.remove_evidence_image
-                                }
-                                allowRemove
-                                uploadEnabled={Boolean(media?.enabled)}
-                            />
-                        )}
+                        <details
+                            className="wb-writing-help"
+                            open={
+                                errors.tried_on ||
+                                errors.evidence_url ||
+                                errors.evidence_image
+                                    ? true
+                                    : undefined
+                            }
+                        >
+                            <summary>Add a date or supporting link</summary>
+                            <div className="mt-4 space-y-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="tried-on">
+                                        When did you try it? (optional)
+                                    </Label>
+                                    <Input
+                                        id="tried-on"
+                                        name="tried_on"
+                                        type="date"
+                                        max={new Date()
+                                            .toISOString()
+                                            .slice(0, 10)}
+                                        defaultValue={
+                                            experience?.tried_on ?? ''
+                                        }
+                                        aria-invalid={Boolean(errors.tried_on)}
+                                        aria-describedby="tried-on-error"
+                                    />
+                                    <InputError
+                                        id="tried-on-error"
+                                        message={errors.tried_on}
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="evidence-url">
+                                        Evidence link (optional)
+                                    </Label>
+                                    <Input
+                                        id="evidence-url"
+                                        name="evidence_url"
+                                        type="url"
+                                        maxLength={2048}
+                                        defaultValue={
+                                            experience?.evidence_url ?? ''
+                                        }
+                                        placeholder="https://..."
+                                        aria-invalid={Boolean(
+                                            errors.evidence_url,
+                                        )}
+                                        aria-describedby="evidence-url-error"
+                                    />
+                                    <InputError
+                                        id="evidence-url-error"
+                                        message={errors.evidence_url}
+                                    />
+                                </div>
+                                {experience?.evidence_image && (
+                                    <ImageUploadField
+                                        key={String(media?.enabled)}
+                                        name="evidence_image"
+                                        label="Evidence photo (optional)"
+                                        currentImage={
+                                            experience?.evidence_image?.url
+                                        }
+                                        maxUploadMb={media.maxUploadMb}
+                                        error={
+                                            errors.evidence_image ??
+                                            errors.remove_evidence_image
+                                        }
+                                        allowRemove
+                                        uploadEnabled={Boolean(media?.enabled)}
+                                    />
+                                )}
+                            </div>
+                        </details>
                         <p className="text-muted-foreground text-xs leading-5">
                             This is public. Do not include passwords, customer
                             data or private documents. Only share evidence you
@@ -152,8 +170,8 @@ export function ExperienceForm({ action, experience }: Props) {
                             {processing
                                 ? 'Saving...'
                                 : experience
-                                  ? 'Update my experience'
-                                  : 'Publish my experience'}
+                                  ? 'Update my response'
+                                  : 'Publish my response'}
                         </Button>
                     </>
                 )}
@@ -165,7 +183,7 @@ export function ExperienceForm({ action, experience }: Props) {
                     disableWhileProcessing
                     onBefore={() =>
                         window.confirm(
-                            'Remove your public experience? This cannot be undone.',
+                            'Remove your public response? This cannot be undone.',
                         )
                     }
                 >
@@ -176,7 +194,7 @@ export function ExperienceForm({ action, experience }: Props) {
                             className="w-full"
                             disabled={processing}
                         >
-                            Remove my experience
+                            Remove my response
                         </Button>
                     )}
                 </Form>

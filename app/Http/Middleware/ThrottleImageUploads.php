@@ -14,7 +14,7 @@ class ThrottleImageUploads
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->hasFile('avatar') && ! $request->hasFile('evidence_image')) {
+        if (! $request->hasFile('avatar') && ! $request->hasFile('evidence_image') && ! $request->hasFile('image')) {
             return $next($request);
         }
 

@@ -10,6 +10,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ContentModeration;
 use App\Services\ImageUploads;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -101,6 +102,7 @@ class ExperienceController extends Controller
                     'evidence_url' => $data['evidence_url'] ?? null,
                     'tried_on' => $data['tried_on'] ?? null,
                 ])->save();
+                RichText::save($experience, $data['body_document'] ?? null);
                 $previous?->update(['pending_deletion' => true]);
 
                 return $previous;
@@ -112,7 +114,7 @@ class ExperienceController extends Controller
 
         $uploads->discard($previous);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Your experience has been saved.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Your response has been saved.')]);
 
         return to_route('experiences.index', [$topic, $method]);
     }
@@ -132,7 +134,7 @@ class ExperienceController extends Controller
         });
         $uploads->discard($previous);
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Your experience has been removed.')]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('Your response has been removed.')]);
 
         return to_route('experiences.index', [$topic, $method]);
     }
@@ -144,6 +146,7 @@ class ExperienceController extends Controller
             'id' => $experience->id,
             'outcome' => $experience->outcome,
             'body' => $experience->body,
+            'body_document' => $experience->body_document,
             'evidence_url' => $experience->evidence_url,
             'evidence_image' => $experience->evidenceImage?->publicData(),
             'tried_on' => $experience->tried_on?->toDateString(),

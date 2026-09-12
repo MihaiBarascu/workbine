@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  * @property int $topic_id
  * @property int $user_id
  * @property string $title
+ * @property array<string, mixed>|null $body_document
  * @property string $body
  * @property string|null $source_url
  * @property int|null $experiences_count
@@ -25,11 +26,17 @@ use Illuminate\Support\Carbon;
  * @property-read Topic $topic
  * @property-read User $user
  */
-#[Fillable(['topic_id', 'user_id', 'title', 'body', 'source_url'])]
+#[Fillable(['topic_id', 'user_id', 'title', 'body', 'body_document', 'source_url'])]
 class Method extends Model
 {
     /** @use HasFactory<MethodFactory> */
     use HasFactory;
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return ['body_document' => 'array'];
+    }
 
     protected static function booted(): void
     {

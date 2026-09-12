@@ -145,13 +145,13 @@ class ExperiencesTest extends TestCase
         $this->assertDatabaseCount('experiences', 0);
     }
 
-    public function test_unsupported_outcomes_short_context_and_future_dates_are_rejected(): void
+    public function test_unsupported_outcomes_empty_context_and_future_dates_are_rejected(): void
     {
         $method = Method::factory()->create();
         $this->actingAs(User::factory()->create())
             ->put(route('experiences.store', [$method->topic, $method]), $this->payload([
                 'outcome' => 'verified',
-                'body' => 'yes',
+                'body' => '',
                 'tried_on' => now()->addDay()->toDateString(),
             ]))
             ->assertSessionHasErrors(['outcome', 'body', 'tried_on']);
