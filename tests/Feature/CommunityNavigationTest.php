@@ -23,12 +23,12 @@ class CommunityNavigationTest extends TestCase
     public function test_account_pages_respect_the_existing_sidebar_cookie_without_changing_account_data(): void
     {
         $user = User::factory()->create();
-        $original = $user->getAttributes();
+        $original = $user->refresh()->getAttributes();
 
         $this->actingAs($user)->withUnencryptedCookie('sidebar_state', 'false')
             ->get('/settings/profile')->assertOk()->assertInertia(fn (Assert $page) => $page
-                ->where('sidebarOpen', false)
-                ->where('communityCategories', TopicDiscovery::categories()));
+            ->where('sidebarOpen', false)
+            ->where('communityCategories', TopicDiscovery::categories()));
 
         $this->assertSame($original, $user->refresh()->getAttributes());
     }
