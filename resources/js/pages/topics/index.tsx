@@ -190,6 +190,7 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     Needs a method
                                 </Link>
                             </nav>
+
                             {!emptyCommunity && (
                                 <span className="wb-topic-count">
                                     {topics.total}{' '}
@@ -455,6 +456,27 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                     easier to fit in, but I needed a reminder.”
                                 </dd>
                             </dl>
+                        </details>
+                        <details className="wb-worked-example">
+                            <summary>Content rules and review</summary>
+                            <p>
+                                Share useful experiences. Do not post
+                                pornography, graphic abuse, threats, hateful
+                                attacks, dangerous instructions, scams or
+                                someone else’s private information.
+                            </p>
+                            <p>
+                                Public text and uploaded photos may be checked
+                                by OpenAI before publication. Flagged
+                                submissions can be held privately for human
+                                review. Review records expire after 30 days;
+                                administrators can correct mistaken decisions.
+                            </p>
+                            <p>
+                                Report harmful contributions using their Report
+                                action. Discussing health or recovery
+                                respectfully is welcome.
+                            </p>
                         </details>
                         {!emptyCommunity && (
                             <div className="wb-starters">

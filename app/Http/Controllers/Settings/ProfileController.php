@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileDeleteRequest;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Services\ContentModeration;
 use App\Services\ImageUploads;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,11 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $user->fill($request->validated());
+
+        $publicFields = ['name', 'username', 'bio', 'location', 'website'];
+        if ($user->isDirty($publicFields)) {
+            app(ContentModeration::class)->text($user, $user->only($publicFields), 'profile', 'name');
+        }
 
         $emailChanged = $user->isDirty('email');
 

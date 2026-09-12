@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Services\ContentModeration;
 use App\Services\Turnstile;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -33,6 +34,8 @@ class CreateNewUser implements CreatesNewUsers
         if (Turnstile::enabled()) {
             app(Turnstile::class)->validate($input['cf-turnstile-response']);
         }
+
+        app(ContentModeration::class)->text(null, ['name' => $input['name']], 'registration', 'name');
 
         return User::create([
             'name' => $input['name'],

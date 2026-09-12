@@ -8,9 +8,11 @@ use App\Models\Method;
 use App\Models\SavedTopic;
 use App\Models\Topic;
 use App\Models\User;
+use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -72,6 +74,7 @@ class TopicController extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
+        app(ContentModeration::class)->text($user, Arr::only($data, ['title', 'description', 'method_title', 'method_body', 'method_source_url']), 'topic:new', 'title');
 
         $topic = DB::transaction(function () use ($user, $data, $request): Topic {
             $topic = $user->topics()->create([
@@ -115,6 +118,7 @@ class TopicController extends Controller
     public function update(UpdateTopicRequest $request, Topic $topic): RedirectResponse
     {
         $data = $request->validated();
+        app(ContentModeration::class)->text($request->user(), Arr::only($data, ['title', 'description']), 'topic:'.$topic->id, 'title');
 
         DB::transaction(function () use ($topic, $data): void {
             $current = Topic::query()->whereKey($topic->id)->lockForUpdate()->firstOrFail();

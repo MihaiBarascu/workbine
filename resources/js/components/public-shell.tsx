@@ -25,9 +25,9 @@ type Props = { children: ReactNode };
 
 export function PublicShell({ children }: Props) {
     const {
-        props: { auth },
+        props: { auth, canModerate },
         url,
-    } = usePage<{ auth: { user: User | null } }>();
+    } = usePage<{ auth: { user: User | null }; canModerate: boolean }>();
     const composingTopic = url.split('?')[0] === '/topics/create';
 
     return (
@@ -97,6 +97,13 @@ export function PublicShell({ children }: Props) {
                                             {auth.user.name}
                                         </p>
                                         <DropdownMenuSeparator />
+                                        {canModerate && (
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/moderation">
+                                                    Moderation
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuItem asChild>
                                             <Link
                                                 href={`/members/${auth.user.username}`}

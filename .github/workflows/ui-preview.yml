@@ -114,6 +114,17 @@ jobs:
           node tests/browser/turnstile-flow.cjs
           node tests/browser/turnstile-widget.cjs
 
+      - name: Exercise private moderation and held submission flows
+        run: |
+          php -S 127.0.0.1:8002 -t public tests/browser/moderation-router.php > /tmp/workbine-moderation-server.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8002/up > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          node tests/browser/moderation-flow.cjs
+
       - name: Print isolated application diagnostics on failure
         if: failure()
         run: |
