@@ -66,7 +66,9 @@ export function PublicShell({ children, discovery }: Props) {
         document.body.style.overflow = 'hidden';
         const focusable = () =>
             Array.from(
-                menu?.querySelectorAll<HTMLElement>('a[href], button:not(:disabled)') ?? [],
+                menu?.querySelectorAll<HTMLElement>(
+                    'a[href], button:not(:disabled)',
+                ) ?? [],
             ).filter((element) => element.offsetParent !== null);
         menu?.querySelector<HTMLElement>('[data-navigation-close]')?.focus();
         const close = (event: KeyboardEvent) => {
@@ -98,7 +100,9 @@ export function PublicShell({ children, discovery }: Props) {
             desktop.removeEventListener('change', resized);
             document.body.style.overflow = previousOverflow;
             // The content's inert state is removed before passive cleanup.
-            const trigger = desktop.matches ? desktopTrigger.current : mobileTrigger.current;
+            const trigger = desktop.matches
+                ? desktopTrigger.current
+                : mobileTrigger.current;
             if (trigger?.isConnected) trigger.focus();
         };
     }, [navigationOpen]);
@@ -108,7 +112,7 @@ export function PublicShell({ children, discovery }: Props) {
         setSidebarExpanded(expanded);
         document.cookie = `sidebar_state=${expanded}; path=/; max-age=604800; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
     };
-    const path = url.split('?')[0];
+    const path = url.split(/[?#]/)[0];
     const composingTopic = path === '/topics/create';
     const categories = discovery?.categories ?? props.communityCategories ?? {};
     const category = discovery?.category ?? '';
@@ -117,6 +121,9 @@ export function PublicShell({ children, discovery }: Props) {
         <div
             className={`wb-public wb-cosmos-shell min-h-screen ${discovery ? 'wb-discovery-shell' : 'wb-secondary-shell'} ${sidebarExpanded ? '' : 'is-sidebar-collapsed'}`}
         >
+            <a href="#main-content" className="wb-skip" inert={navigationOpen}>
+                Skip to content
+            </a>
             {discovery && <CommunityUniverse />}
             <CommunitySidebar
                 categories={categories}
@@ -126,7 +133,6 @@ export function PublicShell({ children, discovery }: Props) {
                 onClose={() => setNavigationOpen(false)}
             />
             <div className="wb-shell-body" inert={navigationOpen}>
-                <a href="#main-content" className="wb-skip">Skip to content</a>
                 <header className="wb-topbar">
                     <div className="wb-topbar-inner">
                         <button
@@ -144,89 +150,237 @@ export function PublicShell({ children, discovery }: Props) {
                             ref={desktopTrigger}
                             type="button"
                             className="wb-desktop-sidebar-toggle"
-                            aria-label={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
-                            title={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+                            aria-label={
+                                sidebarExpanded
+                                    ? 'Collapse sidebar'
+                                    : 'Expand sidebar'
+                            }
+                            title={
+                                sidebarExpanded
+                                    ? 'Collapse sidebar'
+                                    : 'Expand sidebar'
+                            }
                             aria-expanded={sidebarExpanded}
                             aria-controls="community-navigation"
                             onClick={toggleSidebar}
                         >
-                            {sidebarExpanded ? <PanelLeftClose aria-hidden="true" /> : <PanelLeftOpen aria-hidden="true" />}
+                            {sidebarExpanded ? (
+                                <PanelLeftClose aria-hidden="true" />
+                            ) : (
+                                <PanelLeftOpen aria-hidden="true" />
+                            )}
                         </button>
                         <div className="wb-brand-group">
                             <WorkbineBrand />
                             <Link
                                 href="/topics"
                                 className="wb-explore-link"
-                                aria-current={path === '/' || path === '/topics' ? 'page' : undefined}
+                                aria-current={
+                                    path === '/' || path === '/topics'
+                                        ? 'page'
+                                        : undefined
+                                }
                             >
                                 Explore
                             </Link>
                         </div>
                         {discovery ? (
-                            <div className="wb-universe-search">{discovery.search}</div>
+                            <div className="wb-universe-search">
+                                {discovery.search}
+                            </div>
                         ) : (
-                            <Link href="/topics" className="wb-shell-home-link">Explore the community</Link>
+                            <Link href="/topics" className="wb-shell-home-link">
+                                Explore the community
+                            </Link>
                         )}
-                        <nav aria-label="Main navigation" className="wb-main-nav">
-                            <Link href="/community/guide" className="wb-community-link">Community guide</Link>
+                        <nav
+                            aria-label="Main navigation"
+                            className="wb-main-nav"
+                        >
+                            <Link
+                                href="/community/guide"
+                                className="wb-community-link"
+                            >
+                                Community guide
+                            </Link>
                             {user ? (
                                 <>
-                                    <Link className="wb-personal-link" href={`/members/${user.username}?view=topics`}>My topics</Link>
-                                    <Link className="wb-personal-link" href="/saved" aria-current={path === '/saved' ? 'page' : undefined}>Saved</Link>
+                                    <Link
+                                        className="wb-personal-link"
+                                        href={`/members/${user.username}?view=topics`}
+                                    >
+                                        My topics
+                                    </Link>
+                                    <Link
+                                        className="wb-personal-link"
+                                        href="/saved"
+                                        aria-current={
+                                            path === '/saved'
+                                                ? 'page'
+                                                : undefined
+                                        }
+                                    >
+                                        Saved
+                                    </Link>
                                     <Link
                                         href="/notifications"
                                         className="wb-notifications-link"
-                                        aria-label={unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'}
-                                        aria-current={path === '/notifications' ? 'page' : undefined}
+                                        aria-label={
+                                            unread > 0
+                                                ? `Notifications, ${unread} unread`
+                                                : 'Notifications'
+                                        }
+                                        aria-current={
+                                            path === '/notifications'
+                                                ? 'page'
+                                                : undefined
+                                        }
                                     >
-                                        <Bell aria-hidden="true" className="size-5" />
-                                        {unread > 0 && <span className="wb-notification-dot" aria-hidden="true" />}
+                                        <Bell
+                                            aria-hidden="true"
+                                            className="size-5"
+                                        />
+                                        {unread > 0 && (
+                                            <span
+                                                className="wb-notification-dot"
+                                                aria-hidden="true"
+                                            />
+                                        )}
                                     </Link>
                                     {!composingTopic && (
-                                        <Button asChild size="sm" className="wb-start-button">
-                                            <Link href="/topics/create">Start a topic<ArrowRight aria-hidden="true" /></Link>
+                                        <Button
+                                            asChild
+                                            size="sm"
+                                            className="wb-start-button"
+                                        >
+                                            <Link href="/topics/create">
+                                                Start a topic
+                                                <ArrowRight aria-hidden="true" />
+                                            </Link>
                                         </Button>
                                     )}
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <button type="button" className="wb-account-trigger" aria-label="Account menu">
-                                                <MemberAvatar name={user.name} src={user.avatar_url} />
-                                                <ChevronDown className="size-3.5" aria-hidden="true" />
+                                            <button
+                                                type="button"
+                                                className="wb-account-trigger"
+                                                aria-label="Account menu"
+                                            >
+                                                <MemberAvatar
+                                                    name={user.name}
+                                                    src={user.avatar_url}
+                                                />
+                                                <ChevronDown
+                                                    className="size-3.5"
+                                                    aria-hidden="true"
+                                                />
                                             </button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-60 p-2">
-                                            <p className="px-2 py-2 text-sm font-semibold [overflow-wrap:anywhere]">{user.name}</p>
+                                        <DropdownMenuContent
+                                            align="end"
+                                            className="w-60 p-2"
+                                        >
+                                            <p className="px-2 py-2 text-sm font-semibold [overflow-wrap:anywhere]">
+                                                {user.name}
+                                            </p>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem asChild><Link href="/topics"><BookOpen aria-hidden="true" />Explore</Link></DropdownMenuItem>
-                                            <DropdownMenuItem asChild><Link href={`/members/${user.username}?view=topics`}><BookOpen aria-hidden="true" />My topics</Link></DropdownMenuItem>
-                                            {props.canModerate && <DropdownMenuItem asChild><Link href="/moderation">Moderation</Link></DropdownMenuItem>}
-                                            <DropdownMenuItem asChild><Link href={`/members/${user.username}`}><UserRound aria-hidden="true" />My public profile</Link></DropdownMenuItem>
-                                            <DropdownMenuItem asChild><Link href="/saved" aria-current={path === '/saved' ? 'page' : undefined}><Bookmark aria-hidden="true" />Saved topics</Link></DropdownMenuItem>
-                                            <DropdownMenuItem asChild><Link href="/settings/profile"><Settings aria-hidden="true" />Account settings</Link></DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/topics">
+                                                    <BookOpen aria-hidden="true" />
+                                                    Explore
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link
+                                                    href={`/members/${user.username}?view=topics`}
+                                                >
+                                                    <BookOpen aria-hidden="true" />
+                                                    My topics
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            {props.canModerate && (
+                                                <DropdownMenuItem asChild>
+                                                    <Link href="/moderation">
+                                                        Moderation
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuItem asChild>
+                                                <Link
+                                                    href={`/members/${user.username}`}
+                                                >
+                                                    <UserRound aria-hidden="true" />
+                                                    My public profile
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link
+                                                    href="/saved"
+                                                    aria-current={
+                                                        path === '/saved'
+                                                            ? 'page'
+                                                            : undefined
+                                                    }
+                                                >
+                                                    <Bookmark aria-hidden="true" />
+                                                    Saved topics
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/settings/profile">
+                                                    <Settings aria-hidden="true" />
+                                                    Account settings
+                                                </Link>
+                                            </DropdownMenuItem>
                                             <DropdownMenuSeparator />
-                                            <DropdownMenuItem asChild><Link href="/logout" method="post" as="button" className="w-full"><LogOut aria-hidden="true" />Log out</Link></DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link
+                                                    href="/logout"
+                                                    method="post"
+                                                    as="button"
+                                                    className="w-full"
+                                                >
+                                                    <LogOut aria-hidden="true" />
+                                                    Log out
+                                                </Link>
+                                            </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </>
                             ) : (
                                 <>
                                     <Link href="/login">Log in</Link>
-                                    <Button asChild size="sm"><Link href="/register">Join Workbine</Link></Button>
+                                    <Button asChild size="sm">
+                                        <Link href="/register">
+                                            Join Workbine
+                                        </Link>
+                                    </Button>
                                 </>
                             )}
                         </nav>
                     </div>
                 </header>
-                <div id="main-content" tabIndex={-1} className="flex-1 outline-none">
+                <div
+                    id="main-content"
+                    tabIndex={-1}
+                    className="flex-1 outline-none"
+                >
                     {children}
                 </div>
                 <footer className="wb-footer">
                     <div className="wb-footer-inner">
-                        <p><strong>workbine.</strong>Practical knowledge, shared person to person.</p>
+                        <p>
+                            <strong>workbine.</strong>Practical knowledge,
+                            shared person to person.
+                        </p>
                         <div className="flex flex-wrap gap-5">
                             <Link href="/community/guide">Community guide</Link>
-                            <Link href="/community/reputation">How reputation works</Link>
-                            {!composingTopic && <Link href="/topics/create">Start a topic</Link>}
+                            <Link href="/community/reputation">
+                                How reputation works
+                            </Link>
+                            {!composingTopic && (
+                                <Link href="/topics/create">Start a topic</Link>
+                            )}
                         </div>
                     </div>
                 </footer>
