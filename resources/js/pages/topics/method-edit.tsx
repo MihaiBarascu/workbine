@@ -1,6 +1,6 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Label } from '@/components/ui/label';
@@ -33,7 +33,9 @@ export default function MethodEdit({
 }: Props) {
     const [initialRevision] = useState(revision);
     const [initiallyProtected] = useState(Boolean(method.protected_at));
-    const [initialSubmissionId] = useState(submissionId);
+    const [currentSubmissionId, setCurrentSubmissionId] = useState(submissionId);
+    const updateConflictRef = useRef<HTMLDivElement>(null);
+    const updateBodyRef = useRef<HTMLTextAreaElement>(null);
     const methodUrl = `/topics/${topic.slug}/methods/${method.id}`;
     const returnUrl = `/topics/${topic.slug}#method-${method.id}`;
 
@@ -85,20 +87,66 @@ export default function MethodEdit({
                         action={`${methodUrl}/updates`}
                         method="post"
                         disableWhileProcessing
+                        onError={(errors) => {
+                            requestAnimationFrame(() => {
+                                if (errors.submission_id) {
+                                    updateConflictRef.current?.focus();
+                                } else {
+                                    updateBodyRef.current?.focus();
+                                }
+                            });
+                        }}
                         className="wb-panel space-y-5"
                     >
-                        {({ processing, errors }) => (
+                        {({ processing, errors, clearErrors }) => (
                             <>
                                 <input
                                     type="hidden"
                                     name="submission_id"
-                                    value={initialSubmissionId}
+                                    value={currentSubmissionId}
                                 />
+                                {errors.submission_id && (
+                                    <div
+                                        ref={updateConflictRef}
+                                        role="alert"
+                                        tabIndex={-1}
+                                        className="space-y-3"
+                                    >
+                                        <InputError
+                                            id="update-submission-error"
+                                            message={errors.submission_id}
+                                        />
+                                        <a
+                                            href={returnUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-primary block text-sm underline underline-offset-4"
+                                        >
+                                            Review published updates (new tab)
+                                        </a>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            className="h-auto whitespace-normal"
+                                            disabled={processing}
+                                            onClick={() => {
+                                                // Only this explicit choice adopts the fresh
+                                                // server-issued key from the validation redirect.
+                                                setCurrentSubmissionId(submissionId);
+                                                clearErrors('submission_id');
+                                                updateBodyRef.current?.focus();
+                                            }}
+                                        >
+                                            Use this draft for a new update
+                                        </Button>
+                                    </div>
+                                )}
                                 <div className="space-y-2">
                                     <Label htmlFor="method-update-body">
                                         Your update
                                     </Label>
                                     <textarea
+                                        ref={updateBodyRef}
                                         className="border-input focus-visible:ring-ring w-full rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none focus-visible:ring-2"
                                         id="method-update-body"
                                         name="body"
@@ -106,7 +154,11 @@ export default function MethodEdit({
                                         maxLength={5000}
                                         rows={6}
                                         aria-invalid={Boolean(errors.body)}
-                                        aria-describedby="update-help update-error"
+                                        aria-describedby={
+                                            errors.submission_id
+                                                ? 'update-help update-error update-submission-error'
+                                                : 'update-help update-error'
+                                        }
                                         placeholder="Add a correction, clarification or something you learned later."
                                     />
                                     <p
@@ -120,9 +172,6 @@ export default function MethodEdit({
                                     <InputError
                                         id="update-error"
                                         message={errors.body}
-                                    />
-                                    <InputError
-                                        message={errors.submission_id}
                                     />
                                 </div>
                                 <div className="flex flex-wrap gap-3">
