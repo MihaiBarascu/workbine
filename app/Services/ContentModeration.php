@@ -126,7 +126,7 @@ class ContentModeration
         $message = $review->status === 'rejected'
             ? __('This submission was not approved (reference #:id). Edit it or contact support to request another review.', ['id' => $review->id])
             : __('This submission needs a content review (reference #:id) and has not been published. Your form is unchanged. You can edit it or retry after approval.', ['id' => $review->id]);
-        if ($review->status === 'pending' && $review->categories === []) {
+        if ($review->status !== 'rejected' && $review->categories === []) {
             $message = __('Automatic checking is unavailable. This submission is awaiting manual review (reference #:id) and has not been published. You can retry after approval.', ['id' => $review->id]);
         }
         throw ValidationException::withMessages([$field => $message]);

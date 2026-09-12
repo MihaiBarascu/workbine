@@ -208,6 +208,7 @@ class ContentModerationTest extends TestCase
             Http::preventStrayRequests();
             Http::fake(['api.openai.com/*' => $response]);
             $this->post(route('topics.store'), ['title' => 'Retain this draft '.$index])->assertSessionHasErrors('title');
+            $this->assertStringContainsString('Automatic checking is unavailable.', session('errors')->first('title'));
             $review = ModerationReview::query()->latest('id')->firstOrFail();
             $this->assertSame([], $review->categories);
             $this->assertSame('pending', $review->status);
