@@ -1,8 +1,10 @@
 // Imported by community-flow.cjs after login. Only the disposable preview app.
 const assert = require('node:assert/strict');
+const { exerciseDiscoveryDraft } = require('./discovery-draft.cjs');
 
 async function exerciseTopicClarity(page, root, output) {
     assert.equal(new URL(root).origin, 'http://127.0.0.1:8000');
+    await exerciseDiscoveryDraft(page, root, output);
     const idea = 'Making time to learn after work';
     const ownTitle = 'My own topic title, before choosing an idea';
 
@@ -156,7 +158,10 @@ async function exerciseTopicClarity(page, root, output) {
     // A browser-valid URL the existing server rejects; nothing is published.
     await page.locator('#method_source_url').fill('ftp://example.com/source');
     await page
-        .getByRole('button', { name: 'Publish topic & method', exact: true })
+        .getByRole('button', {
+            name: 'Publish topic & method',
+            exact: true,
+        })
         .click();
     await page
         .getByRole('heading', {
