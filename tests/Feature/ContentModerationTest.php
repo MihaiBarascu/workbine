@@ -15,6 +15,7 @@ use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Socialite\Facades\Socialite;
@@ -196,23 +197,88 @@ class ContentModerationTest extends TestCase
         $this->assertSame([], Storage::disk('public')->allFiles());
     }
 
-    public function test_outage_rate_limit_and_malformed_results_do_not_publish_or_create_fake_reviews(): void
+    public function test_provider_failures_create_private_manual_reviews_without_violation_categories(): void
     {
-        $this->actingAs(User::factory()->create());
-        foreach ([Http::response([], 429), Http::response([], 500), Http::response(['results' => []]), Http::response(['results' => [['categories' => ['sexual' => 'false']]]])] as $response) {
+        $user = User::factory()->create();
+        $admin = $this->admin();
+        $this->actingAs($user);
+        $responses = [Http::response([], 429), Http::response([], 500), Http::response(['results' => []]), Http::response(['results' => [['categories' => ['sexual' => 'false']]]]), Http::failedConnection()];
+        foreach ($responses as $index => $response) {
             Http::swap(new Factory);
             Http::preventStrayRequests();
             Http::fake(['api.openai.com/*' => $response]);
-            $this->post(route('topics.store'), ['title' => 'Retain this draft'])->assertSessionHasErrors('title');
+            $this->post(route('topics.store'), ['title' => 'Retain this draft '.$index])->assertSessionHasErrors('title');
+            $this->assertStringContainsString('Automatic checking is unavailable.', session('errors')->first('title'));
+            $review = ModerationReview::query()->latest('id')->firstOrFail();
+            $this->assertSame([], $review->categories);
+            $this->assertSame('pending', $review->status);
         }
-        Http::swap(new Factory);
-        Http::preventStrayRequests();
-        Http::fake(['api.openai.com/*' => Http::failedConnection()]);
-        $this->post(route('topics.store'), ['title' => 'Retain this draft'])->assertSessionHasErrors('title');
         config(['moderation.api_key' => '']);
-        $this->post(route('topics.store'), ['title' => 'Retain this draft'])->assertSessionHasErrors('title');
+        $data = ['title' => 'Draft during unavailable configuration'];
+        $this->post(route('topics.store'), $data)->assertSessionHasErrors('title');
+        $this->post(route('topics.store'), $data)->assertSessionHasErrors('title');
         $this->assertDatabaseCount('topics', 0);
-        $this->assertDatabaseCount('moderation_reviews', 0);
+        $this->assertDatabaseCount('moderation_reviews', 6);
+        $review = ModerationReview::query()->latest('id')->firstOrFail();
+        $this->assertStringNotContainsString($data['title'], DB::table('moderation_reviews')->where('id', $review->id)->value('payload'));
+        $this->actingAs($admin)->get(route('moderation.show', ['review', $review->id]))
+            ->assertInertia(fn (Assert $page) => $page->where('item.reasons.0', 'Automatic checking unavailable — manual review required. No violation has been determined.'));
+        $this->post(route('moderation.decide', ['review', $review->id]), [
+            'action' => 'approve', 'note' => 'Manually checked during provider outage.', 'publishing' => 'unchanged',
+        ])->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('topics', 0);
+        $this->actingAs($user)->post(route('topics.store'), $data)->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('topics', 1);
+        $this->post(route('topics.store'), ['title' => 'Changed content still requires review'])->assertSessionHasErrors('title');
+        $this->assertDatabaseCount('topics', 1);
+    }
+
+    public function test_outage_image_is_private_until_human_approval_and_resubmission(): void
+    {
+        $this->provider([], 503);
+        config(['media.enabled' => true, 'media.disk' => 'public']);
+        Storage::fake('public');
+        $user = User::factory()->create();
+        $admin = $this->admin();
+        $file = UploadedFile::fake()->image('benign.jpg');
+        $this->actingAs($user)->post(route('profile.avatar.store'), ['avatar' => $file])->assertSessionHasErrors('avatar');
+        $review = ModerationReview::query()->firstOrFail();
+        $this->assertSame([], $review->categories);
+        $this->assertSame([], Storage::disk('public')->allFiles());
+        $this->assertDatabaseCount('media_images', 0);
+        $this->get(route('moderation.image', $review->id))->assertForbidden();
+        $this->actingAs($admin)->get(route('moderation.image', $review->id))->assertOk();
+        $this->post(route('moderation.decide', ['review', $review->id]), [
+            'action' => 'approve', 'note' => 'Benign image manually verified.', 'publishing' => 'unchanged',
+        ])->assertSessionHasNoErrors();
+        $this->actingAs($user)->post(route('profile.avatar.store'), ['avatar' => $file])->assertSessionHasNoErrors();
+        Http::assertSentCount(1);
+        $this->assertNotNull($user->refresh()->avatar_image_id);
+    }
+
+    public function test_outage_fallback_respects_capacity_local_throttles_and_guest_registration(): void
+    {
+        $this->provider([], 503);
+        $user = User::factory()->create();
+        config(['moderation.reviews_per_user' => 1]);
+        $this->actingAs($user)->post(route('topics.store'), ['title' => 'First outage draft'])->assertSessionHasErrors('title');
+        $this->post(route('topics.store'), ['title' => 'Second outage draft'])->assertSessionHasErrors('title');
+        $this->assertDatabaseCount('moderation_reviews', 1);
+        config(['moderation.reviews_per_user' => 20]);
+        RateLimiter::increment('moderation:'.$user->id, 60, 30);
+        $this->post(route('topics.store'), ['title' => 'Locally throttled draft'])->assertSessionHasErrors('title');
+        $this->assertDatabaseCount('moderation_reviews', 1);
+        Http::assertSentCount(2);
+        RateLimiter::clear('moderation:'.$user->id);
+        RateLimiter::increment('moderation:global', 60, 200);
+        $this->post(route('topics.store'), ['title' => 'Globally throttled draft'])->assertSessionHasErrors('title');
+        Http::assertSentCount(2);
+        $this->assertDatabaseCount('moderation_reviews', 1);
+        RateLimiter::clear('moderation:global');
+        $this->app['auth']->forgetGuards();
+        $this->post(route('register.store'), ['name' => 'New member', 'email' => 'outage@example.test', 'password' => 'password', 'password_confirmation' => 'password'])->assertSessionHasErrors('name');
+        $this->assertDatabaseMissing('users', ['email' => 'outage@example.test']);
+        $this->assertDatabaseCount('moderation_reviews', 1);
     }
 
     public function test_review_routes_are_denied_to_guests_members_and_unverified_admins(): void

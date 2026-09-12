@@ -108,13 +108,28 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .fill('MODERATION_OUTAGE retain my draft');
         await member.locator('button[type=submit]').click();
         await member
-            .getByText(/Content checking is temporarily unavailable/)
+            .getByText(/Automatic checking is unavailable/)
             .first()
             .waitFor();
         assert.equal(
             await member.locator('input[name=title]').inputValue(),
             'MODERATION_OUTAGE retain my draft',
         );
+        await admin.goto(`${root}/moderation`);
+        await admin
+            .getByRole('link', { name: /New topic/ })
+            .first()
+            .click();
+        await admin.getByText(/No violation has been determined/).waitFor();
+        await capture(admin, 'moderation-outage-review-mobile', 375);
+        await admin.locator('#decision').selectOption('approve');
+        await admin
+            .locator('#review-note')
+            .fill('Benign draft manually checked during outage.');
+        await admin.getByRole('button', { name: 'Save decision' }).click();
+        await admin.getByText(/Status: approved/).waitFor();
+        await member.locator('button[type=submit]').click();
+        await member.waitForURL(/\/topics\/moderation-outage-retain-my-draft$/);
         await member.goto(`${root}/settings/profile`);
         const image = await member.evaluate(() => {
             const canvas = document.createElement('canvas');

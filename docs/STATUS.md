@@ -51,8 +51,8 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   member's own experience available independently of pagination.
 - Optional OpenAI moderation checks public text and processed images before
   publication. Held submissions and community reports share a private Moderation
-  page for configured verified administrators. Human decisions, exact-content
-  resubmission and manual publishing suspension reuse the monolith. Existing public
+  page for configured verified administrators. Provider outages send member submissions to manual review without a violation
+  classification. Human decisions, exact-content resubmission and manual publishing suspension reuse the monolith. Existing public
   image URLs require separate removal when necessary. Activation and live provider
   access are separate from code availability. See [MODERATION.md](MODERATION.md).
 - Branded HTTP errors cover normal and Inertia visits while preserving status,
