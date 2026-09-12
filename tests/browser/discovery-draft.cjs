@@ -61,9 +61,9 @@ async function exerciseDiscoveryDraft(page, root, output) {
         await page
             .getByRole('button', { name: `Use idea: ${idea}`, exact: true })
             .click();
-        await page.getByRole('searchbox', { name: 'Search topics' }).fill(
-            '  customer  ',
-        );
+        await page
+            .getByRole('searchbox', { name: 'Search topics' })
+            .fill('  customer  ');
         await page.getByRole('button', { name: 'Search', exact: true }).click();
         await listingReady('customer', 'latest');
         await page.locator('.wb-search-state').waitFor();
@@ -73,10 +73,15 @@ async function exerciseDiscoveryDraft(page, root, output) {
             .click();
         await listingReady('customer', 'unanswered');
         await page
-            .getByRole('heading', { name: 'No matching topics yet', exact: true })
+            .getByRole('heading', {
+                name: 'No matching topics yet',
+                exact: true,
+            })
             .waitFor();
         await draftIs(idea);
-        await page.getByRole('link', { name: 'Clear search', exact: true }).click();
+        await page
+            .getByRole('link', { name: 'Clear search', exact: true })
+            .click();
         await listingReady('', 'unanswered');
         await page.locator('.wb-search-state').waitFor({ state: 'detached' });
         await draftIs(idea);
@@ -88,13 +93,16 @@ async function exerciseDiscoveryDraft(page, root, output) {
         await page
             .getByRole('button', { name: `Use idea: ${idea}`, exact: true })
             .click();
-        await page.getByRole('searchbox', { name: 'Search topics' }).fill(
-            'workbine-draft-no-match',
-        );
+        await page
+            .getByRole('searchbox', { name: 'Search topics' })
+            .fill('workbine-draft-no-match');
         await page.getByRole('button', { name: 'Search', exact: true }).click();
         await listingReady('workbine-draft-no-match', 'latest');
         await page
-            .getByRole('heading', { name: 'No matching topics yet', exact: true })
+            .getByRole('heading', {
+                name: 'No matching topics yet',
+                exact: true,
+            })
             .waitFor();
         await draftIs(idea);
         for (const width of [320, 1440]) {
@@ -151,12 +159,14 @@ async function exerciseDiscoveryDraft(page, root, output) {
                 last_page: 2,
                 from: currentPage,
                 to: currentPage,
-                prev_page_url: currentPage === 2
-                    ? `${root}/topics?view=latest&q=&page=1`
-                    : null,
-                next_page_url: currentPage === 1
-                    ? `${root}/topics?view=latest&q=&page=2`
-                    : null,
+                prev_page_url:
+                    currentPage === 2
+                        ? `${root}/topics?view=latest&q=&page=1`
+                        : null,
+                next_page_url:
+                    currentPage === 1
+                        ? `${root}/topics?view=latest&q=&page=2`
+                        : null,
             };
             await route.fulfill({ response, json: fixture });
         };
@@ -177,7 +187,9 @@ async function exerciseDiscoveryDraft(page, root, output) {
 
         await page.getByRole('button', { name: 'Undo', exact: true }).click();
         await draftIs(ownTitle);
-        await page.getByRole('button', { name: 'Continue', exact: true }).click();
+        await page
+            .getByRole('button', { name: 'Continue', exact: true })
+            .click();
         await page.waitForURL(/\/topics\/create\?/);
         assert.equal(await page.locator('#title').inputValue(), ownTitle);
         await page
@@ -185,7 +197,11 @@ async function exerciseDiscoveryDraft(page, root, output) {
             .click();
         await listingReady('', 'latest');
         await draftIs('');
-        assert.deepEqual(writes, [], 'Exploring a draft never publishes content');
+        assert.deepEqual(
+            writes,
+            [],
+            'Exploring a draft never publishes content',
+        );
         console.log(
             'PASS discovery draft: filters, normalized search, clear, empty recovery, pagination fixture, Undo, title handoff and no writes',
         );
