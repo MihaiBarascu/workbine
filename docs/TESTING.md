@@ -86,9 +86,38 @@ temporary workflow to commit and remove. Do not introduce general push-triggered
 workflows to work around a missing tool. Remote checks consume Actions usage;
 choose one remote request method and do not also run the full local suite.
 
-`production-smoke.yml` remains an optional, manually dispatched read-only live
-check. The historical bootstrap workflow is not a test command. Do not invoke it
-for ordinary development. No cron or unattended coding agent is enabled.
+## Read-only production verification
+
+`production-smoke.yml` is separate from the isolated release gate. It does not
+create accounts, topics, methods, experiences or uploads. Run it only when a
+release needs live confirmation, either with workflow dispatch or by adding
+`verify-production` to a same-repository PR.
+
+For a PR-label request the workflow intentionally verifies the PR **base SHA**,
+which should be the `main` release already expected in production, rather than the
+proposed PR head. The workflow checks out that source, builds the repository
+Dockerfile, extracts the production Vite manifest and compares the public release
+with that build. It prefers the full public `/build/manifest.json`; if that path
+returns 404, it falls back to checking the exact application entry asset in the
+public HTML. It also checks `/up`, bounded search behavior and the public topic
+listing without writing production data.
+
+This closes an important ambiguity for frontend releases: a healthy but stale
+frontend no longer counts as confirmation. It is still not a universal commit
+attestation. Runtime environment values, external OAuth/mail/storage providers
+and a backend-only revision whose frontend build is unchanged need their own
+applicable evidence. Zero public topics also means topic-detail and experience
+pages cannot be sampled by the read-only smoke; never seed production to improve
+coverage.
+
+Keeping `verify-production` on a PR does not re-run the check after later events.
+Remove and re-add it for a fresh explicit request. Do not substitute a historical
+rerun whose expected source differs from the current release.
+
+The historical bootstrap workflow is not a test command. Do not invoke it for
+ordinary development. The historical repository-hosted coding agent remains
+cancelled; explicit owner-requested development sessions are separate and do not
+reactivate that workflow.
 
 References: [GitHub manual workflow documentation](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)
 and [pull request label events](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#pull_request).
@@ -103,8 +132,12 @@ and [pull request label events](https://docs.github.com/en/actions/reference/wor
    the current PR head. Review UI artifacts before merging interface changes.
 4. Fix failures on the branch and request fresh checks for the new revision.
    A previous commit's green checks do not validate later changes.
-5. Merge only after current results pass. `main` deploys automatically; do not
-   invoke deployment manually or run synthetic mutations against production.
+5. Before a subsequent release when live state matters, use the read-only
+   production verification and distinguish its base/source evidence from PR-head
+   test evidence.
+6. Merge only after current results pass and the current base is still the tested
+   base. `main` deploys automatically; do not invoke deployment manually or run
+   synthetic mutations against production.
 
 ## Handoff between environments
 
