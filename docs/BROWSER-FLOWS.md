@@ -56,6 +56,20 @@ moderation visibility and changes to verification eligibility retain their backe
 checks in [ReputationTest.php](../tests/Feature/ReputationTest.php); this one journey
 does not attest all reputation permutations or external provider behavior.
 
+## Product integrity gap identified during review
+
+Experiences currently reference a method ID, not an immutable revision of its
+content. Editing a method can therefore leave earlier positive outcomes beside
+materially changed instructions. The edit-conflict token prevents overwriting a
+concurrent edit; it is not a historical revision record. Current passing tests do
+not resolve this trust problem.
+
+Experience authors can change their own result, and current-record reputation
+recalculates accordingly. Experiences themselves do not receive review scores.
+Before launch, define how method revisions retain the context of earlier
+experiences (or a simpler restriction on replacing already-tried instructions).
+No version-history product behavior was added by this testing change.
+
 ## Highest-priority remaining browser gaps
 
 - Password-reset token receipt, reset submission and relogin need a controlled
