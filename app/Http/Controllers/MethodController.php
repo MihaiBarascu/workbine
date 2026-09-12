@@ -20,6 +20,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Inertia\Support\SessionKey;
 
 class MethodController extends Controller
 {
@@ -69,6 +70,12 @@ class MethodController extends Controller
     public function addUpdate(Request $request, Topic $topic, Method $method): RedirectResponse
     {
         abort_unless($request->user()?->getAuthIdentifier() === $method->user_id, 403);
+
+        // A lost response can leave the previous success in this session.
+        // Feedback on this submission must describe its own outcome, including
+        // validation and moderation failures. Leave unrelated flash data intact.
+        $request->session()->forget(SessionKey::FLASH_DATA.'.toast');
+
         $data = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
             'submission_id' => ['required', 'uuid'],
