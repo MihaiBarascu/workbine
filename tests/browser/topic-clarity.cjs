@@ -106,6 +106,11 @@ async function exerciseTopicClarity(page, root, output) {
         .fill(
             'I practised one small task after dinner, then wrote down what helped. A reminder made it easier to remember.',
         );
+    await page
+        .getByText('Add a source', {
+            exact: true,
+        })
+        .click();
     await page.locator('#method_source_url').fill('https://example.com/source');
     await include.uncheck();
     const inactiveData = await page.locator('#title').evaluate((input) => {
@@ -125,19 +130,12 @@ async function exerciseTopicClarity(page, root, output) {
         'One small step after dinner',
     );
     assert.ok(
-        (await page.locator('#method_body').inputValue()).includes(
-            'A reminder',
-        ),
+        (await page.locator('#method_body').innerText()).includes('A reminder'),
     );
     assert.equal(
         await page.locator('#method_source_url').inputValue(),
         'https://example.com/source',
     );
-    await page.getByText('Need a little guidance?', { exact: true }).click();
-    await page
-        .getByText('What should someone do first, then next?', { exact: true })
-        .waitFor();
-
     for (const width of [320, 1440]) {
         await page.setViewportSize({ width, height: 1000 });
         for (const colorScheme of ['light', 'dark']) {

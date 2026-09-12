@@ -269,95 +269,85 @@ const { chromium } = requireBrowser('playwright');
         await page.locator('select[name="outcome"]').selectOption('worked');
         const experienceBody =
             'I tested this approach with a small weekly batch and documented the outcome in this synthetic public evidence image.';
-        await page.locator('textarea[name="body"]').fill(experienceBody);
+        await page.locator('[contenteditable="true"]').fill(experienceBody);
+        await page
+            .getByText('Add a date or supporting link', { exact: true })
+            .click();
         await page
             .locator('input[name="evidence_url"]')
             .fill('ftp://example.test/evidence');
-        await page.locator('#evidence_image').setInputFiles(blue);
-        await loaded(page.getByAltText('Selected photo preview'));
         await page
-            .getByRole('button', { name: 'Publish my experience', exact: true })
+            .getByRole('textbox', { name: 'How did it go?' })
+            .press('ControlOrMeta+End');
+        await page
+            .getByLabel('Upload photo', { exact: true })
+            .setInputFiles(blue);
+        await page.locator('.wb-editor img').waitFor();
+        await loaded(page.locator('.wb-editor img'));
+        await page
+            .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
         await page.locator('#evidence-url-error').waitFor();
         assert.equal(
-            await page
-                .locator('#evidence_image')
-                .evaluate((node) => node.files.length),
+            await page.locator('.wb-editor img').count(),
             1,
-            'Validation preserves the selected file',
+            'Validation preserves uploaded photos',
         );
-        assert.equal(
-            await page.locator('textarea[name="body"]').inputValue(),
-            experienceBody,
-            'Validation preserves the written experience',
+        assert.ok(
+            (
+                await page.locator('[contenteditable="true"]').innerText()
+            ).includes(experienceBody),
+            'Validation preserves text',
         );
         await page
             .locator('input[name="evidence_url"]')
             .fill('https://example.test/evidence');
-        const upload = page.waitForRequest(
-            (request) =>
-                request.method() === 'POST' &&
-                request.url().endsWith('/experience'),
-        );
         await page
-            .getByRole('button', { name: 'Publish my experience', exact: true })
+            .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
-        const uploadRequest = await upload;
-        assert.match(
-            uploadRequest.headers()['content-type'],
-            /^multipart\/form-data;/,
-        );
-        assert.equal(
-            await page.locator('input[name="_method"]').inputValue(),
-            'put',
-            'Multipart form keeps the update method override',
-        );
         const article = page
             .locator('main article')
             .filter({ hasText: experienceBody });
-        const evidence = article.getByAltText(
-            'Evidence shared by Media test contributor',
-        );
+        const evidence = article.locator('.wb-rich-text img');
         await loaded(evidence);
         const imageUrl = await evidence.getAttribute('src');
-        const imageResponse = await context.request.get(imageUrl);
-        assert.equal(imageResponse.status(), 200);
-        assert.match(imageResponse.headers()['content-type'], /^image\/webp/);
-        const bytes = await imageResponse.body();
-        assert.equal(bytes.subarray(0, 4).toString(), 'RIFF');
-        assert.equal(bytes.subarray(8, 12).toString(), 'WEBP');
-        assert.equal(
-            await page
-                .locator('#evidence_image')
-                .evaluate((node) => node.files.length),
-            0,
-            'Successful publication clears the file selection',
-        );
+        const response = await context.request.get(imageUrl);
+        assert.equal(response.status(), 200);
+        assert.match(response.headers()['content-type'], /^image\/webp/);
         const experienceUrl = page.url();
         await page.reload();
         await loaded(evidence);
-        assert.equal(
-            await evidence.getAttribute('src'),
-            imageUrl,
-            'Evidence persists after reload',
-        );
+        assert.equal(await evidence.getAttribute('src'), imageUrl);
         await responsiveCaptures('media-experience');
-
-        await page.locator('#evidence_image').setInputFiles(grey);
         await page
-            .getByRole('button', { name: 'Update my experience', exact: true })
+            .locator('[contenteditable="true"]')
+            .press('ControlOrMeta+End');
+        await page
+            .getByLabel('Upload photo', { exact: true })
+            .setInputFiles(grey);
+        await page.waitForFunction(
+            () => document.querySelectorAll('.wb-editor img').length === 2,
+        );
+        await page
+            .getByRole('button', { name: 'Update my response', exact: true })
             .click();
         await page.waitForFunction(
-            (previous) =>
-                [...document.querySelectorAll('main article img')].some(
-                    (image) =>
-                        image.alt ===
-                            'Evidence shared by Media test contributor' &&
-                        image.src !== previous,
-                ),
-            imageUrl,
+            () =>
+                document.querySelectorAll('main article .wb-rich-text img')
+                    .length === 2,
         );
-        await loaded(evidence);
+        await page.locator(`.wb-editor img[src="${imageUrl}"]`).click();
+        await page
+            .getByRole('button', { name: 'Remove photo', exact: true })
+            .click();
+        await page
+            .getByRole('button', { name: 'Update my response', exact: true })
+            .click();
+        await page.waitForFunction(
+            () =>
+                document.querySelectorAll('main article .wb-rich-text img')
+                    .length === 1,
+        );
         assert.notEqual(await evidence.getAttribute('src'), imageUrl);
         const evidencePage = `${root}${new URL(experienceUrl).pathname}`;
         await hideUploadControlsOnVisits(evidencePage);
@@ -367,39 +357,139 @@ const { chromium } = requireBrowser('playwright');
         await page
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
-        await loaded(evidence);
         assert.equal(
-            await page.locator('#evidence_image').count(),
+            await page
+                .getByRole('button', { name: 'Photo', exact: true })
+                .count(),
             0,
-            'Paused uploads hide evidence file selection',
         );
+        await page.locator('.wb-editor img').click();
         await page
-            .getByRole('checkbox', {
-                name: 'Remove the current photo when I save',
-            })
-            .check();
+            .getByRole('button', { name: 'Remove photo', exact: true })
+            .click();
         await page
-            .getByRole('button', { name: 'Update my experience', exact: true })
+            .getByRole('button', { name: 'Update my response', exact: true })
             .click();
         await evidence.waitFor({ state: 'detached' });
         await page.unroute(evidencePage);
         await page.reload();
-        assert.equal(
-            await article.locator('img[alt^="Evidence shared"]').count(),
-            0,
-        );
+        assert.equal(await article.locator('.wb-rich-text img').count(), 0);
         assert.equal(
             await article
                 .getByRole('link', { name: 'View shared evidence' })
                 .getAttribute('href'),
             'https://example.test/evidence',
-            'Removing a photo preserves the separate evidence link',
+        );
+        // The same editor also publishes and edits a method with formatting and photos.
+        await page.goto(`${root}/topics/create`);
+        await page.locator('#title').fill('Sharing a clear visual method');
+        await page.locator('#include_method').check();
+        await page
+            .locator('#method_title')
+            .fill('Keep the explanation beside the photo');
+        const methodEditor = page.locator('#method_body');
+        await methodEditor.fill('Start with a small repeatable action.');
+        await methodEditor.press('ControlOrMeta+a');
+        await page.getByRole('button', { name: 'Bold', exact: true }).click();
+        await methodEditor.press('ArrowRight');
+        await methodEditor.press('Enter');
+        await page
+            .getByRole('button', { name: 'Numbered steps', exact: true })
+            .click();
+        await page.keyboard.insertText('Show the first action.');
+        await page.keyboard.press('Enter');
+        await page.keyboard.insertText('Check the result.');
+        await page.keyboard.press('Enter');
+        await page.keyboard.press('Enter');
+        await page
+            .getByRole('button', { name: 'Add link', exact: true })
+            .click();
+        await page
+            .getByLabel('Link address', { exact: true })
+            .fill('https://example.test/reference');
+        await page
+            .getByRole('button', { name: 'Apply link', exact: true })
+            .click();
+        // Exercise clipboard image handling, including text retention on a failed upload.
+        await page.getByLabel('Upload photo', { exact: true }).setInputFiles({
+            name: 'invalid.svg',
+            mimeType: 'image/svg+xml',
+            buffer: Buffer.from('<svg></svg>'),
+        });
+        await page
+            .getByText('Choose a JPEG, PNG or WebP photo', { exact: false })
+            .waitFor();
+        await methodEditor.evaluate((element, base64) => {
+            const bytes = Uint8Array.from(atob(base64), (character) =>
+                character.charCodeAt(0),
+            );
+            const clipboardData = new DataTransfer();
+            clipboardData.items.add(
+                new File([bytes], 'clipboard.png', { type: 'image/png' }),
+            );
+            element.dispatchEvent(
+                new ClipboardEvent('paste', {
+                    clipboardData,
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        }, blue.buffer.toString('base64'));
+        await loaded(page.locator('.wb-editor img'));
+        await page.locator('.wb-editor img').click();
+        await page
+            .getByLabel('Describe this photo for people who cannot see it')
+            .fill('The completed first step');
+        await page
+            .getByRole('button', {
+                name: 'Publish topic & method',
+                exact: true,
+            })
+            .click();
+        await page.waitForURL(/sharing-a-clear-visual-method$/);
+        const methodArticle = page
+            .locator('article')
+            .filter({ hasText: 'Keep the explanation beside the photo' });
+        await methodArticle.locator('strong').first().waitFor();
+        assert.equal(await methodArticle.locator('ol li').count(), 2);
+        assert.equal(
+            await methodArticle
+                .getByRole('link', {
+                    name: 'https://example.test/reference',
+                    exact: true,
+                })
+                .getAttribute('href'),
+            'https://example.test/reference',
+        );
+        await loaded(methodArticle.getByAltText('The completed first step'));
+        await responsiveCaptures('rich-method');
+        await methodArticle
+            .getByRole('link', { name: 'Edit method', exact: true })
+            .click();
+        await page.locator('.wb-editor img').waitFor();
+        assert.equal(await page.locator('.wb-editor ol li').count(), 2);
+        await page.locator('.wb-editor img').click();
+        await page
+            .getByRole('button', { name: 'Remove photo', exact: true })
+            .click();
+        await page
+            .getByRole('button', { name: 'Save changes', exact: true })
+            .click();
+        await methodArticle.waitFor();
+        assert.equal(
+            await methodArticle.locator('.wb-rich-text img').count(),
+            0,
+        );
+        console.log(
+            'PASS shared method editor: bold, numbered steps, links, clipboard photos, alt text, editing and removal',
         );
         await context.clearCookies();
         await page.goto(experienceUrl);
         await article.waitFor();
         assert.equal(
-            await page.locator('#evidence_image').count(),
+            await page
+                .getByRole('button', { name: 'Photo', exact: true })
+                .count(),
             0,
             'Guests cannot upload',
         );

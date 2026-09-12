@@ -1,3 +1,5 @@
+import type { RichTextNode } from '@/components/rich-text-content';
+
 export type PublicMember = {
     id: number;
     name: string;
@@ -32,6 +34,7 @@ export type MethodSummary = {
     id: number;
     title: string;
     body: string;
+    body_document?: RichTextNode | null;
     source_url: string | null;
     created_at: string | null;
     updated_at: string | null;
@@ -53,6 +56,7 @@ export type ExperienceSummary = {
     id: number;
     outcome: ExperienceOutcome;
     body: string;
+    body_document?: RichTextNode | null;
     evidence_url: string | null;
     evidence_image: SharedImage | null;
     tried_on: string | null;

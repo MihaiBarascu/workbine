@@ -38,7 +38,7 @@ conformance or measured audience growth.
 
 ## Screens and behavior
 
-The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public text is rendered as text, not injected HTML; website links accept only HTTP/HTTPS. Profile photos and one evidence image per experience are optional. Custom avatars use the shared image component with initials as a fallback; the Google avatar remains separate. See [MEDIA.md](MEDIA.md) for the deployed upload behavior.
+The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public contribution rich text uses allowlisted React elements, not injected HTML; website links accept only HTTP/HTTPS. Profile photos and inline contribution photos are optional; legacy evidence images retain their controls. See [RICH-TEXT.md](RICH-TEXT.md) for the shared editor. Custom avatars use the shared image component with initials as a fallback; the Google avatar remains separate. See [MEDIA.md](MEDIA.md) for the deployed upload behavior.
 
 Each member has one unique lowercase username, separate from their display name. Profile settings show the current public URL and explain that changing the username makes the previous one available to others. Numeric profile links redirect to the current username; previous usernames are not retained as aliases.
 
@@ -53,3 +53,11 @@ The cancelled coding agent and cron remain removed. Only explicitly requested de
 - Creliq UX/UI Design Agency, Community Feed Dashboard UI for Learning Platform: https://dribbble.com/shots/27266379-Community-Feed-Dashboard-UI-for-Learning-Platform - supporting reference for content/navigation organization, not its color palette.
 
 These are attributed design portfolios, not evidence that those interfaces passed usability research. No illustrations, personal photos or assets are copied. Validation here means the repository's own functional/privacy tests plus actual browser and visual review; it does not claim audience growth or independent human usability testing.
+
+## Contribution writing — 2026-09-12
+
+Optimize for the person explaining something, including someone writing a short
+response on a phone. Methods and responses share a small rich-text toolbar and
+inline photos. Use gentle writing guidance instead of mandatory sections, step
+counts or minimum lengths. Reveal secondary source/date/link controls only when
+needed. Keep validation recoverable and publication explicit.

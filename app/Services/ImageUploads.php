@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Experience;
 use App\Models\MediaImage;
+use App\Models\Method;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -157,26 +159,32 @@ class ImageUploads
             return true;
         }
 
-        // References are removed in a committed transaction before this is called.
-        if (! MediaImage::query()->whereKey($image->id)->unreferenced()->exists()) {
-            return false;
-        }
-
-        $image->update(['pending_deletion' => true]);
-
-        try {
-            if (! Storage::disk($image->disk)->delete($image->path)) {
-                throw new \RuntimeException('Image storage did not acknowledge the deletion.');
+        return DB::transaction(function () use ($image): bool {
+            $image = MediaImage::query()->whereKey($image->id)->lockForUpdate()->first();
+            if ($image === null) {
+                return true;
+            }
+            // References are removed in a committed transaction before this is called.
+            if (! MediaImage::query()->whereKey($image->id)->unreferenced()->exists()) {
+                return false;
             }
 
-            $image->delete();
+            $image->update(['pending_deletion' => true]);
 
-            return true;
-        } catch (Throwable $exception) {
-            Log::warning('Image deletion needs retry.', ['image_id' => $image->id, 'exception' => $exception::class]);
+            try {
+                if (! Storage::disk($image->disk)->delete($image->path)) {
+                    throw new \RuntimeException('Image storage did not acknowledge the deletion.');
+                }
 
-            return false;
-        }
+                $image->delete();
+
+                return true;
+            } catch (Throwable $exception) {
+                Log::warning('Image deletion needs retry.', ['image_id' => $image->id, 'exception' => $exception::class]);
+
+                return false;
+            }
+        });
     }
 
     public function deleteAccount(User $user): void
@@ -184,7 +192,13 @@ class ImageUploads
         $images = DB::transaction(function () use ($user) {
             $locked = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
             $images = MediaImage::query()
-                ->whereHas('avatars', fn ($query) => $query->whereKey($user->id))
+                ->where(fn ($query) => $query->where('user_id', $user->id)->where('rich_text', true))
+                ->orWhereIn('rich_method_id', Method::withoutGlobalScopes()->select('id')->where('user_id', $user->id)
+                    ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)))
+                ->orWhereIn('rich_experience_id', Experience::withoutGlobalScopes()->select('id')->where('user_id', $user->id)
+                    ->orWhereHas('method', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)
+                        ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id))))
+                ->orWhereHas('avatars', fn ($query) => $query->whereKey($user->id))
                 ->orWhereHas('experiences', fn ($query) => $query->where('user_id', $user->id)
                     ->orWhereHas('method', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)
                         ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id))))

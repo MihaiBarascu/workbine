@@ -11,7 +11,7 @@ class ContributionRevision
     {
         $fields = $contribution instanceof Topic
             ? ['title', 'description']
-            : ['title', 'body', 'source_url'];
+            : ['title', 'body', 'body_document', 'source_url'];
 
         // Content also distinguishes edits saved within the same timestamp second.
         return hash('sha256', json_encode($contribution->only($fields), JSON_THROW_ON_ERROR));

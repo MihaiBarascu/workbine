@@ -75,16 +75,19 @@ const { chromium } = browserRequire('playwright');
         );
         await page.locator('select[name="outcome"]').selectOption('partly');
         await page
-            .locator('textarea[name="body"]')
+            .locator('[contenteditable="true"]')
             .fill(
                 'I tested this with three product imports. It saved time, but inconsistent supplier files still needed manual corrections.',
             );
+        await page
+            .getByText('Add a date or supporting link', { exact: true })
+            .click();
         await page.locator('input[name="tried_on"]').fill('2025-01-15');
         await page
             .locator('input[name="evidence_url"]')
             .fill('https://example.com/public-evidence');
         await page
-            .getByRole('button', { name: 'Publish my experience', exact: true })
+            .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
         await page
             .getByRole('heading', { name: '1 experience', exact: true })
@@ -101,12 +104,12 @@ const { chromium } = browserRequire('playwright');
 
         await page.locator('select[name="outcome"]').selectOption('worked');
         await page
-            .locator('textarea[name="body"]')
+            .locator('[contenteditable="true"]')
             .fill(
                 'After adding one validation step, the repeated imports worked reliably. This is an update, not a second vote.',
             );
         await page
-            .getByRole('button', { name: 'Update my experience', exact: true })
+            .getByRole('button', { name: 'Update my response', exact: true })
             .click();
         await page
             .locator('main article')
@@ -115,7 +118,7 @@ const { chromium } = browserRequire('playwright');
         assert.equal(await page.locator('main article').count(), 1);
         page.once('dialog', (dialog) => dialog.accept());
         await page
-            .getByRole('button', { name: 'Remove my experience', exact: true })
+            .getByRole('button', { name: 'Remove my response', exact: true })
             .click();
         await page
             .getByRole('heading', { name: '0 experiences', exact: true })
@@ -126,12 +129,12 @@ const { chromium } = browserRequire('playwright');
             .locator('select[name="outcome"]')
             .selectOption('did_not_work');
         await page
-            .locator('textarea[name="body"]')
+            .locator('[contenteditable="true"]')
             .fill(
                 'This did not fit our workflow because every supplier used a different format. I would standardize the inputs before trying again.',
             );
         await page
-            .getByRole('button', { name: 'Publish my experience', exact: true })
+            .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
         await page
             .getByRole('heading', { name: '1 experience', exact: true })
@@ -191,7 +194,7 @@ const { chromium } = browserRequire('playwright');
             .locator('input[name="title"]')
             .fill('Reserve one small repeatable task');
         await page
-            .locator('textarea[name="body"]')
+            .locator('[contenteditable="true"]')
             .fill(
                 'I reserve twenty minutes for one repeatable task, write down the result, and stop before adding another task.',
             );
@@ -255,14 +258,20 @@ const { chromium } = browserRequire('playwright');
             .fill('Check a small batch before importing everything');
         const methodBody =
             'I mapped supplier columns, tested ten products, then imported the remaining files. The weekly import was quicker, but new supplier formats still needed review.';
-        await page.locator('textarea[name="method_body"]').fill(methodBody);
+        await page.locator('#method_body').fill(methodBody);
         await includeMethod.uncheck();
         await includeMethod.check();
         assert.equal(
-            await page.locator('textarea[name="method_body"]').inputValue(),
+            await page.locator('#method_body').innerText(),
             methodBody,
             'Toggling the optional method preserves the draft',
         );
+        await page
+            .locator('details')
+            .filter({ hasText: 'Add a source' })
+            .evaluate((node) => {
+                node.open = true;
+            });
         await page
             .locator('input[name="method_source_url"]')
             .fill('ftp://example.com/import');
@@ -279,7 +288,7 @@ const { chromium } = browserRequire('playwright');
             .waitFor();
         assert.equal(await includeMethod.isChecked(), true);
         assert.equal(
-            await page.locator('textarea[name="method_body"]').inputValue(),
+            await page.locator('#method_body').innerText(),
             methodBody,
             'Validation errors preserve the method draft',
         );
@@ -287,6 +296,12 @@ const { chromium } = browserRequire('playwright');
             await page.locator('input[name="title"]').inputValue(),
             'Automating product imports for an online store',
         );
+        await page
+            .locator('details')
+            .filter({ hasText: 'Add a source' })
+            .evaluate((node) => {
+                node.open = true;
+            });
         await page
             .locator('input[name="method_source_url"]')
             .fill('https://example.com/import');
@@ -338,7 +353,7 @@ const { chromium } = browserRequire('playwright');
             .waitFor();
         await page
             .getByRole('link', {
-                name: 'Log in to share an experience',
+                name: 'Log in to share how it went',
                 exact: true,
             })
             .waitFor();

@@ -1,3 +1,4 @@
+import { RichTextContent } from '@/components/rich-text-content';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
@@ -241,9 +242,12 @@ export default function ExperiencesIndex({
                                                     }
                                                 </span>
                                             </div>
-                                            <p className="wb-detail-body">
-                                                {experience.body}
-                                            </p>
+                                            <RichTextContent
+                                                document={
+                                                    experience.body_document
+                                                }
+                                                text={experience.body}
+                                            />
                                             {experience.evidence_image && (
                                                 <a
                                                     href={
@@ -375,8 +379,8 @@ export default function ExperiencesIndex({
                     >
                         <h2 id="share-heading">
                             {ownExperience
-                                ? 'Update your experience'
-                                : 'Share your experience'}
+                                ? 'Update your response'
+                                : 'Tried this method?'}
                         </h2>
                         <p className="wb-experience-share-intro">
                             What did you try, and how did it go? Your context
@@ -385,7 +389,7 @@ export default function ExperiencesIndex({
                         {!auth.user ? (
                             <Button asChild className="w-full">
                                 <Link href={`${base}/experiences/create`}>
-                                    Log in to share an experience
+                                    Log in to share how it went
                                 </Link>
                             </Button>
                         ) : isAuthor ? (
@@ -414,7 +418,7 @@ export default function ExperiencesIndex({
                                             );
                                     }}
                                 >
-                                    Remove my experience
+                                    Remove my response
                                 </Button>
                             </div>
                         ) : (

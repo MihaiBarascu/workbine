@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\EditorImageController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MethodController;
@@ -20,6 +21,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::post('editor/images', [EditorImageController::class, 'store'])->middleware(['throttle:20,1', ThrottleImageUploads::class])->name('editor.images.store');
     Route::get('dashboard', fn () => to_route('topics.index'))->name('dashboard');
     Route::get('topics/create', [TopicController::class, 'create'])->name('topics.create');
     Route::post('topics', [TopicController::class, 'store'])->middleware('throttle:20,1')->name('topics.store');

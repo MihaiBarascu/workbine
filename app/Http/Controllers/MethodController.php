@@ -9,6 +9,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
+use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -25,7 +26,7 @@ class MethodController extends Controller
 
         return Inertia::render('topics/method-edit', [
             'topic' => $topic->only(['id', 'title', 'slug']),
-            'method' => $method->only(['id', 'title', 'body', 'source_url']),
+            'method' => $method->only(['id', 'title', 'body', 'body_document', 'source_url']),
             'revision' => ContributionRevision::token($method),
         ]);
     }
@@ -49,6 +50,7 @@ class MethodController extends Controller
                 'body' => $data['body'],
                 'source_url' => $data['source_url'] ?? null,
             ]);
+            RichText::save($current, $data['body_document'] ?? null);
         });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Method updated.')]);
@@ -74,12 +76,16 @@ class MethodController extends Controller
         $data = $request->validated();
         app(ContentModeration::class)->text($user, Arr::only($data, ['title', 'body', 'source_url']), 'method:new:'.$topic->id, 'body');
 
-        $topic->methods()->create([
-            'user_id' => $user->id,
-            'title' => $data['title'],
-            'body' => $data['body'],
-            'source_url' => $data['source_url'] ?? null,
-        ]);
+        DB::transaction(function () use ($topic, $user, $data): void {
+            $method = $topic->methods()->create([
+                'user_id' => $user->id,
+                'title' => $data['title'],
+                'body' => $data['body'],
+                'source_url' => $data['source_url'] ?? null,
+            ]);
+
+            RichText::save($method, $data['body_document'] ?? null);
+        });
 
         Inertia::flash('toast', [
             'type' => 'success',

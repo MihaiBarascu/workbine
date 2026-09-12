@@ -10,6 +10,9 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
+ * @property bool $rich_text
+ * @property int|null $rich_method_id
+ * @property int|null $rich_experience_id
  * @property int $id
  * @property int|null $user_id
  * @property string $disk
@@ -20,7 +23,7 @@ use Illuminate\Support\Facades\Storage;
  * @property bool $pending_deletion
  * @property Carbon $created_at
  */
-#[Fillable(['user_id', 'disk', 'path', 'bytes', 'width', 'height', 'pending_deletion'])]
+#[Fillable(['user_id', 'disk', 'path', 'bytes', 'width', 'height', 'pending_deletion', 'rich_text', 'rich_method_id', 'rich_experience_id'])]
 class MediaImage extends Model
 {
     /** @return HasMany<User, $this> */
@@ -39,7 +42,7 @@ class MediaImage extends Model
     /** @param Builder<self> $query */
     public function scopeUnreferenced(Builder $query): void
     {
-        $query->doesntHave('avatars')->doesntHave('experiences');
+        $query->doesntHave('avatars')->doesntHave('experiences')->whereNull('rich_method_id')->whereNull('rich_experience_id');
     }
 
     public function url(): string
@@ -57,6 +60,6 @@ class MediaImage extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['pending_deletion' => 'boolean', 'bytes' => 'integer', 'width' => 'integer', 'height' => 'integer'];
+        return ['rich_text' => 'boolean', 'rich_method_id' => 'integer', 'rich_experience_id' => 'integer', 'pending_deletion' => 'boolean', 'bytes' => 'integer', 'width' => 'integer', 'height' => 'integer'];
     }
 }

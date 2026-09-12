@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
  * @property int $method_id
  * @property int $user_id
  * @property string $outcome
+ * @property array<string, mixed>|null $body_document
  * @property string $body
  * @property string|null $evidence_url
  * @property int|null $evidence_image_id
@@ -24,7 +25,7 @@ use Illuminate\Support\Carbon;
  * @property-read Method $method
  * @property-read User $user
  */
-#[Fillable(['method_id', 'user_id', 'outcome', 'body', 'evidence_url', 'tried_on'])]
+#[Fillable(['method_id', 'user_id', 'outcome', 'body', 'body_document', 'evidence_url', 'tried_on'])]
 class Experience extends Model
 {
     protected static function booted(): void
@@ -56,6 +57,6 @@ class Experience extends Model
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['tried_on' => 'date'];
+        return ['tried_on' => 'date', 'body_document' => 'array'];
     }
 }

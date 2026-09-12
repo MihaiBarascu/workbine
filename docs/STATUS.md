@@ -7,6 +7,21 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Shared contribution editor
+
+The shared rich-text editor adds paragraphs, basic formatting, links and inline
+photos to methods and “I tried this” responses, including the optional first
+method in topic creation. Secondary source/date/link fields stay collapsed until
+needed. See [RICH-TEXT.md](RICH-TEXT.md) for behavior and validation boundaries.
+The local Docker release gate passed on the feature source based on `719dbfd`:
+production frontend build, formatting/lint, TypeScript, Pint, PHPStan, 317 tests /
+3260 assertions on each of SQLite and PostgreSQL, 13 Python tests and complete
+browser flows with 117 screenshots. Relevant editor, inline-photo, mobile and
+dark-mode captures were reviewed. The tested source snapshot has SHA-256
+`c0f4725b02d4cb755d3e9dabed7a90d1c615403553dc942a0e22d1b4df62ef30`.
+Only documentation changed after that snapshot. These isolated results do not
+attest production uploads or external-service configuration.
+
 ## Current application state
 
 Workbine is deployed at https://workbine.com. The repository baseline now includes

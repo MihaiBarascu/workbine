@@ -10,7 +10,10 @@ import type { MethodSummary, TopicSummary } from '@/types';
 
 type Props = {
     topic: Pick<TopicSummary, 'id' | 'title' | 'slug'>;
-    method: Pick<MethodSummary, 'id' | 'title' | 'body' | 'source_url'>;
+    method: Pick<
+        MethodSummary,
+        'id' | 'title' | 'body' | 'body_document' | 'source_url'
+    >;
     revision: string;
 };
 
