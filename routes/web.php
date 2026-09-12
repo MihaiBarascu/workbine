@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\CommunityNotificationController;
 use App\Http\Controllers\EditorImageController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\MemberController;
@@ -8,6 +9,15 @@ use App\Http\Controllers\MethodController;
 use App\Http\Controllers\TopicController;
 use App\Http\Middleware\ThrottleImageUploads;
 use Illuminate\Support\Facades\Route;
+use Inertia\Middleware\EncryptHistory;
+
+Route::inertia('community/guide', 'community/guide')->name('community.guide');
+
+Route::middleware(['auth', EncryptHistory::class])->group(function () {
+    Route::get('notifications', [CommunityNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read', [CommunityNotificationController::class, 'readAll'])->middleware('throttle:60,1')->name('notifications.read-all');
+    Route::post('notifications/{notification}/open', [CommunityNotificationController::class, 'open'])->whereNumber('notification')->middleware('throttle:60,1')->name('notifications.open');
+});
 
 Route::get('/', [TopicController::class, 'index'])->name('home');
 Route::get('topics', [TopicController::class, 'index'])->name('topics.index');

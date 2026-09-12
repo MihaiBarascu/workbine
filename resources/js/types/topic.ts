@@ -27,6 +27,8 @@ export type TopicSummary = {
     updated_at: string | null;
     methods_count: number;
     saves_count: number;
+    saved?: boolean;
+    cover_image?: SharedImage | null;
     user: PublicMember;
 };
 

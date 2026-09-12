@@ -2,6 +2,8 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
     Bookmark,
+    Bell,
+    BookOpen,
     ChevronDown,
     LogOut,
     Settings,
@@ -20,14 +22,19 @@ import {
 import type { User } from '@/types';
 import '../../css/workbine.css';
 import '../../css/community-clarity.css';
+import '../../css/community-launch.css';
 
 type Props = { children: ReactNode };
 
 export function PublicShell({ children }: Props) {
     const {
-        props: { auth, canModerate },
+        props: { auth, canModerate, unreadNotifications },
         url,
-    } = usePage<{ auth: { user: User | null }; canModerate: boolean }>();
+    } = usePage<{
+        auth: { user: User | null };
+        canModerate: boolean;
+        unreadNotifications: number;
+    }>();
     const composingTopic = url.split('?')[0] === '/topics/create';
 
     return (
@@ -53,13 +60,55 @@ export function PublicShell({ children }: Props) {
                     </div>
                     <nav aria-label="Main navigation" className="wb-main-nav">
                         <Link
-                            href="/topics#field-guide"
+                            href="/community/guide"
                             className="wb-community-link"
                         >
                             Community guide
                         </Link>
                         {auth.user ? (
                             <>
+                                <Link
+                                    className="wb-personal-link"
+                                    href={`/members/${auth.user.username}?view=topics`}
+                                >
+                                    My topics
+                                </Link>
+                                <Link
+                                    className="wb-personal-link"
+                                    href="/saved"
+                                    aria-current={
+                                        url.split('?')[0] === '/saved'
+                                            ? 'page'
+                                            : undefined
+                                    }
+                                >
+                                    Saved
+                                </Link>
+                                <Link
+                                    href="/notifications"
+                                    className="wb-notifications-link"
+                                    aria-label={
+                                        unreadNotifications > 0
+                                            ? `Notifications, ${unreadNotifications} unread`
+                                            : 'Notifications'
+                                    }
+                                    aria-current={
+                                        url.split('?')[0] === '/notifications'
+                                            ? 'page'
+                                            : undefined
+                                    }
+                                >
+                                    <Bell
+                                        aria-hidden="true"
+                                        className="size-5"
+                                    />
+                                    {unreadNotifications > 0 && (
+                                        <span
+                                            className="wb-notification-dot"
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                </Link>
                                 {!composingTopic && (
                                     <Button
                                         asChild
@@ -97,6 +146,20 @@ export function PublicShell({ children }: Props) {
                                             {auth.user.name}
                                         </p>
                                         <DropdownMenuSeparator />
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/topics">
+                                                <BookOpen aria-hidden="true" />
+                                                Explore
+                                            </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link
+                                                href={`/members/${auth.user.username}?view=topics`}
+                                            >
+                                                <BookOpen aria-hidden="true" />
+                                                My topics
+                                            </Link>
+                                        </DropdownMenuItem>
                                         {canModerate && (
                                             <DropdownMenuItem asChild>
                                                 <Link href="/moderation">
@@ -172,7 +235,7 @@ export function PublicShell({ children }: Props) {
                         person to person.
                     </p>
                     <div className="flex flex-wrap gap-5">
-                        <Link href="/#field-guide">Community guide</Link>
+                        <Link href="/community/guide">Community guide</Link>
                         <Link href="/community/reputation">
                             How reputation works
                         </Link>

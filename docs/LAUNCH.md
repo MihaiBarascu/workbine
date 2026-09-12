@@ -17,6 +17,11 @@ Profiles foreground clickable evidence of usefulness; see [REPUTATION.md](REPUTA
   from other members; saver identities stay private. An author's own bookmarks
   do not contribute to the public count. Profiles show totals across visible
   topics. These public counts are distinct from the bounded reputation calculation.
+- Save directly from discovery, find personal topics quickly, and read a public
+  community guide. Optional discovery photos come from visible methods.
+- Receive private in-app notifications for new methods on your topics and first
+  responses to your methods. Self-contributions and response edits do not notify;
+  hidden/deleted content is omitted. No email delivery is involved in these alerts.
 - Recover from missing pages, expired sessions, rate limits and service errors.
 - Offer content reporting only with an assigned reviewer and a working review path.
   See [MODERATION.md](MODERATION.md).

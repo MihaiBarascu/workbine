@@ -10,6 +10,7 @@ import {
 import { useRef, useState } from 'react';
 import { MemberLink } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
+import { SaveTopicButton } from '@/components/save-topic-button';
 import { TopicStarters } from '@/components/topic-starters';
 import { Button } from '@/components/ui/button';
 import type { PaginatedTopics, User } from '@/types';
@@ -66,9 +67,12 @@ export default function TopicsIndex({ topics, view, search }: Props) {
             <Head
                 title={search ? `Search: ${search}` : 'Explore the community'}
             />
-            <main className="wb-notebook">
+            <main className="wb-notebook wb-discovery">
                 <header className="wb-notebook-masthead">
                     <div>
+                        <p className="wb-welcome-kicker">
+                            Small lessons. Shared forward.
+                        </p>
                         <h1>Explore the community</h1>
                         <p>
                             Find a useful approach, share yours, or figure it
@@ -241,17 +245,46 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                                 </time>
                                             )}
                                         </div>
-                                        <h3>
-                                            <Link
-                                                href={`/topics/${topic.slug}`}
-                                            >
-                                                {topic.title}
-                                            </Link>
-                                        </h3>
-                                        <p className="wb-entry-description">
-                                            {topic.description ||
-                                                'Know a way to do this? Share what works for you.'}
-                                        </p>
+                                        <div className="wb-entry-content">
+                                            <div className="wb-entry-copy">
+                                                <h3>
+                                                    <Link
+                                                        href={`/topics/${topic.slug}`}
+                                                    >
+                                                        {topic.title}
+                                                    </Link>
+                                                </h3>
+                                                <p className="wb-entry-description">
+                                                    {topic.description ||
+                                                        'Know a way to do this? Share what works for you.'}
+                                                </p>
+                                            </div>
+                                            {topic.cover_image && (
+                                                <Link
+                                                    href={`/topics/${topic.slug}`}
+                                                    className="wb-entry-photo"
+                                                    tabIndex={-1}
+                                                    aria-hidden="true"
+                                                >
+                                                    <img
+                                                        src={
+                                                            topic.cover_image
+                                                                .url
+                                                        }
+                                                        width={
+                                                            topic.cover_image
+                                                                .width
+                                                        }
+                                                        height={
+                                                            topic.cover_image
+                                                                .height
+                                                        }
+                                                        alt=""
+                                                        loading="lazy"
+                                                    />
+                                                </Link>
+                                            )}
+                                        </div>
                                         <div className="wb-entry-bottom">
                                             <span
                                                 className={
@@ -277,6 +310,14 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                                         : 'saves'}
                                                 </span>
                                             )}
+                                            <SaveTopicButton
+                                                topicSlug={topic.slug}
+                                                saved={topic.saved ?? false}
+                                                authenticated={Boolean(
+                                                    auth.user,
+                                                )}
+                                                className="wb-feed-save"
+                                            />
                                             <Link
                                                 className="wb-entry-invite"
                                                 href={`/topics/${topic.slug}`}
@@ -478,6 +519,10 @@ export default function TopicsIndex({ topics, view, search }: Props) {
                                 respectfully is welcome.
                             </p>
                         </details>
+                        <Link href="/community/guide" className="wb-guide-link">
+                            Read the community guide{' '}
+                            <ArrowRight aria-hidden="true" />
+                        </Link>
                         {!emptyCommunity && (
                             <div className="wb-starters">
                                 <h3>Need a starting point?</h3>

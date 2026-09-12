@@ -14,6 +14,7 @@ use Illuminate\Support\Collection;
 
 /**
  * @property string|null $hidden_at
+ * @property-read MediaImage|null $coverImage
  * @property int $id
  * @property int $user_id
  * @property string $title
@@ -58,6 +59,30 @@ class Topic extends Model
         return $this->hasMany(SavedTopic::class)
             ->whereHas('topic', fn (Builder $query) => $query
                 ->whereColumn('topics.user_id', '<>', 'saved_topics.user_id'));
+    }
+
+    /** @return BelongsTo<MediaImage, $this> */
+    public function coverImage(): BelongsTo
+    {
+        return $this->belongsTo(MediaImage::class, 'cover_image_id');
+    }
+
+    /** @return HasMany<SavedTopic, $this> */
+    public function saves(): HasMany
+    {
+        return $this->hasMany(SavedTopic::class);
+    }
+
+    /** @param Builder<self> $query */
+    public function scopeWithCover(Builder $query): void
+    {
+        $query->addSelect('topics.*')->selectSub(
+            MediaImage::query()->select('media_images.id')
+                ->join('methods', 'methods.id', '=', 'media_images.rich_method_id')
+                ->whereColumn('methods.topic_id', 'topics.id')->whereNull('methods.hidden_at')
+                ->where('media_images.pending_deletion', false)->orderBy('media_images.id')->limit(1),
+            'cover_image_id'
+        )->with('coverImage');
     }
 
     public function getRouteKeyName(): string
