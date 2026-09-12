@@ -26,7 +26,9 @@ for (const changedDraft of [false, true]) {
                     .selectOption('worked');
                 await contributor
                     .getByRole('textbox', { name: 'How did it go?' })
-                    .fill('I tried this method before the author added a note.');
+                    .fill(
+                        'I tried this method before the author added a note.',
+                    );
                 await contributor
                     .getByRole('button', {
                         name: 'Publish my response',
@@ -53,8 +55,10 @@ for (const changedDraft of [false, true]) {
                     name: 'Publish update',
                     exact: true,
                 });
-                const original = 'The first note was saved before the connection failed.';
-                const revised = 'This revised draft must remain available until I publish it.';
+                const original =
+                    'The first note was saved before the connection failed.';
+                const revised =
+                    'This revised draft must remain available until I publish it.';
                 let updateRequests = 0;
                 let responseLost = false;
                 page.on('request', (request) => {
@@ -67,7 +71,8 @@ for (const changedDraft of [false, true]) {
                 });
 
                 // Send the real POST to the isolated application, then discard
-                // only its response. The server has committed the original note.
+                // only its response. Inertia carries fragment redirects in a
+                // 409 response; this is not a publication conflict.
                 await page.route(`**${updateUrl}`, async (route) => {
                     if (route.request().method() !== 'POST' || responseLost) {
                         await route.continue();
@@ -76,7 +81,13 @@ for (const changedDraft of [false, true]) {
 
                     responseLost = true;
                     const response = await route.fetch({ maxRedirects: 0 });
-                    expect([302, 303]).toContain(response.status());
+                    expect(response.status()).toBe(409);
+                    expect(response.headers()['x-inertia-redirect']).toBe(
+                        new URL(
+                            `${topicUrl}#method-${actors.method.id}`,
+                            page.url(),
+                        ).href,
+                    );
                     await route.abort('failed');
                 });
 
