@@ -332,6 +332,11 @@
         gap: 4px 8px;
     }
 }
+@media (max-width: 380px) {
+    .wb-secondary-shell .wb-settings-nav a > svg {
+        display: none;
+    }
+}
 @media (prefers-reduced-motion: reduce) {
     .wb-cosmos-shell {
         transition: none;
