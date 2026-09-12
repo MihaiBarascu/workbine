@@ -1,6 +1,7 @@
 import { Form, Head, Link } from '@inertiajs/react';
 import { ArrowLeft } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import InputError from '@/components/input-error';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Label } from '@/components/ui/label';
@@ -24,6 +25,27 @@ type Props = {
     revision: string;
     submissionId: string;
 };
+
+function UpdateErrorFocus({
+    processing,
+    error,
+    inputRef,
+}: {
+    processing: boolean;
+    error?: string;
+    inputRef: RefObject<HTMLTextAreaElement | null>;
+}) {
+    useEffect(() => {
+        if (processing || !error) return;
+
+        // onError can precede React removing the form's inert attribute.
+        // Wait for the committed interactive state, not an arbitrary timeout.
+        const frame = requestAnimationFrame(() => inputRef.current?.focus());
+        return () => cancelAnimationFrame(frame);
+    }, [processing, error, inputRef]);
+
+    return null;
+}
 
 export default function MethodEdit({
     topic,
@@ -86,15 +108,15 @@ export default function MethodEdit({
                         action={`${methodUrl}/updates`}
                         method="post"
                         disableWhileProcessing
-                        onError={() => {
-                            requestAnimationFrame(() =>
-                                updateBodyRef.current?.focus(),
-                            );
-                        }}
                         className="wb-panel space-y-5"
                     >
                         {({ processing, errors, clearErrors }) => (
                             <>
+                                <UpdateErrorFocus
+                                    processing={processing}
+                                    error={errors.body || errors.submission_id}
+                                    inputRef={updateBodyRef}
+                                />
                                 <input
                                     type="hidden"
                                     name="submission_id"
