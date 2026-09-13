@@ -93,7 +93,7 @@ class ExperienceController extends Controller
                 User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
                 // Same lock as method editing: publication and rewriting cannot cross.
                 $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
-                if (isset($data['method_revision']) && ! hash_equals(ContributionRevision::token($current), $data['method_revision'])) {
+                if (! hash_equals(ContributionRevision::token($current), $data['method_revision'])) {
                     throw ValidationException::withMessages(['method_revision' => __('The method changed while you were writing. Review the method before sharing your result.')]);
                 }
                 $experience = Experience::withoutGlobalScopes()->lockForUpdate()->firstOrNew(['method_id' => $method->id, 'user_id' => $user->id]);
