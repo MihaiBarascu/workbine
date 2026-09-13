@@ -409,6 +409,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await supporterPage
             .getByRole('button', { name: 'Remove saved topic' })
             .waitFor();
+        await supporterPage.goto(root + methodPath);
         await supporterPage
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
