@@ -247,6 +247,9 @@ export function PublicShell({ children, discovery }: Props) {
                                             />
                                         )}
                                     </Link>
+                                    <a href="mailto:hello@workbine.com">
+                                        Contact
+                                    </a>
                                     {!composingTopic && (
                                         <Button
                                             asChild
@@ -378,6 +381,7 @@ export function PublicShell({ children, discovery }: Props) {
                             <Link href="/community/reputation">
                                 How reputation works
                             </Link>
+                            <a href="mailto:hello@workbine.com">Contact</a>
                             {!composingTopic && (
                                 <Link href="/topics/create">Start a topic</Link>
                             )}
