@@ -26,9 +26,10 @@ independent human usability research.
 
 ## Sidebar interaction
 
-On screens wider than 1050px, the labelled **Hide menu / Show menu** header control
-collapses or expands the sidebar. Its icon and text stay together in a neutral
-44px-tall button with a blue hover/focus treatment. The panel, content gutter and
+On screens wider than 1050px, a panel-and-arrow icon collapses or expands the
+sidebar. The neutral 44px-square button has no visible text; its accessible name
+and hover tooltip describe the action. Blue hover/focus treatment matches the
+other header controls. The panel, content gutter and
 discovery backdrop move together over 220ms; reduced-motion makes the change
 immediate. The control keeps keyboard focus so it can be used again immediately.
 Collapsing reclaims the whole navigation column and removes its links from focus

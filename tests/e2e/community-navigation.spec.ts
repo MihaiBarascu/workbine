@@ -78,19 +78,19 @@ test('community navigation retracts without losing routes or keyboard access', a
     } else {
         await expect(sidebar).toBeVisible();
         const before = await page.locator('#main-content').boundingBox();
-        const hideMenu = page.getByRole('button', {
-            name: 'Hide menu',
+        const collapseSidebar = page.getByRole('button', {
+            name: 'Collapse sidebar',
             exact: true,
         });
-        await expect(hideMenu).toHaveText('Hide menu');
-        await hideMenu.focus();
+        await expect(collapseSidebar).toHaveText('');
+        await collapseSidebar.focus();
         await page.keyboard.press('Enter');
         await expect(sidebar).toBeHidden();
         await expect(
-            page.getByRole('button', { name: 'Show menu', exact: true }),
+            page.getByRole('button', { name: 'Expand sidebar', exact: true }),
         ).toHaveAttribute('aria-expanded', 'false');
         await expect(
-            page.getByRole('button', { name: 'Show menu', exact: true }),
+            page.getByRole('button', { name: 'Expand sidebar', exact: true }),
         ).toBeFocused();
         await expect
             .poll(
@@ -107,14 +107,14 @@ test('community navigation retracts without losing routes or keyboard access', a
         await page.goto('/community/guide');
         await expect(sidebar).toBeHidden();
         await expect(
-            page.getByRole('button', { name: 'Show menu', exact: true }),
+            page.getByRole('button', { name: 'Expand sidebar', exact: true }),
         ).toBeVisible();
         await testInfo.attach('desktop-navigation-retracted', {
             body: await page.screenshot({ fullPage: true }),
             contentType: 'image/png',
         });
         await page
-            .getByRole('button', { name: 'Show menu', exact: true })
+            .getByRole('button', { name: 'Expand sidebar', exact: true })
             .click();
         await expect(sidebar).toBeVisible();
         await expect(
@@ -146,12 +146,12 @@ test('community navigation retracts without losing routes or keyboard access', a
             await page.setViewportSize({ width, height: 900 });
             await page.goto('/topics');
             await page
-                .getByRole('button', { name: 'Hide menu', exact: true })
+                .getByRole('button', { name: 'Collapse sidebar', exact: true })
                 .click();
             await expect(sidebar).toBeHidden();
             await expect(sidebar).toHaveCSS('transition-duration', '0s');
             await expect(
-                page.getByRole('button', { name: 'Show menu', exact: true }),
+                page.getByRole('button', { name: 'Expand sidebar', exact: true }),
             ).toBeInViewport();
             expect(
                 await page.evaluate(
@@ -166,7 +166,7 @@ test('community navigation retracts without losing routes or keyboard access', a
                 });
             }
             await page
-                .getByRole('button', { name: 'Show menu', exact: true })
+                .getByRole('button', { name: 'Expand sidebar', exact: true })
                 .click();
             await expect(sidebar).toBeVisible();
             if (width === 1280) {

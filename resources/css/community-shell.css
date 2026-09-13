@@ -24,12 +24,6 @@
 }
 .wb-desktop-sidebar-toggle {
     display: inline-flex;
-    width: 124px;
-    gap: 8px;
-    padding-inline: 12px;
-    font-size: 13px;
-    font-weight: 500;
-    white-space: nowrap;
     color: var(--muted-foreground);
     transition:
         background-color 150ms ease,
