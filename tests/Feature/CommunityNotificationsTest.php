@@ -6,6 +6,7 @@ use App\Models\CommunityNotification;
 use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
+use App\Support\ContributionRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -31,11 +32,11 @@ class CommunityNotificationsTest extends TestCase
     {
         $method = Method::factory()->create();
         $member = User::factory()->create();
-        $payload = ['outcome' => 'worked', 'body_document' => json_encode(['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'It helped me get started.']]]]])];
+        $payload = ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body_document' => json_encode(['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'It helped me get started.']]]]])];
         $this->actingAs($member)->put(route('experiences.store', [$method->topic, $method]), $payload)->assertSessionHasNoErrors();
         $this->assertDatabaseHas('community_notifications', ['user_id' => $method->user_id, 'actor_id' => $member->id, 'experience_id' => $method->experiences()->firstOrFail()->id]);
         $this->put(route('experiences.store', [$method->topic, $method]), $payload)->assertSessionHasNoErrors();
-        $this->actingAs($method->user)->put(route('experiences.store', [$method->topic, $method]), $payload)->assertSessionHasNoErrors();
+        $this->actingAs($method->user)->put(route('experiences.store', [$method->topic, $method]), $payload)->assertForbidden();
         $this->assertDatabaseCount('community_notifications', 1);
     }
 

@@ -113,6 +113,26 @@ class ExperiencesTest extends TestCase
         $this->assertNull($method->refresh()->protected_at);
     }
 
+    public function test_missing_revision_cannot_replace_an_existing_experience(): void
+    {
+        $method = Method::factory()->create();
+        $user = User::factory()->create();
+        $params = [$method->topic, $method];
+        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method))
+            ->assertSessionHasNoErrors();
+        $experience = Experience::query()->firstOrFail();
+        $original = $experience->getAttributes();
+        $protectedAt = $method->refresh()->getRawOriginal('protected_at');
+
+        $this->putJson(route('experiences.store', $params), $this->payload(['outcome' => 'did_not_work']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('method_revision');
+
+        $this->assertDatabaseCount('experiences', 1);
+        $this->assertSame($original, $experience->refresh()->getAttributes());
+        $this->assertSame($protectedAt, $method->refresh()->getRawOriginal('protected_at'));
+    }
+
     public function test_retrying_or_updating_replaces_one_experience_and_preserves_its_creation_date(): void
     {
         $method = Method::factory()->create();

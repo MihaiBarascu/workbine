@@ -13,19 +13,22 @@ metrics.
 
 ## Released baseline
 
-As of 2026-09-12, PRs #12–#21 are merged. The repository baseline is `5bfc0d0`
-(#21): the wider white/grey/blue community UI, topic creation with or without a
-first method, public username profiles, branded account/authentication screens,
-optional profile/evidence image uploads, launch-support controls and the
-human-first discovery/topic flow are all in `main`.
+As of 2026-09-13, the merged baseline includes #39 (`a0402d9`): shared collapsible
+navigation across community/account pages. It also includes method-update retry
+recovery (#37), permanent preservation of tried methods (#36), the browser pilot
+and coverage inventory (#34/#35), connected discovery (#33), in-app notifications
+(#32), rich text and inline photos (#30), moderation/fallback (#28/#29), registration
+protection (#27), standard email verification (#26) and Resend support (#25).
+Earlier topic creation, search, profiles, saves and reputation remain implemented.
 
-The #21 release makes the first contribution path clearer: discovery uses a
-Continue step rather than implying immediate publication, topic context and the
-first method are explicitly optional, starter ideas are labelled as examples,
-drafts survive method toggles and validation, and error focus/keyboard behavior
-is covered by browser tests. Read [STATUS.md](STATUS.md), [UX-CLARITY.md](UX-CLARITY.md)
-and [MEDIA.md](MEDIA.md) before repeating completed work or choosing a new
-increment.
+These are completed features, not a queue for another agent. #38 was a duplicate
+of #37; only its independent JSON conflict test is retained. The current experience
+revision enforcement completes #40's server validation and request fixtures.
+Use [STATUS.md](STATUS.md), [BROWSER-FLOWS.md](BROWSER-FLOWS.md) and the current PR
+for behavior, remaining coverage and actual validation evidence. The highest
+priority browser gaps include full password reset, remaining 2FA/passkey actions,
+report/review flows and non-Chromium engines; they are verification work rather
+than proof of missing product controls.
 
 A repository merge is not by itself evidence that a particular build is live.
 Use the read-only production verification described in [TESTING.md](TESTING.md)
@@ -66,9 +69,11 @@ with an opaque leaderboard or treat self-reports as independently verified resul
   account recovery and deletion remain accessible.
 - Revisit recognition for useful experience writers, abuse handling and any
   earned milestones based on observed community use. Do not reward posting volume.
+- Keep optional automated moderation within its existing scope; do not add new
+  AI features, voting, leaderboards or topic hierarchies merely to make the
+  product appear more advanced.
 - Prefer small observed usability or reliability obstacles over speculative
-  feature expansion. In particular, do not add AI, voting, leaderboards or topic
-  hierarchies merely to make the product appear more advanced.
+  feature expansion.
 
 Follow the environment-selection policy in AGENTS.md and docs/TESTING.md. Read the
 latest `main` and existing PRs before changing files. Keep STATUS truthful about

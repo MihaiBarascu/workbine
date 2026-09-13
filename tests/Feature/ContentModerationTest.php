@@ -9,6 +9,7 @@ use App\Models\ModerationReview;
 use App\Models\Topic;
 use App\Models\User;
 use App\Support\ContributionRevision;
+use App\Support\ContributionRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request;
@@ -138,7 +139,7 @@ class ContentModerationTest extends TestCase
         $user = User::factory()->create();
         $method = Method::factory()->create();
         $this->actingAs($user)->post(route('methods.store', $method->topic), ['title' => 'Another method', 'body' => 'Synthetic test with sufficient detail.'])->assertSessionHasErrors('body');
-        $this->put(route('experiences.store', [$method->topic, $method]), ['outcome' => 'worked', 'body' => 'Synthetic test experience with sufficient detail.'])->assertSessionHasErrors('body');
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'Synthetic test experience with sufficient detail.'])->assertSessionHasErrors('body');
         $this->patch(route('profile.update'), ['name' => 'Changed fixture', 'email' => $user->email, 'bio' => 'Test biography.'])->assertSessionHasErrors('name');
         $this->assertDatabaseCount('experiences', 0);
         $this->assertDatabaseCount('methods', 1);
@@ -190,6 +191,7 @@ class ContentModerationTest extends TestCase
         }]);
         $before = $experience->refresh()->getAttributes();
         $this->actingAs($user)->post(route('experiences.store', [$experience->method->topic, $experience->method]), [
+            'method_revision' => ContributionRevision::token($experience->method),
             '_method' => 'put', 'outcome' => 'worked', 'body' => 'Updated useful experience with enough detail.',
             'evidence_image' => UploadedFile::fake()->image('benign.png'),
         ])->assertSessionHasErrors('evidence_image');
