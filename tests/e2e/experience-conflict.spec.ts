@@ -124,7 +124,7 @@ test('a stale new-response draft cannot replace the response created in another 
     }
 });
 
-test('a stale editor cannot overwrite or recreate a response changed in another tab', async ({
+test('a stale editor cannot overwrite a response updated in another tab', async ({
     page,
     actors,
 }) => {
@@ -198,11 +198,26 @@ test('a stale editor cannot overwrite or recreate a response changed in another 
                 hasText: reviewedUpdate,
             }),
         ).toBeVisible();
+    } finally {
+        await currentPage.close();
+    }
+});
 
-        // Both tabs now open the reviewed response. The second tab removes it;
-        // the first tab's old editor must not silently create it again.
-        await openResponseEditor(currentPage, methodUrl);
+test('a stale editor cannot recreate a response deleted in another tab', async ({
+    page,
+    actors,
+}) => {
+    const methodUrl = `/topics/${actors.topic.slug}/methods/${actors.method.id}`;
+    const currentPage = await page.context().newPage();
+    try {
+        await login(page, actors.contributor);
+        await publishResponse(
+            page,
+            methodUrl,
+            'This response exists before both tabs open their own editor.',
+        );
         await openResponseEditor(page, methodUrl);
+        await openResponseEditor(currentPage, methodUrl);
         const deletedDraft =
             'This edit must remain visible after conflict but cannot recreate the deleted response.';
         const deletedRevision = await page
