@@ -29,7 +29,7 @@ class StoreExperienceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'method_revision' => ['sometimes', 'string', 'size:64'],
+            'method_revision' => ['required', 'string', 'size:64'],
             'body_document' => ['nullable', 'array'],
             'outcome' => ['required', Rule::in(['worked', 'partly', 'did_not_work'])],
             'body' => ['required', 'string', 'max:5000'],
