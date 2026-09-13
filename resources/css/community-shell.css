@@ -1,0 +1,344 @@
+/* Shared community chrome; artwork remains exclusive to discovery. */
+.wb-shell-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 100svh;
+}
+.wb-cosmos-shell {
+    transition: padding-left 180ms ease;
+}
+.wb-desktop-sidebar-toggle,
+.wb-navigation-toggle,
+.wb-sidebar-close {
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--foreground);
+    cursor: pointer;
+}
+.wb-desktop-sidebar-toggle {
+    display: inline-flex;
+}
+.wb-desktop-sidebar-toggle svg,
+.wb-navigation-toggle svg,
+.wb-sidebar-close svg {
+    width: 20px;
+    height: 20px;
+}
+.wb-desktop-sidebar-toggle:hover,
+.wb-navigation-toggle:hover,
+.wb-sidebar-close:hover {
+    background: var(--accent);
+}
+.wb-shell-home-link {
+    font-size: 14px;
+    color: var(--muted-foreground);
+    padding-block: 12px;
+}
+.wb-shell-home-link:hover {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+.wb-community-sidebar {
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+.wb-community-sidebar nav a {
+    min-height: 44px;
+    font-size: 13px;
+}
+.wb-community-sidebar nav a[aria-current='page'] {
+    font-weight: 600;
+}
+.wb-sidebar-brand {
+    position: relative;
+}
+.wb-sidebar-label {
+    font-size: 11px;
+    margin-top: 24px;
+}
+.wb-public .wb-account-trigger,
+.wb-public .wb-notifications-link {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+}
+.wb-public .wb-guide-close {
+    width: 44px;
+    height: 44px;
+    top: 4px;
+    right: 4px;
+}
+.wb-connected-guide > .wb-kicker {
+    padding-right: 30px;
+}
+.wb-public .wb-footer-inner {
+    font-size: 12px;
+}
+.wb-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+}
+.wb-public p.text-red-500 {
+    color: #bf2438;
+}
+.dark .wb-public p.text-red-500 {
+    color: #ffacb7;
+}
+
+/* A quiet reading canvas uses the same surfaces and rhythm as the feed. */
+.wb-secondary-shell .wb-topbar {
+    background: var(--card);
+    backdrop-filter: none;
+    border-bottom-color: var(--border);
+}
+.wb-secondary-shell .wb-page {
+    max-width: 1320px;
+    padding: 32px 30px 56px;
+}
+.wb-secondary-shell #main-content > main {
+    padding-top: 32px;
+    padding-bottom: 56px;
+}
+.wb-secondary-shell main h1 {
+    font-size: clamp(28px, 2.5vw, 36px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+}
+.wb-secondary-shell .wb-kicker {
+    font-size: 11px;
+    line-height: 1.6;
+}
+.wb-secondary-shell .wb-panel,
+.wb-secondary-shell .wb-auth-form,
+.wb-secondary-shell .wb-profile-header,
+.wb-secondary-shell .wb-profile-aside {
+    border-radius: 12px;
+    border-color: var(--border);
+    background: var(--card);
+    box-shadow: 0 3px 16px rgb(35 60 100 / 4%);
+}
+.wb-secondary-shell .wb-panel-heading p:not(.wb-kicker),
+.wb-secondary-shell .wb-auth-form > header > p:last-child {
+    font-size: 14px;
+    line-height: 1.75;
+}
+.wb-secondary-shell .wb-inline-link {
+    font-size: 13px;
+    min-height: 40px;
+}
+.wb-secondary-shell [data-slot='button'],
+.wb-secondary-shell [data-slot='input'],
+.wb-secondary-shell .wb-category-select {
+    min-height: 44px;
+}
+.wb-secondary-shell .wb-auth-grid {
+    gap: clamp(28px, 4vw, 64px);
+    max-width: 1100px;
+}
+.wb-secondary-shell .wb-auth-story h2 {
+    font-size: clamp(30px, 3vw, 42px);
+}
+.wb-secondary-shell .wb-auth-form {
+    padding: 28px;
+}
+.wb-secondary-shell .wb-account-heading {
+    padding-bottom: 28px;
+}
+.wb-secondary-shell .wb-settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+}
+.wb-secondary-shell .wb-settings-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+.wb-secondary-shell .wb-settings-nav a {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    align-items: center;
+}
+.wb-secondary-shell .wb-settings-nav small {
+    font-size: 12px;
+}
+.wb-secondary-shell .wb-private-note {
+    border: 0;
+    margin: 12px 4px 0;
+    padding: 0;
+    max-width: 85ch;
+}
+.wb-secondary-shell .wb-private-note svg {
+    display: inline;
+    margin: 0 6px 0 0;
+    vertical-align: text-bottom;
+}
+.wb-secondary-shell .wb-settings-content {
+    max-width: 960px;
+    width: 100%;
+}
+
+/* Compact does not need to mean tiny: keep content and actions readable. */
+.wb-discovery-shell .wb-topic-card .wb-entry-description {
+    font-size: 13px;
+    line-height: 1.7;
+}
+.wb-discovery-shell .wb-card-author,
+.wb-discovery-shell .wb-card-author .wb-member-link,
+.wb-discovery-shell .wb-card-tags a,
+.wb-discovery-shell .wb-topic-count,
+.wb-discovery-shell .wb-card-methods,
+.wb-discovery-shell .wb-card-first-method {
+    font-size: 12px;
+}
+.wb-discovery-shell .wb-feed-nav a {
+    min-height: 44px;
+    font-size: 12px;
+}
+.wb-discovery-shell .wb-compose > p,
+.wb-discovery-shell .wb-guide-list p,
+.wb-discovery-shell .wb-guide-list strong,
+.wb-discovery-shell .wb-guide-link {
+    font-size: 13px;
+}
+.wb-discovery-shell .wb-discovery-filters select {
+    min-height: 44px;
+    font-size: 13px;
+}
+.wb-discovery-shell .wb-topic-appreciation,
+.wb-discovery-shell .wb-card-methods,
+.wb-discovery-shell .wb-card-more,
+.wb-discovery-shell .wb-card-actions .wb-save-compact {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+@media (min-width: 1051px) {
+    .wb-cosmos-shell.is-sidebar-collapsed {
+        padding-left: 0;
+    }
+    .wb-cosmos-shell.is-sidebar-collapsed .wb-community-sidebar {
+        visibility: hidden;
+        transform: translateX(-100%);
+    }
+    .wb-cosmos-shell.is-sidebar-collapsed .wb-universe {
+        left: 0;
+    }
+    .wb-cosmos-shell.is-sidebar-collapsed .wb-brand-group {
+        display: flex;
+    }
+    .wb-cosmos-shell.is-sidebar-collapsed .wb-explore-link {
+        display: none;
+    }
+    .wb-secondary-shell.is-sidebar-collapsed .wb-shell-home-link {
+        display: none;
+    }
+}
+@media (max-width: 1050px) {
+    .wb-cosmos-shell {
+        /* A viewport change must not animate the old desktop gutter on mobile. */
+        transition: none;
+    }
+    .wb-desktop-sidebar-toggle,
+    .wb-shell-home-link {
+        display: none;
+    }
+    .wb-navigation-toggle {
+        display: inline-flex;
+    }
+    .wb-community-sidebar,
+    .wb-community-sidebar.is-open {
+        width: min(288px, calc(100vw - 40px));
+        z-index: 61;
+    }
+    .wb-sidebar-shade {
+        z-index: 60;
+    }
+    .wb-sidebar-brand {
+        margin: 0 0 24px;
+        padding-right: 46px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    .wb-sidebar-close {
+        top: 0;
+        right: 0;
+    }
+    .wb-sidebar-brand .wb-wordmark {
+        font-size: 23px;
+    }
+    .wb-secondary-shell .wb-auth-grid {
+        gap: 32px;
+    }
+}
+@media (max-width: 760px) {
+    .wb-secondary-shell .wb-page,
+    .wb-secondary-shell #main-content > main {
+        padding: 24px 16px 40px;
+    }
+    .wb-secondary-shell .wb-panel,
+    .wb-secondary-shell .wb-auth-form {
+        padding: 20px;
+    }
+    .wb-secondary-shell .wb-settings-nav a {
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 6px;
+    }
+    .wb-secondary-shell .wb-settings-nav small {
+        display: none;
+    }
+    .wb-secondary-shell .wb-settings-nav strong {
+        font-size: 12px;
+    }
+    .wb-secondary-shell input:not([type='checkbox']):not([type='radio']),
+    .wb-secondary-shell textarea,
+    .wb-secondary-shell select,
+    .wb-secondary-shell [contenteditable='true'] {
+        font-size: 16px;
+    }
+    .wb-public .wb-main-nav > [data-slot='button'] {
+        min-height: 44px;
+        font-size: 12px;
+    }
+    .wb-cosmos-shell .wb-topbar-inner {
+        column-gap: 8px;
+    }
+    .wb-cosmos-shell .wb-main-nav {
+        margin-left: auto;
+    }
+    .wb-discovery-shell .wb-feed-nav a {
+        font-size: 12px;
+    }
+    .wb-discovery-shell .wb-card-first-method {
+        max-width: none;
+    }
+    .wb-discovery-shell .wb-card-actions {
+        flex-wrap: wrap;
+        gap: 4px 8px;
+    }
+}
+@media (max-width: 380px) {
+    .wb-secondary-shell .wb-settings-nav a > svg {
+        display: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wb-cosmos-shell {
+        transition: none;
+    }
+}

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\CommunityNotification;
 use App\Services\ImageUploads;
+use App\Support\TopicDiscovery;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -42,6 +43,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'communityCategories' => TopicDiscovery::categories(),
             'unreadNotifications' => fn () => $user === null ? 0 : CommunityNotification::query()->visible()->where('user_id', $user->id)->whereNull('read_at')->count(),
             'canModerate' => $user?->can('moderate') ?? false,
             'reportsEnabled' => (bool) config('community.reports_enabled'),
