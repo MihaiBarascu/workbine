@@ -203,7 +203,7 @@ const verifyAccount = require('./verify-account.cjs');
         );
         await contributor.locator('.wb-notification-item').click();
         await contributor.waitForURL(
-            /\/topics\/[^/]+\/methods\/\d+\/experiences(?:\?page=\d+)?#experience-\d+$/,
+            /\/topics\/[^/]+\/methods\/\d+(?:\?page=\d+)?#experience-\d+$/,
         );
         assert.ok(
             await contributor

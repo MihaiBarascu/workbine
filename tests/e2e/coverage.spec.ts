@@ -1,5 +1,58 @@
 import { expect, login, test } from './fixtures';
 
+test('guest public pages expose accessible policy footer and GitHub link', async ({
+    page,
+}) => {
+    for (const viewport of [
+        { width: 375, height: 812 },
+        { width: 1440, height: 1080 },
+    ]) {
+        await page.setViewportSize(viewport);
+        for (const path of ['/topics', '/privacy', '/terms']) {
+            await page.goto(path);
+            await expect(page.locator('main h1')).toHaveCount(1);
+            await expect(page.locator('footer')).toBeVisible();
+            await expect(
+                page
+                    .locator('footer')
+                    .getByRole('link', { name: 'Privacy', exact: true }),
+            ).toHaveAttribute('href', '/privacy');
+            await expect(
+                page
+                    .locator('footer')
+                    .getByRole('link', { name: 'Terms', exact: true }),
+            ).toHaveAttribute('href', '/terms');
+            await expect(
+                page.locator(
+                    'a[aria-label="Workbine on GitHub (opens in a new tab)"]',
+                ),
+            ).toHaveAttribute(
+                'href',
+                'https://github.com/MihaiBarascu/workbine',
+            );
+            await expect(
+                page.locator(
+                    'a[aria-label="Workbine on GitHub (opens in a new tab)"]',
+                ),
+            ).toHaveAttribute('target', '_blank');
+            await expect(
+                page.locator(
+                    'a[aria-label="Workbine on GitHub (opens in a new tab)"]',
+                ),
+            ).toHaveAttribute('rel', /noopener/);
+            await expect
+                .poll(() =>
+                    page.evaluate(
+                        () =>
+                            document.documentElement.scrollWidth <=
+                            window.innerWidth + 1,
+                    ),
+                )
+                .toBe(true);
+        }
+    }
+});
+
 test('member can change password and relogin with the new password', async ({
     page,
     actors,

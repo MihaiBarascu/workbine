@@ -19,61 +19,29 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use Inertia\Response;
 use Throwable;
 
 class ExperienceController extends Controller
 {
-    public function index(Request $request, Topic $topic, Method $method): Response
+    public function index(Request $request, Topic $topic, Method $method): RedirectResponse
     {
         $input = $request->query('outcome');
         $outcome = is_string($input) && in_array($input, ['worked', 'partly', 'did_not_work'], true) ? $input : 'all';
-        $method->load('user:id,name,username,avatar_image_id', 'user.avatarImage');
-        $experiences = $method->experiences()
-            ->when($outcome !== 'all', fn ($query) => $query->where('outcome', $outcome))
-            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
-            ->latest('updated_at')
-            ->orderByDesc('id')
-            ->paginate(10)
-            ->appends($outcome === 'all' ? [] : ['outcome' => $outcome])
-            ->through(fn (Experience $experience): array => $this->serialize($experience));
+        $query = [];
+        if ($outcome !== 'all') {
+            $query['outcome'] = $outcome;
+        }
+        $page = $request->query('page');
+        if (is_string($page) && ctype_digit($page) && (int) $page > 0) {
+            $query['page'] = (int) $page;
+        }
 
-        $counts = $method->experiences()
-            ->select('outcome')
-            ->selectRaw('COUNT(*) as total')
-            ->groupBy('outcome')
-            ->pluck('total', 'outcome');
-
-        $own = $request->user() === null ? null : $method->experiences()
-            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
-            ->where('user_id', $request->user()->getAuthIdentifier())
-            ->first();
-
-        return Inertia::render('experiences/index', [
-            'topic' => ['id' => $topic->id, 'title' => $topic->title, 'slug' => $topic->slug],
-            'method' => [
-                'id' => $method->id,
-                'title' => $method->title,
-                'revision' => ContributionRevision::token($method),
-                'user' => ['id' => $method->user->id, 'name' => $method->user->name, 'username' => $method->user->username, 'avatar_url' => $method->user->avatarUrl()],
-            ],
-            'experiences' => $experiences,
-            'outcome' => $outcome,
-            'ownExperience' => $own ? $this->serialize($own) : null,
-            'ownExperienceHidden' => $request->user() !== null && Experience::withoutGlobalScopes()
-                ->where('method_id', $method->id)->where('user_id', $request->user()->getAuthIdentifier())
-                ->whereNotNull('hidden_at')->exists(),
-            'summary' => [
-                'worked' => (int) $counts->get('worked', 0),
-                'partly' => (int) $counts->get('partly', 0),
-                'did_not_work' => (int) $counts->get('did_not_work', 0),
-            ],
-        ]);
+        return redirect()->to(route('methods.show', [$topic, $method, ...$query]));
     }
 
     public function create(Topic $topic, Method $method): RedirectResponse
     {
-        return redirect()->to(route('experiences.index', [$topic, $method]).'#share');
+        return redirect()->to(route('methods.show', [$topic, $method]).'#share');
     }
 
     public function store(StoreExperienceRequest $request, Topic $topic, Method $method, ImageUploads $uploads): RedirectResponse
@@ -126,7 +94,7 @@ class ExperienceController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Your response has been saved.')]);
 
-        return to_route('experiences.index', [$topic, $method]);
+        return redirect()->to(route('methods.show', [$topic, $method]).'#experiences');
     }
 
     public function destroy(Request $request, Topic $topic, Method $method, ImageUploads $uploads): RedirectResponse
@@ -146,23 +114,6 @@ class ExperienceController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Your response has been removed.')]);
 
-        return to_route('experiences.index', [$topic, $method]);
-    }
-
-    /** @return array<string, mixed> */
-    private function serialize(Experience $experience): array
-    {
-        return [
-            'id' => $experience->id,
-            'outcome' => $experience->outcome,
-            'body' => $experience->body,
-            'body_document' => $experience->body_document,
-            'evidence_url' => $experience->evidence_url,
-            'evidence_image' => $experience->evidenceImage?->publicData(),
-            'tried_on' => $experience->tried_on?->toDateString(),
-            'created_at' => $experience->created_at?->toIso8601String(),
-            'updated_at' => $experience->updated_at?->toIso8601String(),
-            'user' => ['id' => $experience->user->id, 'name' => $experience->user->name, 'username' => $experience->user->username, 'avatar_url' => $experience->user->avatarUrl()],
-        ];
+        return redirect()->to(route('methods.show', [$topic, $method]).'#experiences');
     }
 }

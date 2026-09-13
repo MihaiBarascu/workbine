@@ -18,7 +18,7 @@ test('an experienced method stays intact while its author can add dated updates'
         const topicUrl = `/topics/${actors.topic.slug}`;
         const methodEditUrl = `${topicUrl}/methods/${actors.method.id}/edit`;
         const methodUrl = `${topicUrl}/methods/${actors.method.id}`;
-        const experienceUrl = `${methodUrl}/experiences`;
+        const experienceUrl = methodUrl;
 
         await login(owner, actors.owner);
         await login(contributor, actors.contributor);
@@ -110,7 +110,9 @@ test('an experienced method stays intact while its author can add dated updates'
         await contributor
             .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
-        await expect(contributor).toHaveURL(new RegExp(`${experienceUrl}$`));
+        await expect(contributor).toHaveURL(
+            new RegExp(`${experienceUrl}#experiences$`),
+        );
         await expect(
             contributor
                 .getByRole('article')

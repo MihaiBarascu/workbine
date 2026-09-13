@@ -31,7 +31,7 @@ class ExperienceFiltersTest extends TestCase
         }
 
         foreach (['worked', 'partly', 'did_not_work'] as $outcome) {
-            $this->get(route('experiences.index', [$method->topic, $method, 'outcome' => $outcome]))
+            $this->get(route('methods.show', [$method->topic, $method, 'outcome' => $outcome]))
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
                     ->where('outcome', $outcome)
@@ -50,7 +50,7 @@ class ExperienceFiltersTest extends TestCase
         $this->experience($method, 'partly');
 
         foreach ([null, '', 'all', 'invalid', ['worked']] as $outcome) {
-            $this->get(route('experiences.index', [$method->topic, $method, 'outcome' => $outcome]))
+            $this->get(route('methods.show', [$method->topic, $method, 'outcome' => $outcome]))
                 ->assertOk()
                 ->assertInertia(fn (Assert $page) => $page
                     ->where('outcome', 'all')
@@ -69,7 +69,7 @@ class ExperienceFiltersTest extends TestCase
             $this->experience($method, 'worked');
         }
 
-        $this->actingAs($user)->get(route('experiences.index', [$method->topic, $method, 'outcome' => 'worked']))
+        $this->actingAs($user)->get(route('methods.show', [$method->topic, $method, 'outcome' => 'worked']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('experiences.data', 10)
@@ -80,7 +80,7 @@ class ExperienceFiltersTest extends TestCase
                 ->where('ownExperience.id', $own->id)
                 ->where('ownExperience.outcome', 'partly'));
 
-        $this->get(route('experiences.index', [$method->topic, $method, 'outcome' => 'worked', 'page' => 2]))
+        $this->get(route('methods.show', [$method->topic, $method, 'outcome' => 'worked', 'page' => 2]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('outcome', 'worked')
@@ -95,7 +95,7 @@ class ExperienceFiltersTest extends TestCase
         $user = User::factory()->create();
         $own = $this->experience($method, 'partly', $user);
 
-        $this->actingAs($user)->get(route('experiences.index', [$method->topic, $method, 'outcome' => 'worked']))
+        $this->actingAs($user)->get(route('methods.show', [$method->topic, $method, 'outcome' => 'worked']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('outcome', 'worked')
@@ -112,7 +112,7 @@ class ExperienceFiltersTest extends TestCase
         $this->experience($method, 'worked', $user)->forceFill(['hidden_at' => now()])->save();
         $this->experience($method, 'partly');
 
-        $this->actingAs($user)->get(route('experiences.index', [$method->topic, $method, 'outcome' => 'worked']))
+        $this->actingAs($user)->get(route('methods.show', [$method->topic, $method, 'outcome' => 'worked']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->has('experiences.data', 0)

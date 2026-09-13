@@ -11,7 +11,8 @@ A topic is a subject such as `Automating product imports for an online store`, n
 The product prioritizes practical experience, freshness, credibility, and helpfulness over simple popularity.
 
 Methods have individual shareable pages. Topic pages show ten short method previews
-per page, keeping long contributions out of the listing payload.
+per page, keeping long contributions out of the listing payload. Experiences and
+outcome filters live directly below each method, with an inline response editor.
 
 ## Member profiles
 

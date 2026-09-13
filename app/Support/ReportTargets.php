@@ -29,7 +29,18 @@ class ReportTargets
         return match (true) {
             $target instanceof Topic => route('topics.show', $target, false),
             $target instanceof Method => route('methods.show', [$target->topic, $target], false),
-            default => route('experiences.index', [$target->method->topic, $target->method], false).'#experience-'.$target->id,
+            default => self::experienceUrl($target),
         };
+    }
+
+    private static function experienceUrl(Experience $experience): string
+    {
+        $preceding = $experience->method->experiences()->where('outcome', $experience->outcome)->where(fn ($query) => $query
+            ->where('updated_at', '>', $experience->updated_at)
+            ->orWhere(fn ($query) => $query->where('updated_at', $experience->updated_at)->where('id', '>', $experience->id)))
+            ->count();
+        $page = intdiv($preceding, 10) + 1;
+
+        return route('methods.show', [$experience->method->topic, $experience->method, 'outcome' => $experience->outcome, ...($page > 1 ? ['page' => $page] : [])], false).'#experience-'.$experience->id;
     }
 }

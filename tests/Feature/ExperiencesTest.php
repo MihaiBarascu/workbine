@@ -38,10 +38,10 @@ class ExperiencesTest extends TestCase
         $user = User::factory()->create();
         $method->experiences()->create($this->payload(['user_id' => $user->id]));
 
-        $this->get(route('experiences.index', [$method->topic, $method]))
+        $this->get(route('methods.show', [$method->topic, $method]))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('experiences/index')
+                ->component('topics/method-show')
                 ->has('experiences.data', 1)
                 ->where('experiences.data.0.user.name', $user->name)
                 ->where('summary.partly', 1)
@@ -74,7 +74,7 @@ class ExperiencesTest extends TestCase
                 'user_id' => $other->id,
                 'method_id' => 99999,
             ]))
-            ->assertRedirect(route('experiences.index', [$method->topic, $method]));
+            ->assertRedirect(route('methods.show', [$method->topic, $method]).'#experiences');
 
         $this->assertDatabaseHas('experiences', [
             'method_id' => $method->id,
@@ -83,10 +83,24 @@ class ExperiencesTest extends TestCase
         ]);
         $this->assertDatabaseMissing('experiences', ['user_id' => $other->id]);
 
-        $this->get(route('experiences.index', [$method->topic, $method]))
+        $this->get(route('methods.show', [$method->topic, $method]))
             ->assertInertia(fn (Assert $page) => $page
                 ->where('ownExperience.user.id', $user->id)
                 ->where('ownExperience.tried_on', '2025-01-15'));
+    }
+
+    public function test_experience_create_and_write_redirect_to_the_integrated_method_page(): void
+    {
+        $method = Method::factory()->create();
+        $user = User::factory()->create();
+        $params = [$method->topic, $method];
+
+        $this->actingAs($user)->get(route('experiences.create', $params))
+            ->assertRedirect(route('methods.show', $params).'#share');
+        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method))
+            ->assertRedirect(route('methods.show', $params).'#experiences');
+        $this->delete(route('experiences.destroy', $params))
+            ->assertRedirect(route('methods.show', $params).'#experiences');
     }
 
     public function test_authors_cannot_validate_their_own_methods(): void
@@ -151,7 +165,7 @@ class ExperiencesTest extends TestCase
         $this->assertSame($first->created_at?->toIso8601String(), $updated->created_at?->toIso8601String());
         $this->assertSame('worked', $updated->outcome);
         $this->assertNull($updated->evidence_url);
-        $this->get(route('experiences.index', $params))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('methods.show', $params))->assertInertia(fn (Assert $page) => $page
             ->where('summary.worked', 1)
             ->where('summary.partly', 0)
             ->where('experiences.total', 1));
@@ -178,12 +192,29 @@ class ExperiencesTest extends TestCase
         $otherTopic = Topic::factory()->create();
         $params = [$otherTopic, $method];
 
-        $this->get(route('experiences.index', $params))->assertNotFound();
+        $this->get(route('methods.show', $params))->assertNotFound();
         $this->actingAs(User::factory()->create());
         $this->get(route('experiences.create', $params))->assertNotFound();
         $this->put(route('experiences.store', $params), $this->payload())->assertNotFound();
         $this->delete(route('experiences.destroy', $params))->assertNotFound();
         $this->assertDatabaseCount('experiences', 0);
+    }
+
+    public function test_legacy_experience_index_redirects_with_only_validated_query_and_no_fragment(): void
+    {
+        $method = Method::factory()->create();
+        $url = route('experiences.index', [$method->topic, $method, 'outcome' => 'worked', 'page' => 2, 'unexpected' => 'discarded']).'#experience-42';
+
+        $this->get($url)->assertRedirect(route('methods.show', [$method->topic, $method, 'outcome' => 'worked', 'page' => 2]));
+        $this->get(route('experiences.index', [$method->topic, $method, 'outcome' => 'invalid', 'page' => 'nope']))
+            ->assertRedirect(route('methods.show', [$method->topic, $method]));
+    }
+
+    public function test_legacy_experience_index_keeps_topic_scoping(): void
+    {
+        $method = Method::factory()->create();
+
+        $this->get(route('experiences.index', [Topic::factory()->create(), $method]))->assertNotFound();
     }
 
     public function test_unsupported_outcomes_empty_context_and_future_dates_are_rejected(): void
@@ -237,7 +268,7 @@ class ExperiencesTest extends TestCase
         $otherMethod->experiences()->create($this->payload(['user_id' => $users->first()->id]));
 
         $this->actingAs($users->last())
-            ->get(route('experiences.index', [$method->topic, $method, 'page' => 2]))
+            ->get(route('methods.show', [$method->topic, $method, 'page' => 2]))
             ->assertInertia(fn (Assert $page) => $page
                 ->has('experiences.data', 1)
                 ->where('experiences.total', 11)

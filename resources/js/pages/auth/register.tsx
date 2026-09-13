@@ -26,6 +26,12 @@ export default function Register({ passwordRules, turnstileSiteKey }: Props) {
             <Head title="Register" />
 
             <div className="flex flex-col gap-6">
+                <p className="text-muted-foreground text-sm leading-6">
+                    By creating an account, you agree to the{' '}
+                    <TextLink href="/terms">Terms</TextLink>. Read how we use
+                    information in our{' '}
+                    <TextLink href="/privacy">Privacy notice</TextLink>.
+                </p>
                 <Button asChild variant="outline" className="w-full">
                     <a href="/auth/google">Continue with Google</a>
                 </Button>

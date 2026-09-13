@@ -236,7 +236,7 @@ class ImageUploadsTest extends TestCase
         $this->assertSame(800, $image->height);
         $this->post($route, $this->experiencePayload($method, ['body' => 'Here is my updated experience, keeping the same supporting photograph.']))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame($image->id, $experience->refresh()->evidence_image_id);
-        $this->get(route('experiences.index', [$method->topic, $method]))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('methods.show', [$method->topic, $method]))->assertInertia(fn (Assert $page) => $page
             ->where('experiences.data.0.evidence_image', $image->publicData())
             ->missing('experiences.data.0.evidence_image.path')->missing('experiences.data.0.evidence_image.disk'));
         config(['media.enabled' => false]);

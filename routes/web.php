@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Middleware\EncryptHistory;
 
 Route::inertia('community/guide', 'community/guide')->name('community.guide');
+Route::inertia('privacy', 'legal/privacy')->name('privacy');
+Route::inertia('terms', 'legal/terms')->name('terms');
 
 Route::middleware(['auth', EncryptHistory::class])->group(function () {
     Route::get('notifications', [CommunityNotificationController::class, 'index'])->name('notifications.index');

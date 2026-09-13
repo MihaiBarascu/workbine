@@ -77,7 +77,7 @@ class CommunityNotification extends Model
             ->orWhere(fn ($query) => $query->where('updated_at', $experience->updated_at)->where('id', '>', $experience->id)))
             ->count();
 
-        return route('experiences.index', [$topic, $this->method, 'page' => intdiv($preceding, 10) + 1]).'#experience-'.$this->experience_id;
+        return route('methods.show', [$topic, $this->method, 'page' => intdiv($preceding, 10) + 1]).'#experience-'.$this->experience_id;
     }
 
     /** @return array<string, string> */

@@ -43,8 +43,12 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                 <a
                                     href={action.replace(
                                         /\/experience$/,
-                                        '/experiences',
+                                        '#share',
                                     )}
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        window.location.reload();
+                                    }}
                                     className="text-primary text-sm underline"
                                 >
                                     Copy your response and reload before trying
@@ -204,7 +208,8 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                     action={action}
                     method="delete"
                     disableWhileProcessing
-                    onBefore={() =>
+                    onBefore={(visit) =>
+                        visit.method !== 'delete' ||
                         window.confirm(
                             'Remove your public response? This cannot be undone.',
                         )

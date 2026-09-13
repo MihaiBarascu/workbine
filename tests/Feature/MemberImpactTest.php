@@ -27,7 +27,7 @@ class MemberImpactTest extends TestCase
             ->where('member.impact', ['methods_tried' => 1, 'worked' => 2, 'partly' => 1, 'topic_saves' => 1])
             ->where('contributions.data.0.feedback', [
                 'total' => 4, 'worked' => 2, 'partly' => 1, 'did_not_work' => 1,
-                'url' => route('experiences.index', [$topic, $method], false),
+                'url' => route('methods.show', [$topic, $method], false).'#experiences',
             ]));
     }
 

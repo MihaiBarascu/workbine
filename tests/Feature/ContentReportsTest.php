@@ -10,6 +10,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ImageUploads;
 use App\Support\ContributionRevision;
+use App\Support\ReportTargets;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -69,8 +70,30 @@ class ContentReportsTest extends TestCase
         }
         $this->assertDatabaseCount('content_reports', 3);
         $this->get(route('topics.show', $method->topic))->assertDontSee('Private report context.');
-        $this->get(route('experiences.index', [$method->topic, $method]))->assertDontSee('Private report context.');
+        $this->get(route('methods.show', [$method->topic, $method]))->assertDontSee('Private report context.');
         $this->get(route('members.show', $user->username))->assertDontSee('Private report context.');
+    }
+
+    public function test_experience_report_target_uses_the_filtered_page_and_anchor(): void
+    {
+        $method = Method::factory()->create();
+        $experiences = [];
+        foreach (range(1, 11) as $index) {
+            $experiences[] = $this->experience($method);
+        }
+        foreach (range(1, 10) as $index) {
+            $method->experiences()->create([
+                'user_id' => User::factory()->create()->id, 'outcome' => 'worked',
+                'body' => 'A different outcome with enough practical context to be useful.',
+            ]);
+        }
+
+        $target = $experiences[0];
+        $this->actingAs(User::factory()->create())
+            ->get(route('reports.create', ['experience', $target->id]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('target.url', ReportTargets::url($target))
+                ->where('target.url', route('methods.show', [$method->topic, $method, 'outcome' => 'partly', 'page' => 2], false).'#experience-'.$target->id));
     }
 
     public function test_retries_create_one_report_and_cannot_rewrite_it(): void
@@ -115,7 +138,7 @@ class ContentReportsTest extends TestCase
         $report = $this->report($topic, 'topic');
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Spam content reviewed.'])->assertSuccessful();
         $this->get(route('topics.show', $topic))->assertNotFound();
-        $this->get(route('experiences.index', [$topic, $method]))->assertNotFound();
+        $this->get(route('methods.show', [$topic, $method]))->assertNotFound();
         $this->get(route('topics.index'))->assertInertia(fn (Assert $page) => $page->has('topics.data', 0));
         foreach ([$topic->user, $method->user, $experience->user] as $user) {
             foreach (['topics', 'methods', 'experiences'] as $view) {
@@ -127,7 +150,7 @@ class ContentReportsTest extends TestCase
         $this->assertDatabaseCount('methods', 1);
         $this->assertDatabaseCount('experiences', 1);
         $this->artisan('content:restore', ['type' => 'topic', 'id' => $topic->id])->assertSuccessful();
-        $this->get(route('experiences.index', [$topic, $method]))->assertOk();
+        $this->get(route('methods.show', [$topic, $method]))->assertOk();
     }
 
     public function test_hiding_method_preserves_topic_and_history_and_blocks_mutations(): void
@@ -148,7 +171,7 @@ class ContentReportsTest extends TestCase
         $experience = $this->experience($method);
         $report = $this->report($experience, 'experience');
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Reviewed harassment.'])->assertSuccessful();
-        $this->actingAs($experience->user)->get(route('experiences.index', [$method->topic, $method]))
+        $this->actingAs($experience->user)->get(route('methods.show', [$method->topic, $method]))
             ->assertInertia(fn (Assert $page) => $page->has('experiences.data', 0)->where('ownExperience', null)->where('ownExperienceHidden', true)->where('summary.partly', 0));
         $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'Trying to replace a hidden experience with another.'])->assertForbidden();
         $this->assertDatabaseCount('experiences', 1);

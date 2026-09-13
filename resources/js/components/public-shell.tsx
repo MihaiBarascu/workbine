@@ -1,6 +1,7 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
+    Github,
     Menu,
     PanelLeftClose,
     PanelLeftOpen,
@@ -203,6 +204,16 @@ export function PublicShell({ children, discovery }: Props) {
                             >
                                 Community guide
                             </Link>
+                            <a
+                                href="https://github.com/MihaiBarascu/workbine"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-10 shrink-0 items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
+                                aria-label="Workbine on GitHub (opens in a new tab)"
+                                title="GitHub"
+                            >
+                                <Github aria-hidden="true" className="size-5" />
+                            </a>
                             {user ? (
                                 <>
                                     <Link
@@ -351,8 +362,15 @@ export function PublicShell({ children, discovery }: Props) {
                                 <>
                                     <Link href="/login">Log in</Link>
                                     <Button asChild size="sm">
-                                        <Link href="/register">
-                                            Join Workbine
+                                        <Link
+                                            href="/register"
+                                            aria-label="Join Workbine"
+                                        >
+                                            Join
+                                            <span className="hidden min-[480px]:inline">
+                                                {' '}
+                                                Workbine
+                                            </span>
                                         </Link>
                                     </Button>
                                 </>
@@ -378,6 +396,8 @@ export function PublicShell({ children, discovery }: Props) {
                             <Link href="/community/reputation">
                                 How reputation works
                             </Link>
+                            <Link href="/privacy">Privacy</Link>
+                            <Link href="/terms">Terms</Link>
                             <a href="mailto:hello@workbine.com">Contact</a>
                             {!composingTopic && (
                                 <Link href="/topics/create">Start a topic</Link>

@@ -115,9 +115,7 @@ test('three members complete one topic, methods, feedback and reputation journey
         const ownerMethodHref = await ownerMethod
             .getByRole('link', { name: /experiences$/ })
             .getAttribute('href');
-        const ownerMethodId = ownerMethodHref!.match(
-            /methods\/(\d+)\/experiences/,
-        )![1];
+        const ownerMethodId = ownerMethodHref!.match(/methods\/(\d+)/)![1];
 
         async function publishMethod(page: Page, methodTitle: string) {
             await page.goto(`${topicUrl}/methods/create`);
@@ -150,7 +148,7 @@ test('three members complete one topic, methods, feedback and reputation journey
                 .getAttribute('href');
             return {
                 article,
-                id: href!.match(/methods\/(\d+)\/experiences/)![1],
+                id: href!.match(/methods\/(\d+)/)![1],
             };
         }
 
@@ -249,7 +247,7 @@ test('three members complete one topic, methods, feedback and reputation journey
                 })
                 .click();
             await expect(page).toHaveURL(
-                new RegExp(`${topicUrl}/methods/${methodId}/experiences$`),
+                new RegExp(`${topicUrl}/methods/${methodId}#experiences$`),
             );
             await expect(
                 page.getByRole('article').filter({ hasText: body }),
@@ -330,9 +328,8 @@ test('three members complete one topic, methods, feedback and reputation journey
         await assertProfile(owner, actors.owner, 9, 2, 1, 1, 1);
         await assertProfile(contributor, actors.contributor, 5, 0, 1, 0, 1);
 
-        await contributor.goto(
-            `${topicUrl}/methods/${ownerMethodId}/experiences`,
-        );
+        await contributor.goto(`${topicUrl}/methods/${ownerMethodId}`);
+        await contributor.locator('#experiences').scrollIntoViewIfNeeded();
         await contributor
             .getByRole('link', { name: 'Edit my experience', exact: true })
             .click();

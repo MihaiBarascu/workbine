@@ -19,6 +19,20 @@ The rich-text toolbar stays below the shared header while editing long content.
 The public footer links to `hello@workbine.com`; this does not configure a mailbox
 or change transactional email delivery. Release validation is recorded in the PR.
 
+## Experiences on the method page
+
+The method detail now includes its experiences, outcome filters and ten-item
+pagination below the original contribution. The response editor opens inline and
+keeps its draft when collapsed. Legacy experience URLs redirect to the method;
+profile, report and notification links point to the relevant experience section
+or paginated response. Existing ownership, moderation and revision checks remain.
+
+The shared header links to the public GitHub repository. Privacy and Terms pages
+are linked from the footer and registration, and email verification reminds people
+to check Spam. These pages document product behavior; publication is not a claim
+that deployment-specific legal and operational launch checks are complete.
+Release validation is recorded in the pull request.
+
 ## Current integration handoff
 
 The merged baseline includes shared navigation (#39, `a0402d9`) and method-update
