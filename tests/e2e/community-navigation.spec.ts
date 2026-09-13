@@ -151,7 +151,10 @@ test('community navigation retracts without losing routes or keyboard access', a
             await expect(sidebar).toBeHidden();
             await expect(sidebar).toHaveCSS('transition-duration', '0s');
             await expect(
-                page.getByRole('button', { name: 'Expand sidebar', exact: true }),
+                page.getByRole('button', {
+                    name: 'Expand sidebar',
+                    exact: true,
+                }),
             ).toBeInViewport();
             expect(
                 await page.evaluate(
