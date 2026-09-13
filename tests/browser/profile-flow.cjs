@@ -269,6 +269,12 @@ const { chromium } = requireBrowser('playwright');
                 )
                 .waitFor();
         }
+        await page.evaluate(() =>
+            Object.defineProperty(navigator, 'share', {
+                configurable: true,
+                value: undefined,
+            }),
+        );
         // Exercise the actual clipboard-denied path, without relying on OS clipboard permissions.
         await page.evaluate(() =>
             Object.defineProperty(navigator, 'clipboard', {
@@ -281,7 +287,7 @@ const { chromium } = requireBrowser('playwright');
             }),
         );
         await page
-            .getByRole('button', { name: 'Copy link', exact: true })
+            .getByRole('button', { name: 'Share link', exact: true })
             .click();
         await page.getByRole('textbox', { name: 'Link to copy' }).waitFor();
         assert.equal(

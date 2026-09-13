@@ -8,7 +8,7 @@ import {
     Pencil,
 } from 'lucide-react';
 import { MemberAvatar } from '@/components/community';
-import { CopyLinkButton } from '@/components/copy-link-button';
+import { ShareLinkButton } from '@/components/share-link-button';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import type { User } from '@/types';
@@ -148,7 +148,7 @@ export default function MemberProfile({
                                     </Link>
                                 </Button>
                             )}
-                            <CopyLinkButton
+                            <ShareLinkButton
                                 path={`/members/${member.username}`}
                             />
                         </div>

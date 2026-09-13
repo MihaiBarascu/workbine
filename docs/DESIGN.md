@@ -82,3 +82,17 @@ shortcuts remain in the account menu on narrow screens. The notification bell
 indicates only real unread contributions addressed to the signed-in member.
 A standalone community guide explains topics, methods and responses without
 introducing additional publishing forms.
+
+## Common actions — 2026-09-13
+
+Use compact Lucide icon controls for familiar secondary actions: sharing, saving,
+reporting and editing. Keep accessible names, hover labels, visible focus and
+feedback after an action. Creation, publication and destructive confirmations keep
+explicit text. Menu entries retain labels so their choices are understandable.
+Avoid redundant instructions beside controls; keep guidance that prevents errors.
+
+Sharing reuses one control across topics, individual methods, profiles and
+experience lists. It opens native sharing when available, falls back to clipboard
+copy and exposes a selectable URL when clipboard access fails. Cancelling native
+sharing does not copy anything. Method links target that specific method, while
+topic sharing keeps the topic URL. Create a method is distinct from sharing a link.

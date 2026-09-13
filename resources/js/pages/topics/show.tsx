@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { LikeTopicButton } from '@/components/topic-card';
-import { CopyLinkButton } from '@/components/copy-link-button';
+import { ShareLinkButton } from '@/components/share-link-button';
 import { PublicShell } from '@/components/public-shell';
 import { ReportLink } from '@/components/report-link';
 import { SaveTopicButton } from '@/components/save-topic-button';
@@ -85,7 +85,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                         : 'methods shared'}
                                     <ArrowDown aria-hidden="true" />
                                 </a>
-                                <CopyLinkButton
+                                <ShareLinkButton
                                     path={`/topics/${topic.slug}`}
                                 />
                                 <ReportLink type="topic" id={topic.id} />
@@ -96,9 +96,15 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                     authenticated={Boolean(auth.user)}
                                 />
                                 {auth.user?.id === topic.user.id && (
-                                    <Link href={`/topics/${topic.slug}/edit`}>
+                                    <Link
+                                        href={`/topics/${topic.slug}/edit`}
+                                        title="Edit topic"
+                                        className="min-h-10 min-w-10 justify-center"
+                                    >
                                         <Pencil aria-hidden="true" />
-                                        Edit topic
+                                        <span className="sr-only">
+                                            Edit topic
+                                        </span>
                                     </Link>
                                 )}
                             </div>
@@ -188,7 +194,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                             )}
                                                     </div>
                                                 </div>
-                                                <CopyLinkButton
+                                                <ShareLinkButton
                                                     path={`/topics/${topic.slug}#method-${method.id}`}
                                                 />
                                             </div>
@@ -274,11 +280,25 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                     method.user.id && (
                                                     <Link
                                                         href={`/topics/${topic.slug}/methods/${method.id}/edit`}
+                                                        title={
+                                                            method.protected_at
+                                                                ? 'Add an update'
+                                                                : 'Edit method'
+                                                        }
+                                                        className="inline-flex min-h-10 min-w-10 items-center justify-center"
                                                     >
                                                         <Pencil aria-hidden="true" />
-                                                        {method.protected_at
-                                                            ? 'Add an update'
-                                                            : 'Edit method'}
+                                                        <span
+                                                            className={
+                                                                method.protected_at
+                                                                    ? undefined
+                                                                    : 'sr-only'
+                                                            }
+                                                        >
+                                                            {method.protected_at
+                                                                ? 'Add an update'
+                                                                : 'Edit method'}
+                                                        </span>
                                                     </Link>
                                                 )}
                                                 <Link

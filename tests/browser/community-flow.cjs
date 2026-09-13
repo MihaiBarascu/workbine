@@ -214,7 +214,8 @@ const { chromium } = browserRequire('playwright');
             0,
         );
         await page
-            .getByRole('button', { name: 'Copy link', exact: true })
+            .locator('.wb-topic-tools')
+            .getByRole('button', { name: 'Share link', exact: true })
             .click();
         await page
             .getByRole('status')
