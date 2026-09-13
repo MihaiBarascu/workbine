@@ -131,15 +131,22 @@ jobs:
                   listing = read_page('/topics')
                   topics = listing.get('props', {}).get('topics', {}).get('data', [])
                   topic_pages_checked = 0
+                  method_pages_checked = 0
                   experience_pages_checked = 0
                   if topics:
                       topic = read_page('/topics/' + urllib.parse.quote(topics[0]['slug'], safe=''))
                       assert topic.get('component') == 'topics/show', 'Topic detail failed'
                       topic_pages_checked = 1
-                      methods = topic.get('props', {}).get('methods', [])
+                      methods = topic.get('props', {}).get('methods', {}).get('data', [])
                       for method in methods[:1]:
                           assert 'experiences_count' in method, 'Experience release is not visible yet'
-                          experience = read_page('/topics/' + urllib.parse.quote(topics[0]['slug'], safe='') + '/methods/' + str(method['id']) + '/experiences')
+                          method_path = '/topics/' + urllib.parse.quote(topics[0]['slug'], safe='') + '/methods/' + str(method['id'])
+                          detail = read_page(method_path)
+                          assert detail.get('component') == 'topics/method-show', 'Public method page failed'
+                          assert detail.get('props', {}).get('method', {}).get('id') == method['id'], 'Wrong method detail'
+                          assert detail.get('props', {}).get('canonicalUrl') == base + method_path, 'Method canonical URL failed'
+                          method_pages_checked += 1
+                          experience = read_page(method_path + '/experiences')
                           assert experience.get('component') == 'experiences/index', 'Public experiences page failed'
                           experience_pages_checked += 1
 
@@ -151,6 +158,7 @@ jobs:
                       'search_behavior': 'confirmed',
                       'public_listing': 'confirmed',
                       'topic_pages_checked': topic_pages_checked,
+                      'method_pages_checked': method_pages_checked,
                       'experience_pages_checked': experience_pages_checked,
                       'public_topic_total': listing.get('props', {}).get('topics', {}).get('total'),
                   }
@@ -166,7 +174,7 @@ jobs:
                           + '\n```\n\n'
                           + 'The frontend fingerprint is built from the same Dockerfile used for production and compared with the public Vite manifest when available, with the application entry asset as a 404 fallback. '
                           + 'It verifies the shipped frontend build for the expected source, but it does not prove runtime environment values, external providers, or a backend-only revision whose frontend build is unchanged. '
-                          + 'Zero sampled topic/experience pages is not coverage of those flows. No authenticated Google session is tested.\n'
+                          + 'Zero sampled topic/method/experience pages is not coverage of those flows. No authenticated Google session is tested.\n'
                       )
                   break
               except urllib.error.HTTPError as error:
