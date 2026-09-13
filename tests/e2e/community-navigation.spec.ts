@@ -78,13 +78,20 @@ test('community navigation retracts without losing routes or keyboard access', a
     } else {
         await expect(sidebar).toBeVisible();
         const before = await page.locator('#main-content').boundingBox();
-        await page
-            .getByRole('button', { name: 'Collapse sidebar', exact: true })
-            .click();
+        const hideMenu = page.getByRole('button', {
+            name: 'Hide menu',
+            exact: true,
+        });
+        await expect(hideMenu).toHaveText('Hide menu');
+        await hideMenu.focus();
+        await page.keyboard.press('Enter');
         await expect(sidebar).toBeHidden();
         await expect(
-            page.getByRole('button', { name: 'Expand sidebar', exact: true }),
+            page.getByRole('button', { name: 'Show menu', exact: true }),
         ).toHaveAttribute('aria-expanded', 'false');
+        await expect(
+            page.getByRole('button', { name: 'Show menu', exact: true }),
+        ).toBeFocused();
         await expect
             .poll(
                 async () =>
@@ -100,14 +107,14 @@ test('community navigation retracts without losing routes or keyboard access', a
         await page.goto('/community/guide');
         await expect(sidebar).toBeHidden();
         await expect(
-            page.getByRole('button', { name: 'Expand sidebar', exact: true }),
+            page.getByRole('button', { name: 'Show menu', exact: true }),
         ).toBeVisible();
         await testInfo.attach('desktop-navigation-retracted', {
             body: await page.screenshot({ fullPage: true }),
             contentType: 'image/png',
         });
         await page
-            .getByRole('button', { name: 'Expand sidebar', exact: true })
+            .getByRole('button', { name: 'Show menu', exact: true })
             .click();
         await expect(sidebar).toBeVisible();
         await expect(
@@ -127,6 +134,54 @@ test('community navigation retracts without losing routes or keyboard access', a
                 .getByRole('navigation', { name: 'Categories', exact: true })
                 .locator('[aria-current="page"]'),
         ).toHaveCount(1);
+    }
+
+    // The full-width layout and the restore control stay usable near the breakpoint.
+    if (!mobile) {
+        await page.emulateMedia({
+            colorScheme: 'dark',
+            reducedMotion: 'reduce',
+        });
+        for (const width of [1051, 1280, 1920]) {
+            await page.setViewportSize({ width, height: 900 });
+            await page.goto('/topics');
+            await page
+                .getByRole('button', { name: 'Hide menu', exact: true })
+                .click();
+            await expect(sidebar).toBeHidden();
+            await expect(sidebar).toHaveCSS('transition-duration', '0s');
+            await expect(
+                page.getByRole('button', { name: 'Show menu', exact: true }),
+            ).toBeInViewport();
+            expect(
+                await page.evaluate(
+                    () =>
+                        document.documentElement.scrollWidth <= innerWidth + 1,
+                ),
+            ).toBe(true);
+            if (width === 1280) {
+                await testInfo.attach('desktop-menu-hidden-dark', {
+                    body: await page.screenshot(),
+                    contentType: 'image/png',
+                });
+            }
+            await page
+                .getByRole('button', { name: 'Show menu', exact: true })
+                .click();
+            await expect(sidebar).toBeVisible();
+            if (width === 1280) {
+                await testInfo.attach('desktop-menu-open-dark', {
+                    body: await page.screenshot(),
+                    contentType: 'image/png',
+                });
+            }
+            expect(
+                await page.evaluate(
+                    () =>
+                        document.documentElement.scrollWidth <= innerWidth + 1,
+                ),
+            ).toBe(true);
+        }
     }
 
     // Drawer state is independent of the persisted desktop preference.

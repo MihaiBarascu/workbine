@@ -150,16 +150,6 @@ export function PublicShell({ children, discovery }: Props) {
                             ref={desktopTrigger}
                             type="button"
                             className="wb-desktop-sidebar-toggle"
-                            aria-label={
-                                sidebarExpanded
-                                    ? 'Collapse sidebar'
-                                    : 'Expand sidebar'
-                            }
-                            title={
-                                sidebarExpanded
-                                    ? 'Collapse sidebar'
-                                    : 'Expand sidebar'
-                            }
                             aria-expanded={sidebarExpanded}
                             aria-controls="community-navigation"
                             onClick={toggleSidebar}
@@ -169,6 +159,9 @@ export function PublicShell({ children, discovery }: Props) {
                             ) : (
                                 <PanelLeftOpen aria-hidden="true" />
                             )}
+                            <span>
+                                {sidebarExpanded ? 'Hide menu' : 'Show menu'}
+                            </span>
                         </button>
                         <div className="wb-brand-group">
                             <WorkbineBrand />
