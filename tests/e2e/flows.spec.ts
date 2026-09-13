@@ -73,6 +73,10 @@ test('member can publish a first rich-text method with an inline photo', async (
         .getByRole('button', { name: 'Publish topic & method', exact: true })
         .click();
     await expect(page).toHaveURL(/\/topics\/[^/]+$/);
+    await page
+        .getByRole('link', { name: 'A repeatable browser method', exact: true })
+        .click();
+    await expect(page).toHaveURL(/\/topics\/[^/]+\/methods\/\d+$/);
     await expect(
         page.getByRole('heading', {
             name: 'A repeatable browser method',
@@ -180,7 +184,11 @@ test('a second member can share an experience and notify the method recipient', 
             .filter({ hasText: actors.method.title })
             .first()
             .click();
-        await expect(ownerPage).toHaveURL(/#experience-\d+$/);
+        await expect(ownerPage).toHaveURL(
+            new RegExp(
+                `/topics/${actors.topic.slug}/methods/${actors.method.id}/experiences(?:\\?page=\\d+)?#experience-\\d+$`,
+            ),
+        );
         await expect(
             ownerPage.getByText(
                 'The method worked in my own context and saved useful time.',

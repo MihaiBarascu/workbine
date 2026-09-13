@@ -197,12 +197,17 @@ class TopicController extends Controller
         $topic->setAttribute('liked', $request->user() !== null && $topic->likes()->where('user_id', $request->user()->getAuthIdentifier())->exists());
 
         $methods = $topic->methods()
-            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'updates'])
-            ->withCount('experiences')
+            ->select(['methods.id', 'methods.topic_id', 'methods.user_id', 'methods.title', 'methods.body', 'methods.source_url', 'methods.protected_at', 'methods.created_at', 'methods.updated_at'])
+            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage'])
+            ->withCount([
+                'experiences',
+                'experiences as worked_count' => fn ($query) => $query->where('outcome', 'worked'),
+                'experiences as partly_count' => fn ($query) => $query->where('outcome', 'partly'),
+            ])
             ->latest()
             ->orderByDesc('id')
-            ->get()
-            ->map(fn (Method $method): array => $this->serializeMethod($method));
+            ->paginate(10)
+            ->through(fn (Method $method): array => $this->serializeMethodSummary($method));
 
         return Inertia::render('topics/show', [
             'topic' => $this->serializeTopic($topic),
@@ -212,6 +217,29 @@ class TopicController extends Controller
                 ->where('topic_id', $topic->id)
                 ->exists(),
         ]);
+    }
+
+    /** @return array<string, mixed> */
+    private function serializeMethodSummary(Method $method): array
+    {
+        return [
+            'id' => $method->id,
+            'title' => $method->title,
+            'body' => Str::limit(Str::squish($method->body), 239, '…'),
+            'protected_at' => $method->protected_at?->toIso8601String(),
+            'source_url' => $method->source_url,
+            'created_at' => $method->created_at?->toIso8601String(),
+            'updated_at' => $method->updated_at?->toIso8601String(),
+            'experiences_count' => $method->experiences_count ?? 0,
+            'worked_count' => $method->worked_count ?? 0,
+            'partly_count' => $method->partly_count ?? 0,
+            'user' => [
+                'id' => $method->user->id,
+                'name' => $method->user->name,
+                'username' => $method->user->username,
+                'avatar_url' => $method->user->avatarUrl(),
+            ],
+        ];
     }
 
     /** @return array<string, mixed> */
@@ -237,31 +265,6 @@ class TopicController extends Controller
                 'name' => $topic->user->name,
                 'username' => $topic->user->username,
                 'avatar_url' => $topic->user->avatarUrl(),
-            ],
-        ];
-    }
-
-    /** @return array<string, mixed> */
-    private function serializeMethod(Method $method): array
-    {
-        return [
-            'id' => $method->id,
-            'title' => $method->title,
-            'body' => $method->body,
-            'body_document' => $method->body_document,
-            'protected_at' => $method->protected_at?->toIso8601String(),
-            'updates' => $method->updates->map(fn ($update) => [
-                'id' => $update->id, 'body' => $update->body, 'created_at' => $update->created_at?->toIso8601String(),
-            ])->all(),
-            'source_url' => $method->source_url,
-            'created_at' => $method->created_at?->toIso8601String(),
-            'updated_at' => $method->updated_at?->toIso8601String(),
-            'experiences_count' => $method->experiences_count ?? 0,
-            'user' => [
-                'id' => $method->user->id,
-                'name' => $method->user->name,
-                'username' => $method->user->username,
-                'avatar_url' => $method->user->avatarUrl(),
             ],
         ];
     }

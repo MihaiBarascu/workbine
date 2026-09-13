@@ -22,15 +22,16 @@ for (const clipboardAvailable of [true, false]) {
                 },
             });
         }, clipboardAvailable);
-        await page.goto(`/topics/${actors.topic.slug}`);
-        const method = page.locator(`#method-${actors.method.id}`);
+        const methodUrl = `/topics/${actors.topic.slug}/methods/${actors.method.id}`;
+        await page.goto(methodUrl);
+        const method = page.locator('main article').first();
         await expect(
             method.getByRole('button', { name: 'Share link', exact: true }),
         ).toHaveText('');
         await method
             .getByRole('button', { name: 'Share link', exact: true })
             .click();
-        const expected = `http://127.0.0.1:8000/topics/${actors.topic.slug}#method-${actors.method.id}`;
+        const expected = `http://127.0.0.1:8000${methodUrl}`;
         if (clipboardAvailable) {
             await expect(method.getByRole('status')).toHaveText('Link copied');
             await expect(page.locator('html')).toHaveAttribute(
@@ -45,9 +46,7 @@ for (const clipboardAvailable of [true, false]) {
                 expected,
             );
         }
-        await expect(page).toHaveURL(
-            `http://127.0.0.1:8000/topics/${actors.topic.slug}`,
-        );
+        await expect(page).toHaveURL(`http://127.0.0.1:8000${methodUrl}`);
         expect(
             await page.evaluate(() => document.documentElement.scrollWidth),
         ).toBeLessThanOrEqual(page.viewportSize()!.width);
@@ -58,7 +57,7 @@ for (const clipboardAvailable of [true, false]) {
         await page.goto(expected);
         await expect(page).toHaveURL(expected);
         await expect(
-            method.getByRole('heading', {
+            page.getByRole('heading', {
                 name: actors.method.title,
                 exact: true,
             }),
@@ -91,14 +90,15 @@ for (const outcome of ['shared', 'cancelled', 'unavailable'] as const) {
                 },
             });
         }, outcome);
-        await page.goto(`/topics/${actors.topic.slug}`);
-        const method = page.locator(`#method-${actors.method.id}`);
+        const methodUrl = `/topics/${actors.topic.slug}/methods/${actors.method.id}`;
+        await page.goto(methodUrl);
+        const method = page.locator('main article').first();
         const button = method.getByRole('button', {
             name: 'Share link',
             exact: true,
         });
         await button.click();
-        const expected = `http://127.0.0.1:8000/topics/${actors.topic.slug}#method-${actors.method.id}`;
+        const expected = `http://127.0.0.1:8000${methodUrl}`;
         await expect(page.locator('html')).toHaveAttribute(
             'data-shared-link',
             expected,
@@ -116,6 +116,7 @@ for (const outcome of ['shared', 'cancelled', 'unavailable'] as const) {
             );
             await expect(method.getByRole('status')).toHaveText('');
         }
+        await page.goto(`/topics/${actors.topic.slug}`);
         await page
             .locator('.wb-topic-tools')
             .getByRole('button', { name: 'Share link', exact: true })

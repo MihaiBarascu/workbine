@@ -25,9 +25,9 @@ class MethodsTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('topics/show')
-                ->has('methods', 1)
-                ->where('methods.0.id', $method->id)
-                ->where('methods.0.title', 'Start with the smallest paid version')
+                ->has('methods.data', 1)
+                ->where('methods.data.0.id', $method->id)
+                ->where('methods.data.0.title', 'Start with the smallest paid version')
                 ->where('topic.methods_count', 1));
     }
 
@@ -52,7 +52,7 @@ class MethodsTest extends TestCase
             'source_url' => 'https://example.com/source',
         ]);
 
-        $response->assertRedirect(route('topics.show', $topic));
+        $response->assertRedirect(route('methods.show', [$topic, Method::query()->where('topic_id', $topic->id)->sole()]));
 
         $this->assertDatabaseHas('methods', [
             'topic_id' => $topic->id,

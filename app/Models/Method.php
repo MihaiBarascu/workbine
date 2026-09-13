@@ -21,6 +21,8 @@ use Illuminate\Support\Carbon;
  * @property array<string, mixed>|null $body_document
  * @property string $body
  * @property string|null $source_url
+ * @property int|null $worked_count
+ * @property int|null $partly_count
  * @property int|null $experiences_count
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at

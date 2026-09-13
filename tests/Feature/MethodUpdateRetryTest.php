@@ -20,7 +20,7 @@ class MethodUpdateRetryTest extends TestCase
         $submissionId = (string) Str::uuid();
         $body = 'I now check the first step before continuing.';
         $url = route('methods.updates.store', [$method->topic, $method]);
-        $returnUrl = route('topics.show', $method->topic).'#method-'.$method->id;
+        $returnUrl = route('methods.show', [$method->topic, $method]);
 
         $this->actingAs($method->user)
             ->post($url, ['submission_id' => $submissionId, 'body' => $body])
@@ -92,7 +92,7 @@ class MethodUpdateRetryTest extends TestCase
 
         // Only an explicit new submission may publish the changed text.
         $this->post($url, ['submission_id' => $newSubmissionId, 'body' => $draft])
-            ->assertRedirect(route('topics.show', $method->topic).'#method-'.$method->id)
+            ->assertRedirect(route('methods.show', [$method->topic, $method]))
             ->assertSessionHasNoErrors()
             ->assertInertiaFlash('toast.message', 'Update added.');
 

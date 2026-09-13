@@ -1,10 +1,10 @@
-import { RichTextContent } from '@/components/rich-text-content';
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
 import {
     ArrowDown,
     ArrowLeft,
+    ArrowRight,
     ArrowUpRight,
-    ExternalLink,
     Pencil,
     Plus,
 } from 'lucide-react';
@@ -15,10 +15,10 @@ import { PublicShell } from '@/components/public-shell';
 import { ReportLink } from '@/components/report-link';
 import { SaveTopicButton } from '@/components/save-topic-button';
 import { Button } from '@/components/ui/button';
-import type { MethodSummary, TopicSummary, User } from '@/types';
+import type { PaginatedMethods, TopicSummary, User } from '@/types';
 import '../../../css/topic-detail.css';
 
-type Props = { topic: TopicSummary; methods: MethodSummary[]; saved: boolean };
+type Props = { topic: TopicSummary; methods: PaginatedMethods; saved: boolean };
 
 function formatDate(value: string): string {
     return new Intl.DateTimeFormat('en', {
@@ -31,6 +31,23 @@ function formatDate(value: string): string {
 
 export default function TopicShow({ topic, methods, saved }: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
+    useEffect(() => {
+        const openLegacyLink = () => {
+            const method = window.location.hash.match(/^#method-(\d+)$/);
+            const update = window.location.hash.match(/^#method-update-(\d+)$/);
+            if (method)
+                router.visit(`/topics/${topic.slug}/methods/${method[1]}`, {
+                    replace: true,
+                });
+            else if (update)
+                window.location.replace(
+                    `/topics/${topic.slug}/method-updates/${update[1]}`,
+                );
+        };
+        openLegacyLink();
+        window.addEventListener('hashchange', openLegacyLink);
+        return () => window.removeEventListener('hashchange', openLegacyLink);
+    }, [topic.slug]);
     const contributionUrl = `/topics/${topic.slug}/methods/create`;
 
     return (
@@ -128,7 +145,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                         What worked for people
                                     </h2>
                                     <p>
-                                        {methods.length > 0
+                                        {methods.data.length > 0
                                             ? 'Different approaches, shared from experience. Newest first.'
                                             : 'Every useful topic starts with one approach.'}
                                     </p>
@@ -140,14 +157,14 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                     </Link>
                                 </Button>
                             </div>
-                            {methods.length > 0 ? (
+                            {methods.data.length > 0 ? (
                                 <div className="wb-method-list">
-                                    {methods.map((method) => (
+                                    {methods.data.map((method) => (
                                         <article
                                             key={method.id}
                                             id={`method-${method.id}`}
                                             aria-labelledby={`method-title-${method.id}`}
-                                            className="wb-method-article"
+                                            className="wb-method-article wb-method-preview"
                                         >
                                             <div className="wb-method-meta">
                                                 <div className="wb-detail-author">
@@ -159,148 +176,39 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                         }
                                                     />
                                                     <div className="min-w-0">
-                                                        <p>
-                                                            <MemberLink
-                                                                user={
-                                                                    method.user
-                                                                }
-                                                            />
-                                                        </p>
+                                                        <MemberLink
+                                                            user={method.user}
+                                                        />
                                                         {method.created_at && (
                                                             <time
                                                                 dateTime={
                                                                     method.created_at
                                                                 }
                                                             >
-                                                                Shared{' '}
                                                                 {formatDate(
                                                                     method.created_at,
                                                                 )}
                                                             </time>
                                                         )}
-                                                        {method.updated_at &&
-                                                            method.updated_at !==
-                                                                method.created_at && (
-                                                                <time
-                                                                    dateTime={
-                                                                        method.updated_at
-                                                                    }
-                                                                >
-                                                                    Updated{' '}
-                                                                    {formatDate(
-                                                                        method.updated_at,
-                                                                    )}
-                                                                </time>
-                                                            )}
                                                     </div>
                                                 </div>
                                                 <ShareLinkButton
-                                                    path={`/topics/${topic.slug}#method-${method.id}`}
+                                                    path={`/topics/${topic.slug}/methods/${method.id}`}
                                                 />
                                             </div>
                                             <h3
                                                 id={`method-title-${method.id}`}
                                             >
-                                                {method.title}
-                                            </h3>
-                                            <RichTextContent
-                                                document={method.body_document}
-                                                text={method.body}
-                                            />
-                                            {method.source_url && (
-                                                <div className="wb-method-source">
-                                                    <a
-                                                        href={method.source_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer nofollow ugc"
-                                                    >
-                                                        Original source
-                                                        <ExternalLink aria-hidden="true" />
-                                                        <span className="sr-only">
-                                                            (opens in a new tab)
-                                                        </span>
-                                                    </a>
-                                                    <p>{method.source_url}</p>
-                                                </div>
-                                            )}
-                                            {method.protected_at && (
-                                                <p className="text-muted-foreground mt-4 text-sm">
-                                                    The original method is
-                                                    preserved because someone
-                                                    has tried it.
-                                                </p>
-                                            )}
-                                            {!!method.updates?.length && (
-                                                <section
-                                                    aria-label="Author updates"
-                                                    className="mt-5 space-y-4 border-t pt-5"
+                                                <Link
+                                                    href={`/topics/${topic.slug}/methods/${method.id}`}
                                                 >
-                                                    <h4 className="font-semibold">
-                                                        Updates from the author
-                                                    </h4>
-                                                    <p className="text-muted-foreground text-sm">
-                                                        Separate from the
-                                                        original method. Earlier
-                                                        experiences do not
-                                                        evaluate these updates.
-                                                    </p>
-                                                    <ol className="space-y-4">
-                                                        {method.updates.map(
-                                                            (update) => (
-                                                                <li
-                                                                    key={
-                                                                        update.id
-                                                                    }
-                                                                    id={`method-update-${update.id}`}
-                                                                    className="border-l-2 pl-4"
-                                                                >
-                                                                    <time
-                                                                        dateTime={
-                                                                            update.created_at
-                                                                        }
-                                                                        className="text-muted-foreground text-sm"
-                                                                    >
-                                                                        {formatDate(
-                                                                            update.created_at,
-                                                                        )}
-                                                                    </time>
-                                                                    <p className="mt-2 [overflow-wrap:anywhere] whitespace-pre-wrap">
-                                                                        {
-                                                                            update.body
-                                                                        }
-                                                                    </p>
-                                                                </li>
-                                                            ),
-                                                        )}
-                                                    </ol>
-                                                </section>
-                                            )}
+                                                    {method.title}
+                                                </Link>
+                                            </h3>
+                                            <p className="wb-method-excerpt">
+                                                {method.body}
+                                            </p>
                                             <footer className="wb-method-footer">
-                                                {auth.user?.id ===
-                                                    method.user.id && (
-                                                    <Link
-                                                        href={`/topics/${topic.slug}/methods/${method.id}/edit`}
-                                                        title={
-                                                            method.protected_at
-                                                                ? 'Add an update'
-                                                                : 'Edit method'
-                                                        }
-                                                        className="inline-flex min-h-10 min-w-10 items-center justify-center"
-                                                    >
-                                                        <Pencil aria-hidden="true" />
-                                                        <span
-                                                            className={
-                                                                method.protected_at
-                                                                    ? undefined
-                                                                    : 'sr-only'
-                                                            }
-                                                        >
-                                                            {method.protected_at
-                                                                ? 'Add an update'
-                                                                : 'Edit method'}
-                                                        </span>
-                                                    </Link>
-                                                )}
                                                 <Link
                                                     href={`/topics/${topic.slug}/methods/${method.id}/experiences`}
                                                 >
@@ -309,26 +217,26 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                     1
                                                         ? 'experience'
                                                         : 'experiences'}
+                                                </Link>
+                                                {!!method.worked_count && (
+                                                    <span className="text-muted-foreground text-sm">
+                                                        {method.worked_count}{' '}
+                                                        worked
+                                                    </span>
+                                                )}
+                                                {!!method.partly_count && (
+                                                    <span className="text-muted-foreground text-sm">
+                                                        {method.partly_count}{' '}
+                                                        partly worked
+                                                    </span>
+                                                )}
+                                                <Link
+                                                    href={`/topics/${topic.slug}/methods/${method.id}`}
+                                                    aria-label={`Read method: ${method.title}`}
+                                                    className="ml-auto"
+                                                >
                                                     <ArrowUpRight aria-hidden="true" />
                                                 </Link>
-                                                {auth.user?.id !==
-                                                    method.user.id && (
-                                                    <Button
-                                                        asChild
-                                                        variant="outline"
-                                                        size="sm"
-                                                    >
-                                                        <Link
-                                                            href={`/topics/${topic.slug}/methods/${method.id}/experiences/create`}
-                                                        >
-                                                            I tried this
-                                                        </Link>
-                                                    </Button>
-                                                )}
-                                                <ReportLink
-                                                    type="method"
-                                                    id={method.id}
-                                                />
                                             </footer>
                                         </article>
                                     ))}
@@ -356,41 +264,57 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                     </Button>
                                 </div>
                             )}
+                            {methods.last_page > 1 && (
+                                <nav
+                                    aria-label="Method pagination"
+                                    className="mt-6 flex items-center justify-between gap-4"
+                                >
+                                    <Button
+                                        asChild={Boolean(methods.prev_page_url)}
+                                        variant="outline"
+                                        disabled={!methods.prev_page_url}
+                                    >
+                                        {methods.prev_page_url ? (
+                                            <Link href={methods.prev_page_url}>
+                                                <ArrowLeft aria-hidden="true" />
+                                                Previous
+                                            </Link>
+                                        ) : (
+                                            <span>
+                                                <ArrowLeft aria-hidden="true" />
+                                                Previous
+                                            </span>
+                                        )}
+                                    </Button>
+                                    <span className="text-muted-foreground text-sm">
+                                        {methods.current_page} /{' '}
+                                        {methods.last_page}
+                                    </span>
+                                    <Button
+                                        asChild={Boolean(methods.next_page_url)}
+                                        variant="outline"
+                                        disabled={!methods.next_page_url}
+                                    >
+                                        {methods.next_page_url ? (
+                                            <Link href={methods.next_page_url}>
+                                                Next
+                                                <ArrowRight aria-hidden="true" />
+                                            </Link>
+                                        ) : (
+                                            <span>
+                                                Next
+                                                <ArrowRight aria-hidden="true" />
+                                            </span>
+                                        )}
+                                    </Button>
+                                </nav>
+                            )}
                         </section>
                     </div>
                     <aside
                         aria-label="Contribution guidance"
                         className="wb-topic-aside"
                     >
-                        {methods.length > 0 && (
-                            <nav aria-label="Methods in this topic">
-                                <h2>In this topic</h2>
-                                <ol className="wb-method-index">
-                                    {methods
-                                        .slice(0, 6)
-                                        .map((method, index) => (
-                                            <li key={method.id}>
-                                                <a
-                                                    href={`#method-${method.id}`}
-                                                >
-                                                    <span aria-hidden="true">
-                                                        {index + 1}
-                                                    </span>
-                                                    <span>{method.title}</span>
-                                                </a>
-                                            </li>
-                                        ))}
-                                </ol>
-                                {methods.length > 6 && (
-                                    <a
-                                        href="#methods-heading"
-                                        className="wb-detail-text-link"
-                                    >
-                                        See all {methods.length} methods
-                                    </a>
-                                )}
-                            </nav>
-                        )}
                         <section className="wb-topic-guidance">
                             <h2>Have another way?</h2>
                             <p>

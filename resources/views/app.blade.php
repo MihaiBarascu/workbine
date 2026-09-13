@@ -39,7 +39,22 @@
         @viteReactRefresh
         @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
         <x-inertia::head>
-            <title>{{ config('app.name', 'Workbine') }}</title>
+            @if ($page['component'] === 'topics/method-show')
+                @php
+                    $method = $page['props']['method'];
+                    $description = mb_substr(\Illuminate\Support\Str::squish($method['body']), 0, 180);
+                    $canonicalUrl = $page['props']['canonicalUrl'];
+                @endphp
+                <title>{{ $method['title'] }} - {{ config('app.name', 'Workbine') }}</title>
+                <meta name="description" content="{{ $description }}" inertia="description">
+                <link rel="canonical" href="{{ $canonicalUrl }}" inertia="canonical">
+                <meta property="og:title" content="{{ $method['title'] }}" inertia="og:title">
+                <meta property="og:description" content="{{ $description }}" inertia="og:description">
+                <meta property="og:url" content="{{ $canonicalUrl }}" inertia="og:url">
+                <meta property="og:type" content="article" inertia="og:type">
+            @else
+                <title>{{ config('app.name', 'Workbine') }}</title>
+            @endif
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">

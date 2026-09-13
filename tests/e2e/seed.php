@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 require __DIR__.'/../../vendor/autoload.php';
 $app = require __DIR__.'/../../bootstrap/app.php';
@@ -27,6 +28,25 @@ DB::transaction(function () use ($argv, $token): void {
     if (($argv[1] ?? '') === 'cleanup') {
         // Email-change scenarios must remain removable even after a failed assertion.
         User::query()->whereIn('username', ['o-'.$token, 'c-'.$token, 'r-'.$token])->get()->each->delete();
+
+        return;
+    }
+    if (($argv[1] ?? '') === 'add-method-pages') {
+        $topic = Topic::query()->where('slug', 'client-workflow-'.$token)->firstOrFail();
+        $method = $topic->methods()->oldest('id')->firstOrFail();
+        $update = $method->updates()->create([
+            'submission_id' => (string) Str::uuid(),
+            'body' => 'A dated note reached from a legacy bookmark.',
+        ]);
+        echo json_encode(['updateId' => $update->id], JSON_THROW_ON_ERROR);
+        for ($index = 0; $index < 10; $index++) {
+            Method::factory()->create([
+                'user_id' => $topic->user_id,
+                'topic_id' => $topic->id,
+                'title' => 'Pagination method '.$index,
+                'body' => 'A complete practical method for pagination check '.$index.'.',
+            ]);
+        }
 
         return;
     }

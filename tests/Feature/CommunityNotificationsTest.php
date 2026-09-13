@@ -52,7 +52,7 @@ class CommunityNotificationsTest extends TestCase
         $this->post('/notifications/'.$item->id.'/open')->assertNotFound();
         $this->post('/notifications/read')->assertRedirect('/notifications');
         $this->assertNull($item->fresh()->read_at);
-        $this->actingAs($method->topic->user)->post('/notifications/'.$item->id.'/open')->assertRedirect(route('topics.show', $method->topic).'#method-'.$method->id);
+        $this->actingAs($method->topic->user)->post('/notifications/'.$item->id.'/open')->assertRedirect(route('methods.show', [$method->topic, $method]));
         $this->assertNotNull($item->fresh()->read_at);
         $this->get('/notifications')->assertInertia(fn (Assert $page) => $page->where('unreadNotifications', 0)->where('notifications.data.0.read', true));
     }

@@ -24,6 +24,32 @@ use Inertia\Support\SessionKey;
 
 class MethodController extends Controller
 {
+    public function redirectUpdate(Topic $topic, int $update): RedirectResponse
+    {
+        $methodUpdate = MethodUpdate::query()
+            ->whereKey($update)
+            ->whereHas('method', fn ($query) => $query->where('topic_id', $topic->id))
+            ->firstOrFail();
+
+        return redirect()->to(route('methods.show', [$topic, $methodUpdate->method_id]).'#method-update-'.$methodUpdate->id);
+    }
+
+    public function show(Topic $topic, Method $method): Response
+    {
+        $method->load(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'updates'])
+            ->loadCount([
+                'experiences',
+                'experiences as worked_count' => fn ($query) => $query->where('outcome', 'worked'),
+                'experiences as partly_count' => fn ($query) => $query->where('outcome', 'partly'),
+            ]);
+
+        return Inertia::render('topics/method-show', [
+            'topic' => $topic->only(['id', 'title', 'slug']),
+            'method' => $this->serializeMethod($method),
+            'canonicalUrl' => route('methods.show', [$topic, $method]),
+        ]);
+    }
+
     public function edit(Request $request, Topic $topic, Method $method): Response
     {
         abort_unless($request->user()?->getAuthIdentifier() === $method->user_id, 403);
@@ -64,7 +90,7 @@ class MethodController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Method updated.')]);
 
-        return redirect()->to(route('topics.show', $topic).'#method-'.$method->id);
+        return to_route('methods.show', [$topic, $method]);
     }
 
     public function addUpdate(Request $request, Topic $topic, Method $method): RedirectResponse
@@ -104,7 +130,7 @@ class MethodController extends Controller
             'message' => $created ? __('Update added.') : __('This update was already published.'),
         ]);
 
-        return redirect()->to(route('topics.show', $topic).'#method-'.$method->id);
+        return to_route('methods.show', [$topic, $method]);
     }
 
     public function create(Topic $topic): Response
@@ -125,7 +151,7 @@ class MethodController extends Controller
         $data = $request->validated();
         app(ContentModeration::class)->text($user, Arr::only($data, ['title', 'body', 'source_url']), 'method:new:'.$topic->id, 'body');
 
-        DB::transaction(function () use ($topic, $user, $data): void {
+        $method = DB::transaction(function () use ($topic, $user, $data): Method {
             $method = $topic->methods()->create([
                 'user_id' => $user->id,
                 'title' => $data['title'],
@@ -135,13 +161,42 @@ class MethodController extends Controller
 
             RichText::save($method, $data['body_document'] ?? null);
             CommunityNotification::forMethod($method);
+
+            return $method;
         });
 
         Inertia::flash('toast', [
             'type' => 'success',
-            'message' => __('Method shared.'),
+            'message' => __('Method created.'),
         ]);
 
-        return to_route('topics.show', $topic);
+        return to_route('methods.show', [$topic, $method]);
+    }
+
+    /** @return array<string, mixed> */
+    private function serializeMethod(Method $method): array
+    {
+        return [
+            'id' => $method->id,
+            'title' => $method->title,
+            'body' => $method->body,
+            'body_document' => $method->body_document,
+            'protected_at' => $method->protected_at?->toIso8601String(),
+            'updates' => $method->updates->map(fn ($update) => [
+                'id' => $update->id, 'body' => $update->body, 'created_at' => $update->created_at?->toIso8601String(),
+            ])->all(),
+            'source_url' => $method->source_url,
+            'created_at' => $method->created_at?->toIso8601String(),
+            'updated_at' => $method->updated_at?->toIso8601String(),
+            'experiences_count' => $method->experiences_count ?? 0,
+            'worked_count' => $method->worked_count ?? 0,
+            'partly_count' => $method->partly_count ?? 0,
+            'user' => [
+                'id' => $method->user->id,
+                'name' => $method->user->name,
+                'username' => $method->user->username,
+                'avatar_url' => $method->user->avatarUrl(),
+            ],
+        ];
     }
 }

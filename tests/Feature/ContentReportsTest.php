@@ -136,7 +136,7 @@ class ContentReportsTest extends TestCase
         $this->experience($method);
         $report = $this->report($method, 'method');
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Reviewed unsafe instructions.'])->assertSuccessful();
-        $this->get(route('topics.show', $method->topic))->assertInertia(fn (Assert $page) => $page->has('methods', 0)->where('topic.methods_count', 0));
+        $this->get(route('topics.show', $method->topic))->assertInertia(fn (Assert $page) => $page->has('methods.data', 0)->where('topic.methods_count', 0));
         $this->actingAs($method->user)->get(route('methods.edit', [$method->topic, $method]))->assertNotFound();
         $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'A trial with enough practical context.'])->assertNotFound();
         $this->assertDatabaseCount('experiences', 1);

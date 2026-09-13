@@ -66,7 +66,7 @@ class CommunityNotification extends Model
     {
         $topic = $this->method->topic;
         if ($this->experience_id === null) {
-            return route('topics.show', $topic).'#method-'.$this->method_id;
+            return route('methods.show', [$topic, $this->method_id]);
         }
 
         $experience = $this->experience;

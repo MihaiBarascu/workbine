@@ -65,7 +65,7 @@ export default function ExperiencesIndex({
             <Head title={`Experiences - ${method.title}`} />
             <main className="wb-detail-page">
                 <Link
-                    href={`/topics/${topic.slug}#method-${method.id}`}
+                    href={`/topics/${topic.slug}/methods/${method.id}`}
                     className="wb-detail-back"
                 >
                     <ArrowLeft aria-hidden="true" />

@@ -10,6 +10,9 @@ A topic is a subject such as `Automating product imports for an online store`, n
 
 The product prioritizes practical experience, freshness, credibility, and helpfulness over simple popularity.
 
+Methods have individual shareable pages. Topic pages show ten short method previews
+per page, keeping long contributions out of the listing payload.
+
 ## Member profiles
 
 Public profiles use `/members/{username}`. Usernames are assigned automatically and can be changed in Profile settings. Each member has one current username; previous usernames are available for reuse. Legacy numeric links redirect to the current profile.

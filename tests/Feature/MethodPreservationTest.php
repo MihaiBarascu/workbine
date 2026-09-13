@@ -149,10 +149,10 @@ class MethodPreservationTest extends TestCase
         $this->assertSame($original['source_url'], $method->refresh()->source_url);
         $this->assertSame($original['updated_at'], $method->refresh()->getRawOriginal('updated_at'));
 
-        $this->get(route('topics.show', $method->topic))->assertInertia(fn (Assert $page) => $page
-            ->where('methods.0.updates.0.id', $update->id)
-            ->where('methods.0.updates.0.body', $update->body)
-            ->missing('methods.0.updates.0.submission_id'));
+        $this->get(route('methods.show', [$method->topic, $method]))->assertInertia(fn (Assert $page) => $page
+            ->where('method.updates.0.id', $update->id)
+            ->where('method.updates.0.body', $update->body)
+            ->missing('method.updates.0.submission_id'));
 
         $method->topic->forceFill(['hidden_at' => now()])->save();
         $this->get(route('topics.show', $method->topic))->assertNotFound();

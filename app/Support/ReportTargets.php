@@ -28,7 +28,7 @@ class ReportTargets
     {
         return match (true) {
             $target instanceof Topic => route('topics.show', $target, false),
-            $target instanceof Method => route('topics.show', $target->topic, false).'#method-'.$target->id,
+            $target instanceof Method => route('methods.show', [$target->topic, $target], false),
             default => route('experiences.index', [$target->method->topic, $target->method], false).'#experience-'.$target->id,
         };
     }

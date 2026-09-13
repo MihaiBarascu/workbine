@@ -116,9 +116,6 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .click();
         await page.waitForURL(/\/topics\/keeping-a-useful-launch-checklist$/);
         const topicPath = new URL(page.url()).pathname;
-        const method = page.locator('main article').first();
-        const methodId = await method.getAttribute('id');
-        assert.match(methodId, /^method-\d+$/);
 
         await page
             .getByRole('button', { name: 'Save topic', exact: true })
@@ -157,6 +154,17 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         console.log(
             'PASS report submission, required context and contribution return',
         );
+        await page
+            .getByRole('link', {
+                name: 'Try one complete member journey',
+                exact: true,
+            })
+            .click();
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
+        const methodPath = new URL(page.url()).pathname;
+        const method = page.locator('main article').first();
+        const methodId = await method.getAttribute('id');
+        assert.match(methodId, /^method-\d+$/);
         await openSaved();
         assert.equal(await page.locator('main article').count(), 1);
         await capture('saved-topics-desktop', 1440);
@@ -173,6 +181,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             'PASS private saved list navigation, persistence, removal and empty state',
         );
 
+        await page.goto(root + topicPath);
         await page
             .getByRole('link', { name: 'Edit topic', exact: true })
             .click();
@@ -204,14 +213,21 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             topicPath,
             'Editing keeps the topic link stable',
         );
-        assert.equal(
-            await page.locator(`#${methodId}`).count(),
-            1,
-            'Existing method remains attached',
-        );
+        await page
+            .getByRole('link', {
+                name: 'Try one complete member journey',
+                exact: true,
+            })
+            .waitFor();
 
         await page
-            .locator(`#${methodId}`)
+            .getByRole('link', {
+                name: 'Try one complete member journey',
+                exact: true,
+            })
+            .click();
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
+        await page
             .getByRole('link', { name: 'Edit method', exact: true })
             .click();
         await page.getByRole('heading', { name: 'Edit your method' }).waitFor();
@@ -259,13 +275,9 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
                 exact: true,
             })
             .waitFor();
-        assert.equal(new URL(page.url()).pathname, topicPath);
-        assert.equal(new URL(page.url()).hash, `#${methodId}`);
+        assert.equal(new URL(page.url()).pathname, methodPath);
         await page.reload();
-        await page
-            .locator(`#${methodId}`)
-            .getByText(updatedBody, { exact: true })
-            .waitFor();
+        await page.getByText(updatedBody, { exact: true }).waitFor();
         await capture('edited-topic-small-dark', 320, 'dark');
         console.log(
             'PASS topic and method editing, stable links, source validation and persistence',
@@ -278,6 +290,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await stalePage
             .locator('input[name="title"]')
             .fill('A stale browser tab must not replace newer changes');
+        await page.goto(root + topicPath);
         await page
             .getByRole('link', { name: 'Edit topic', exact: true })
             .click();
@@ -396,6 +409,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await supporterPage
             .getByRole('button', { name: 'Remove saved topic' })
             .waitFor();
+        await supporterPage.goto(root + methodPath);
         await supporterPage
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();

@@ -236,11 +236,11 @@ class ContributionEditingTest extends TestCase
         $this->assertFalse($image->refresh()->pending_deletion);
         Storage::disk('public')->assertExists($image->path);
 
-        $this->get(route('topics.show', $method->topic))->assertOk()
+        $this->get(route('methods.show', [$method->topic, $method]))->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('methods.0.id', $method->id)
-                ->where('methods.0.experiences_count', 1)
-                ->where('methods.0.updated_at', $method->updated_at?->toIso8601String()));
+                ->where('method.id', $method->id)
+                ->where('method.experiences_count', 1)
+                ->where('method.updated_at', $method->updated_at?->toIso8601String()));
     }
 
     public function test_method_source_can_be_removed(): void

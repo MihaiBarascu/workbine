@@ -7,6 +7,18 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Individual method pages
+
+Methods have a public detail page at `/topics/{topic}/methods/{method}`. Topics
+show ten short previews per page, without loading rich documents or dated notes.
+Sharing, profile contributions and notifications use the detail URL. Legacy topic
+fragments still resolve to their method or dated note, including off-page methods.
+Detail pages provide initial HTML titles, descriptions and canonical metadata.
+
+The rich-text toolbar stays below the shared header while editing long content.
+The public footer links to `hello@workbine.com`; this does not configure a mailbox
+or change transactional email delivery. Release validation is recorded in the PR.
+
 ## Current integration handoff
 
 The merged baseline includes shared navigation (#39, `a0402d9`) and method-update

@@ -44,7 +44,7 @@ class MemberProfileTest extends TestCase
             ->where('member.counts.methods', 1)
             ->has('contributions.data', 1)
             ->where('contributions.data.0.id', $method->id)
-            ->where('contributions.data.0.href', '/topics/'.$topic->slug.'#method-'.$method->id)
+            ->where('contributions.data.0.href', '/topics/'.$topic->slug.'/methods/'.$method->id)
             ->missing('contributions.data.0.user'));
         $this->get(route('members.show', [$user->username, 'view' => 'topics']))->assertInertia(fn (Assert $page) => $page
             ->where('view', 'topics')->has('contributions.data', 1)->where('contributions.data.0.id', $topic->id));

@@ -52,6 +52,10 @@ test('copied rich text keeps email links and explains simplified content', async
         .getByRole('button', { name: 'Publish topic & method', exact: true })
         .click();
     await expect(page).toHaveURL(/\/topics\/[^/]+$/);
+    await page
+        .getByRole('link', { name: 'A copied business method', exact: true })
+        .click();
+    await expect(page).toHaveURL(/\/topics\/[^/]+\/methods\/\d+$/);
     await expect(
         page.getByRole('heading', {
             name: 'A copied business method',
@@ -98,6 +102,10 @@ test('an invalid manually entered link has actionable feedback and keeps the dra
         .getByRole('button', { name: 'Publish topic & method', exact: true })
         .click();
     await expect(page).toHaveURL(/\/topics\/[^/]+$/);
+    await page
+        .getByRole('link', { name: 'Recoverable draft', exact: true })
+        .click();
+    await expect(page).toHaveURL(/\/topics\/[^/]+\/methods\/\d+$/);
     await expect(page.locator('.wb-rich-text')).toContainText(
         'Keep this explanation while fixing the link.',
     );

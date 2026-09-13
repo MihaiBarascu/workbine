@@ -41,6 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::scopeBindings()->group(function () {
+    Route::get('topics/{topic}/methods/{method}', [MethodController::class, 'show'])->whereNumber('method')->name('methods.show');
+    Route::get('topics/{topic}/method-updates/{update}', [MethodController::class, 'redirectUpdate'])->whereNumber('update')->name('methods.updates.redirect');
     Route::get('topics/{topic}/methods/{method}/experiences', [ExperienceController::class, 'index'])->name('experiences.index');
 
     Route::middleware(['auth', 'verified'])->group(function () {

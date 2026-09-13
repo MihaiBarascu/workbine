@@ -212,6 +212,16 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             if (!response?.ok()) {
                 throw new Error(`${path} returned HTTP ${response?.status()}`);
             }
+            if (
+                path === '/topics/preview-first-customer' &&
+                name.startsWith('method-')
+            ) {
+                await page
+                    .locator('main article a[href*="/methods/"]')
+                    .first()
+                    .click();
+                await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
+            }
             await page.locator(selector).first().waitFor();
             await page.evaluate(() => document.fonts.ready);
             const feed = new URL(root + path).pathname === '/topics';
