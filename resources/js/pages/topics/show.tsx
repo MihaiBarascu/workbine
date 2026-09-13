@@ -5,7 +5,6 @@ import {
     ArrowLeft,
     ArrowUpRight,
     ExternalLink,
-    Link2,
     Pencil,
     Plus,
 } from 'lucide-react';
@@ -189,13 +188,9 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                             )}
                                                     </div>
                                                 </div>
-                                                <a
-                                                    href={`#method-${method.id}`}
-                                                    aria-label={`Link to method: ${method.title}`}
-                                                    className="wb-method-permalink"
-                                                >
-                                                    <Link2 aria-hidden="true" />
-                                                </a>
+                                                <CopyLinkButton
+                                                    path={`/topics/${topic.slug}#method-${method.id}`}
+                                                />
                                             </div>
                                             <h3
                                                 id={`method-title-${method.id}`}
