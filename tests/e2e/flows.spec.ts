@@ -186,7 +186,7 @@ test('a second member can share an experience and notify the method recipient', 
             .click();
         await expect(ownerPage).toHaveURL(
             new RegExp(
-                `/topics/${actors.topic.slug}/methods/${actors.method.id}/experiences#experience-\\d+$`,
+                `/topics/${actors.topic.slug}/methods/${actors.method.id}/experiences(?:\\?page=\\d+)?#experience-\\d+$`,
             ),
         );
         await expect(

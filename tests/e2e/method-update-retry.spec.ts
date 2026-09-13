@@ -69,8 +69,8 @@ for (const changedDraft of [false, true]) {
                 });
 
                 // Send the real POST to the isolated application, then discard
-                // only its response. Inertia carries fragment redirects in a
-                // 409 response; this is not a publication conflict.
+                // only its response. The canonical detail page uses a normal
+                // redirect after publication.
                 await page.route(`**${updateUrl}`, async (route) => {
                     if (route.request().method() !== 'POST' || responseLost) {
                         await route.continue();
@@ -79,8 +79,8 @@ for (const changedDraft of [false, true]) {
 
                     responseLost = true;
                     const response = await route.fetch({ maxRedirects: 0 });
-                    expect(response.status()).toBe(409);
-                    expect(response.headers()['x-inertia-redirect']).toBe(
+                    expect(response.status()).toBe(302);
+                    expect(response.headers()['location']).toBe(
                         new URL(methodUrl, page.url()).href,
                     );
                     await route.abort('failed');
