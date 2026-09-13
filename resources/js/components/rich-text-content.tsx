@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { validEditorLink } from '@/lib/editor-links';
 
 export type RichTextNode = {
     type: string;
@@ -38,7 +39,11 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
             for (const mark of node.marks ?? []) {
                 if (mark.type === 'bold') text = <strong>{text}</strong>;
                 if (mark.type === 'italic') text = <em>{text}</em>;
-                if (mark.type === 'link' && safeUrl(mark.attrs?.href))
+                if (
+                    mark.type === 'link' &&
+                    mark.attrs?.href &&
+                    validEditorLink(mark.attrs.href)
+                )
                     text = (
                         <a
                             href={mark.attrs?.href}

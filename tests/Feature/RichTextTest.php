@@ -48,6 +48,53 @@ class RichTextTest extends TestCase
         $this->get(route('experiences.index', [$topic, $method]))->assertInertia(fn (Assert $page) => $page->has('experiences.data.0.body_document')->where('experiences.data.0.body', 'Worked for me.'));
     }
 
+    public function test_email_links_survive_saving_a_method_and_an_experience(): void
+    {
+        $topic = Topic::factory()->create();
+        $document = json_encode(['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [
+            ['type' => 'text', 'text' => 'Contact the business: '],
+            ['type' => 'text', 'text' => 'contact@example.com', 'marks' => [['type' => 'bold'], ['type' => 'link', 'attrs' => ['href' => 'mailto:contact@example.com']]]],
+        ]]]], JSON_THROW_ON_ERROR);
+        $this->actingAs(User::factory()->create())->post(route('methods.store', $topic), ['title' => 'Business website', 'body_document' => $document])->assertSessionHasNoErrors();
+        $method = $topic->methods()->firstOrFail();
+        $this->assertStringContainsString('mailto:contact@example.com', $method->body);
+        $this->assertSame('mailto:contact@example.com', $method->body_document['content'][0]['content'][1]['marks'][1]['attrs']['href']);
+        $this->actingAs(User::factory()->create())->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body_document' => $document])->assertSessionHasNoErrors();
+        $this->assertSame($method->body_document, $method->experiences()->firstOrFail()->body_document);
+    }
+
+    public function test_rejected_links_identify_the_text_to_fix_without_saving(): void
+    {
+        $topic = Topic::factory()->create();
+        $this->actingAs(User::factory()->create());
+        foreach (['javascript:alert(1)', 'mailto:invalid', 'mailto:a@example.com?subject=Hello', 'mailto:a@example.com%0aBcc:b@example.com', 'ftp://example.com/file', 'https://'.str_repeat('a', 2050).'.com'] as $href) {
+            $document = $this->richDocument(extra: [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Contact the business', 'marks' => [['type' => 'link', 'attrs' => ['href' => $href]]]]]]]);
+            $response = $this->postJson(route('methods.store', $topic), ['title' => 'Business website', 'body_document' => $document])->assertUnprocessable();
+            $this->assertStringContainsString('The link on “Contact the business”', $response->json('errors.body.0'));
+            $this->assertStringContainsString('mailto:', $response->json('errors.body.0'));
+        }
+        $this->assertSame(0, $topic->methods()->count());
+    }
+
+    public function test_document_limits_explain_how_to_recover(): void
+    {
+        $topic = Topic::factory()->create();
+        $this->actingAs(User::factory()->create());
+        $cases = [
+            [$this->richDocument(extra: array_fill(0, 11, ['type' => 'image', 'attrs' => ['imageId' => 1]])), 'up to 10 photos'],
+            [$this->richDocument(extra: [['type' => 'image', 'attrs' => ['src' => 'https://example.com/photo.png']]]), 'use the Photo button'],
+            [$this->richDocument(extra: [['type' => 'image', 'attrs' => ['imageId' => 1, 'alt' => str_repeat('a', 301)]]]), '300 characters'],
+            [$this->richDocument(str_repeat('a', 150001)), 'too much formatting'],
+            [$this->richDocument(extra: array_fill(0, 1501, ['type' => 'paragraph'])), 'deeply nested lists'],
+            ['invalid JSON', 'Paste it as plain text'],
+        ];
+        foreach ($cases as [$document, $message]) {
+            $response = $this->postJson(route('methods.store', $topic), ['title' => 'Business website', 'body_document' => $document])->assertUnprocessable();
+            $this->assertStringContainsString($message, $response->json('errors.body.0'));
+        }
+        $this->assertSame(0, $topic->methods()->count());
+    }
+
     public function test_inline_photos_are_owned_normalized_retained_by_pruning_and_detached_after_editing(): void
     {
         $user = User::factory()->create();

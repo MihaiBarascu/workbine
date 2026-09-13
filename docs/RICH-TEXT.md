@@ -1,7 +1,7 @@
 # Writing methods and responses
 
 Methods and “I tried this” responses share one Tiptap editor. Writers can add
-paragraphs, bold text, lists, numbered steps, HTTP/HTTPS links and photos between
+paragraphs, bold text, lists, numbered steps, HTTP/HTTPS links, single-address mailto links and photos between
 paragraphs. Methods have a title; responses retain the short outcome choice.
 There are no mandatory sections or minimum step counts. Responses require some
 text, with no artificial minimum character count. Source attribution and the
@@ -45,3 +45,20 @@ method editor. See [BROWSER-FLOWS.md](BROWSER-FLOWS.md).
 
 References: [Tiptap React integration](https://tiptap.dev/docs/editor/getting-started/install/react)
 and [image extension](https://tiptap.dev/docs/editor/extensions/nodes/image).
+
+## Pasting and recovery
+
+The existing editor parses pasted HTML. Unsupported presentation is simplified;
+code blocks become lines of text and table rows become paragraphs with separated
+cells. A status message explains these changes. Copied external images are not
+uploaded automatically: their alternative text is retained and the notice points
+to Photo. Unsupported link destinations become plain text with a notice naming
+the affected text. Plain-text clipboard content remains plain text; Markdown is
+not interpreted as formatting.
+
+Email links use `mailto:` followed by one email address, without query parameters.
+The editor, public renderer and server use the same allowed link categories;
+photo/source/evidence URL rules remain HTTP/HTTPS. The server independently
+validates submitted documents, names rejected links, and gives specific recovery
+instructions for photo limits, descriptions and excessive formatting. Validation
+keeps the mounted draft available for correction. No arbitrary HTML is rendered.

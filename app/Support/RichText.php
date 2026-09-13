@@ -18,8 +18,11 @@ class RichText
         if ($raw === null || $raw === '') {
             return;
         }
-        if (! is_string($raw) || strlen($raw) > 150000) {
+        if (! is_string($raw)) {
             self::invalid($field);
+        }
+        if (strlen($raw) > 150000) {
+            self::invalid($field, 'This text contains too much formatting. Paste it as plain text or split it into shorter contributions.');
         }
         $document = json_decode($raw, true, 20);
         $count = 0;
@@ -33,7 +36,10 @@ class RichText
      */
     private static function node(mixed $node, array $allowed, int $depth, int &$count, int &$images, string $field): array
     {
-        if (! is_array($node) || ++$count > 1500 || $depth > 10 || ! in_array($node['type'] ?? null, $allowed, true)) {
+        if (++$count > 1500 || $depth > 10) {
+            self::invalid($field, 'This text contains too much formatting or deeply nested lists. Simplify the lists or paste it as plain text.');
+        }
+        if (! is_array($node) || ! in_array($node['type'] ?? null, $allowed, true)) {
             self::invalid($field);
         }
         $type = $node['type'];
@@ -54,9 +60,8 @@ class RichText
                 $clean = ['type' => $mark['type']];
                 if ($mark['type'] === 'link') {
                     $href = $mark['attrs']['href'] ?? null;
-                    if (! is_string($href) || strlen($href) > 2048 || ! filter_var($href, FILTER_VALIDATE_URL)
-                        || ! in_array(strtolower((string) parse_url($href, PHP_URL_SCHEME)), ['http', 'https'], true)) {
-                        self::invalid($field);
+                    if (! is_string($href) || ! self::validLink($href)) {
+                        self::invalid($field, __('The link on “:text” is not supported. Use a complete http:// or https:// address, or mailto: followed by one email address, without extra parameters. Links must be at most 2048 characters.', ['text' => mb_substr($node['text'], 0, 80)]));
                     }
                     $clean['attrs'] = ['href' => $href];
                 }
@@ -65,8 +70,14 @@ class RichText
         } elseif ($type === 'image') {
             $id = $node['attrs']['imageId'] ?? null;
             $alt = $node['attrs']['alt'] ?? '';
-            if (! is_int($id) || $id < 1 || ++$images > 10 || ! is_string($alt) || mb_strlen($alt) > 300) {
-                self::invalid($field);
+            if (++$images > 10) {
+                self::invalid($field, 'You can add up to 10 photos. Remove one before saving.');
+            }
+            if (! is_int($id) || $id < 1) {
+                self::invalid($field, 'A photo was not uploaded through this editor. Remove it and use the Photo button to upload it.');
+            }
+            if (! is_string($alt) || mb_strlen($alt) > 300) {
+                self::invalid($field, 'A photo description is too long. Shorten it to 300 characters or fewer.');
             }
             // Never trust a submitted image URL, dimensions or HTML attributes.
             $result['attrs'] = ['imageId' => $id, 'alt' => $alt];
@@ -144,8 +155,21 @@ class RichText
         $model->update(['body_document' => $document]);
     }
 
-    private static function invalid(string $field): never
+    private static function validLink(string $href): bool
     {
-        throw ValidationException::withMessages([$field => __('This text could not be saved. Use paragraphs, lists, links and up to 10 uploaded photos.')]);
+        if (strlen($href) > 2048 || preg_match('/[\x00-\x20\x7f]/', $href)) {
+            return false;
+        }
+        if (str_starts_with(strtolower($href), 'mailto:')) {
+            return (bool) preg_match('/^[a-z0-9.!#$%&\'*+\/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)+$/iD', substr($href, 7));
+        }
+
+        return (bool) filter_var($href, FILTER_VALIDATE_URL)
+            && in_array(strtolower((string) parse_url($href, PHP_URL_SCHEME)), ['http', 'https'], true);
+    }
+
+    private static function invalid(string $field, string $message = 'This text contains unsupported formatting. Paste it as plain text using Ctrl+Shift+V (Command+Shift+V on Mac), then apply formatting in the editor.'): never
+    {
+        throw ValidationException::withMessages([$field => __($message)]);
     }
 }
