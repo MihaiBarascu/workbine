@@ -1,14 +1,15 @@
-import { Link, router, usePage } from '@inertiajs/react';
+import { Form, Link, usePage } from '@inertiajs/react';
 import { ExternalLink, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { ExperienceForm } from '@/components/experience-form';
+import InputError from '@/components/input-error';
 import { ReportLink } from '@/components/report-link';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Button } from '@/components/ui/button';
 import type {
     ExperienceOutcome,
-    ExperienceSummary,
+    OwnExperience,
     PaginatedExperiences,
     User,
 } from '@/types';
@@ -16,8 +17,9 @@ import type {
 export type MethodExperienceProps = {
     experiences: PaginatedExperiences;
     outcome: ExperienceOutcome | 'all';
-    ownExperience: ExperienceSummary | null;
+    ownExperience: OwnExperience | null;
     ownExperienceHidden: boolean;
+    ownExperienceHiddenRevision: string | null;
     summary: Record<ExperienceOutcome, number>;
 };
 
@@ -48,6 +50,7 @@ export function MethodExperiences({
     outcome,
     ownExperience,
     ownExperienceHidden,
+    ownExperienceHiddenRevision,
     summary,
 }: Props) {
     const {
@@ -57,6 +60,9 @@ export function MethodExperiences({
     const isAuthor = auth.user?.id === authorId;
     const triggerRef = useRef<HTMLAnchorElement>(null);
     const [formOpen, setFormOpen] = useState(false);
+    const [hiddenRevision, setHiddenRevision] = useState(
+        ownExperienceHiddenRevision,
+    );
     const total = summary.worked + summary.partly + summary.did_not_work;
     useEffect(() => {
         const openFromHash = () => {
@@ -120,6 +126,8 @@ export function MethodExperiences({
                 >
                     <Link
                         href={`${base}#experiences`}
+                        preserveScroll
+                        preserveState
                         aria-label="All experiences"
                         aria-current={outcome === 'all' ? 'page' : undefined}
                     >
@@ -130,6 +138,8 @@ export function MethodExperiences({
                             <Link
                                 key={value}
                                 href={`${base}?outcome=${value}#experiences`}
+                                preserveScroll
+                                preserveState
                                 aria-current={
                                     outcome === value ? 'page' : undefined
                                 }
@@ -183,30 +193,65 @@ export function MethodExperiences({
                         You shared this method. Experiences are for other people
                         who tried it.
                     </p>
-                ) : ownExperienceHidden ? (
+                ) : hiddenRevision ? (
                     <div className="space-y-4">
                         <p className="text-muted-foreground text-sm">
                             Your experience is hidden following moderation. You
                             can still remove it.
                         </p>
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                if (
-                                    window.confirm(
-                                        'Remove your experience? This cannot be undone.',
-                                    )
+                        <Form
+                            action={`${base}/experience`}
+                            method="delete"
+                            disableWhileProcessing
+                            onSuccess={() => setHiddenRevision(null)}
+                            onBefore={(visit) =>
+                                visit.method !== 'delete' ||
+                                window.confirm(
+                                    'Remove your experience? This cannot be undone.',
                                 )
-                                    router.delete(`${base}/experience`, {
-                                        preserveScroll: true,
-                                    });
-                            }}
+                            }
                         >
-                            Remove my response
-                        </Button>
+                            {({ errors, processing }) => (
+                                <div className="space-y-3">
+                                    <input
+                                        type="hidden"
+                                        name="experience_revision"
+                                        value={hiddenRevision}
+                                    />
+                                    {errors.experience_revision && (
+                                        <div role="alert">
+                                            <InputError
+                                                message={
+                                                    errors.experience_revision
+                                                }
+                                            />
+                                            <a
+                                                href={`${base}#share`}
+                                                onClick={(event) => {
+                                                    event.preventDefault();
+                                                    window.location.reload();
+                                                }}
+                                                className="text-primary text-sm underline"
+                                            >
+                                                Reload the latest response
+                                                before trying again
+                                            </a>
+                                        </div>
+                                    )}
+                                    <Button
+                                        type="submit"
+                                        variant="outline"
+                                        disabled={processing}
+                                    >
+                                        Remove my response
+                                    </Button>
+                                </div>
+                            )}
+                        </Form>
                     </div>
                 ) : (
                     <ExperienceForm
+                        key={base}
                         action={`${base}/experience`}
                         methodRevision={methodRevision}
                         experience={ownExperience}
@@ -338,6 +383,8 @@ export function MethodExperiences({
                         {experiences.prev_page_url ? (
                             <Link
                                 href={`${experiences.prev_page_url}#experiences`}
+                                preserveScroll
+                                preserveState
                             >
                                 Previous
                             </Link>
@@ -357,6 +404,8 @@ export function MethodExperiences({
                         {experiences.next_page_url ? (
                             <Link
                                 href={`${experiences.next_page_url}#experiences`}
+                                preserveScroll
+                                preserveState
                             >
                                 Next
                             </Link>

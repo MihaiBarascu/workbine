@@ -9,25 +9,44 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { ExperienceSummary } from '@/types';
+import type { OwnExperience } from '@/types';
 
 type Props = {
     action: string;
     methodRevision: string;
-    experience: ExperienceSummary | null;
+    experience: OwnExperience | null;
 };
 
 export function ExperienceForm({ action, experience, methodRevision }: Props) {
     const { media } = usePage().props;
     const [initialMethodRevision] = useState(methodRevision);
+    const [draftExperience, setDraftExperience] = useState(experience);
+    const [experienceRevision, setExperienceRevision] = useState(
+        experience?.revision ?? 'new',
+    );
+    const [submission, setSubmission] = useState<'save' | 'delete' | null>(
+        null,
+    );
+    const acceptCurrentExperience = (current: OwnExperience | null) => {
+        setDraftExperience(current);
+        setExperienceRevision(current?.revision ?? 'new');
+        setSubmission(null);
+    };
+
     return (
         <div className="space-y-5">
             <Form
-                key={`${experience?.updated_at ?? 'new'}:${experience?.evidence_image?.url ?? 'no-image'}`}
+                key={experienceRevision}
                 action={action}
                 method="post"
                 disableWhileProcessing
                 className="space-y-5"
+                onStart={() => setSubmission('save')}
+                onSuccess={(page) =>
+                    acceptCurrentExperience(
+                        page.props.ownExperience as OwnExperience | null,
+                    )
+                }
             >
                 {({ errors, processing, progress }) => (
                     <>
@@ -37,25 +56,37 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                             name="method_revision"
                             value={initialMethodRevision}
                         />
-                        {errors.method_revision && (
-                            <div role="alert">
-                                <InputError message={errors.method_revision} />
-                                <a
-                                    href={action.replace(
-                                        /\/experience$/,
-                                        '#share',
-                                    )}
-                                    onClick={(event) => {
-                                        event.preventDefault();
-                                        window.location.reload();
-                                    }}
-                                    className="text-primary text-sm underline"
-                                >
-                                    Copy your response and reload before trying
-                                    again
-                                </a>
-                            </div>
-                        )}
+                        <input
+                            type="hidden"
+                            name="experience_revision"
+                            value={experienceRevision}
+                        />
+                        {submission === 'save' &&
+                            (errors.method_revision ||
+                                errors.experience_revision) && (
+                                <div role="alert">
+                                    <InputError
+                                        message={
+                                            errors.experience_revision ??
+                                            errors.method_revision
+                                        }
+                                    />
+                                    <a
+                                        href={action.replace(
+                                            /\/experience$/,
+                                            '#share',
+                                        )}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            window.location.reload();
+                                        }}
+                                        className="text-primary text-sm underline"
+                                    >
+                                        Copy your response and reload before
+                                        trying again
+                                    </a>
+                                </div>
+                            )}
                         <div className="grid gap-2">
                             <Label htmlFor="outcome">
                                 What was your result?
@@ -64,7 +95,7 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                 id="outcome"
                                 name="outcome"
                                 required
-                                defaultValue={experience?.outcome ?? ''}
+                                defaultValue={draftExperience?.outcome ?? ''}
                                 aria-invalid={Boolean(errors.outcome)}
                                 aria-describedby="outcome-error"
                                 className="border-input bg-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2"
@@ -93,8 +124,8 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                             <RichTextEditor
                                 id="experience-body"
                                 name="body"
-                                initialText={experience?.body}
-                                initialDocument={experience?.body_document}
+                                initialText={draftExperience?.body}
+                                initialDocument={draftExperience?.body_document}
                                 invalid={Boolean(errors.body)}
                                 describedBy="experience-body-error"
                                 maxLength={5000}
@@ -129,7 +160,7 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                             .toISOString()
                                             .slice(0, 10)}
                                         defaultValue={
-                                            experience?.tried_on ?? ''
+                                            draftExperience?.tried_on ?? ''
                                         }
                                         aria-invalid={Boolean(errors.tried_on)}
                                         aria-describedby="tried-on-error"
@@ -149,7 +180,7 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                         type="url"
                                         maxLength={2048}
                                         defaultValue={
-                                            experience?.evidence_url ?? ''
+                                            draftExperience?.evidence_url ?? ''
                                         }
                                         placeholder="https://..."
                                         aria-invalid={Boolean(
@@ -162,13 +193,13 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                         message={errors.evidence_url}
                                     />
                                 </div>
-                                {experience?.evidence_image && (
+                                {draftExperience?.evidence_image && (
                                     <ImageUploadField
                                         key={String(media?.enabled)}
                                         name="evidence_image"
                                         label="Evidence photo (optional)"
                                         currentImage={
-                                            experience?.evidence_image?.url
+                                            draftExperience.evidence_image.url
                                         }
                                         maxUploadMb={media.maxUploadMb}
                                         error={
@@ -196,18 +227,24 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                         >
                             {processing
                                 ? 'Saving...'
-                                : experience
+                                : draftExperience
                                   ? 'Update my response'
                                   : 'Publish my response'}
                         </Button>
                     </>
                 )}
             </Form>
-            {experience && (
+            {draftExperience && (
                 <Form
                     action={action}
                     method="delete"
                     disableWhileProcessing
+                    onStart={() => setSubmission('delete')}
+                    onSuccess={(page) =>
+                        acceptCurrentExperience(
+                            page.props.ownExperience as OwnExperience | null,
+                        )
+                    }
                     onBefore={(visit) =>
                         visit.method !== 'delete' ||
                         window.confirm(
@@ -215,15 +252,44 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                         )
                     }
                 >
-                    {({ processing }) => (
-                        <Button
-                            type="submit"
-                            variant="outline"
-                            className="w-full"
-                            disabled={processing}
-                        >
-                            Remove my response
-                        </Button>
+                    {({ errors, processing }) => (
+                        <div className="space-y-3">
+                            <input
+                                type="hidden"
+                                name="experience_revision"
+                                value={experienceRevision}
+                            />
+                            {submission === 'delete' &&
+                                errors.experience_revision && (
+                                    <div role="alert">
+                                        <InputError
+                                            message={errors.experience_revision}
+                                        />
+                                        <a
+                                            href={action.replace(
+                                                /\/experience$/,
+                                                '#share',
+                                            )}
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                window.location.reload();
+                                            }}
+                                            className="text-primary text-sm underline"
+                                        >
+                                            Reload the latest response before
+                                            trying again
+                                        </a>
+                                    </div>
+                                )}
+                            <Button
+                                type="submit"
+                                variant="outline"
+                                className="w-full"
+                                disabled={processing}
+                            >
+                                Remove my response
+                            </Button>
+                        </div>
                     )}
                 </Form>
             )}

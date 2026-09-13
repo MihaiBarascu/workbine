@@ -7,6 +7,7 @@ use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
 use App\Support\ContributionRevision;
+use App\Support\ExperienceRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -25,10 +26,11 @@ class ExperiencesTest extends TestCase
         ], $overrides);
     }
 
-    private function requestPayload(Method $method, array $overrides = []): array
+    private function requestPayload(Method $method, string $experienceRevision, array $overrides = []): array
     {
         return $this->payload(array_merge([
             'method_revision' => ContributionRevision::token($method),
+            'experience_revision' => $experienceRevision,
         ], $overrides));
     }
 
@@ -70,7 +72,7 @@ class ExperiencesTest extends TestCase
         $other = User::factory()->create();
 
         $this->actingAs($user)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, [
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new', [
                 'user_id' => $other->id,
                 'method_id' => 99999,
             ]))
@@ -97,9 +99,9 @@ class ExperiencesTest extends TestCase
 
         $this->actingAs($user)->get(route('experiences.create', $params))
             ->assertRedirect(route('methods.show', $params).'#share');
-        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method))
+        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method, 'new'))
             ->assertRedirect(route('methods.show', $params).'#experiences');
-        $this->delete(route('experiences.destroy', $params))
+        $this->delete(route('experiences.destroy', $params), ['experience_revision' => ExperienceRevision::token(Experience::query()->firstOrFail())])
             ->assertRedirect(route('methods.show', $params).'#experiences');
     }
 
@@ -114,14 +116,14 @@ class ExperiencesTest extends TestCase
         $this->assertDatabaseCount('experiences', 0);
     }
 
-    public function test_method_revision_is_required_before_an_experience_is_written_or_a_method_is_preserved(): void
+    public function test_method_and_experience_revisions_are_required_before_an_experience_is_written_or_a_method_is_preserved(): void
     {
         $method = Method::factory()->create();
         $user = User::factory()->create();
 
         $this->actingAs($user)
             ->put(route('experiences.store', [$method->topic, $method]), $this->payload())
-            ->assertSessionHasErrors('method_revision');
+            ->assertSessionHasErrors(['method_revision', 'experience_revision']);
 
         $this->assertDatabaseCount('experiences', 0);
         $this->assertNull($method->refresh()->protected_at);
@@ -132,7 +134,7 @@ class ExperiencesTest extends TestCase
         $method = Method::factory()->create();
         $user = User::factory()->create();
         $params = [$method->topic, $method];
-        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method))
+        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors();
         $experience = Experience::query()->firstOrFail();
         $original = $experience->getAttributes();
@@ -140,7 +142,7 @@ class ExperiencesTest extends TestCase
 
         $this->putJson(route('experiences.store', $params), $this->payload(['outcome' => 'did_not_work']))
             ->assertUnprocessable()
-            ->assertJsonValidationErrors('method_revision');
+            ->assertJsonValidationErrors(['method_revision', 'experience_revision']);
 
         $this->assertDatabaseCount('experiences', 1);
         $this->assertSame($original, $experience->refresh()->getAttributes());
@@ -154,10 +156,10 @@ class ExperiencesTest extends TestCase
         $params = [$method->topic, $method];
         $this->freezeTime();
 
-        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method))->assertRedirect();
+        $this->actingAs($user)->put(route('experiences.store', $params), $this->requestPayload($method, 'new'))->assertRedirect();
         $first = Experience::query()->firstOrFail();
         $this->travel(1)->minutes();
-        $this->put(route('experiences.store', $params), $this->requestPayload($method, ['outcome' => 'worked', 'evidence_url' => null]))->assertRedirect();
+        $this->put(route('experiences.store', $params), $this->requestPayload($method, ExperienceRevision::token($first), ['outcome' => 'worked', 'evidence_url' => null]))->assertRedirect();
         $updated = Experience::query()->firstOrFail();
 
         $this->assertDatabaseCount('experiences', 1);
@@ -179,10 +181,10 @@ class ExperiencesTest extends TestCase
         $method->experiences()->create($this->payload(['user_id' => $user->id]));
         $method->experiences()->create($this->payload(['user_id' => $other->id]));
 
-        $this->actingAs($user)->delete(route('experiences.destroy', [$method->topic, $method]), ['user_id' => $other->id])->assertRedirect();
+        $this->actingAs($user)->delete(route('experiences.destroy', [$method->topic, $method]), ['experience_revision' => ExperienceRevision::token($method->experiences()->where('user_id', $user->id)->firstOrFail()), 'user_id' => $other->id])->assertRedirect();
         $this->assertDatabaseCount('experiences', 1);
         $this->assertDatabaseHas('experiences', ['user_id' => $other->id]);
-        $this->delete(route('experiences.destroy', [$method->topic, $method]))->assertRedirect();
+        $this->delete(route('experiences.destroy', [$method->topic, $method]), ['experience_revision' => 'new'])->assertRedirect();
         $this->assertDatabaseCount('experiences', 1);
     }
 
@@ -221,7 +223,7 @@ class ExperiencesTest extends TestCase
     {
         $method = Method::factory()->create();
         $this->actingAs(User::factory()->create())
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, [
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new', [
                 'outcome' => 'verified',
                 'body' => '',
                 'tried_on' => now()->addDay()->toDateString(),
@@ -235,7 +237,7 @@ class ExperiencesTest extends TestCase
         $method = Method::factory()->create();
         $this->actingAs(User::factory()->create());
         foreach (['javascript:alert(1)', 'data:text/html,test', 'ftp://example.com/file'] as $url) {
-            $this->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, [
+            $this->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new', [
                 'evidence_url' => $url,
                 'body' => str_repeat('x', 5001),
             ]))->assertSessionHasErrors(['evidence_url', 'body']);
@@ -250,6 +252,7 @@ class ExperiencesTest extends TestCase
             $this->actingAs(User::factory()->create())
                 ->put(route('experiences.store', [$method->topic, $method]), [
                     'method_revision' => ContributionRevision::token($method),
+                    'experience_revision' => 'new',
                     'outcome' => $outcome,
                     'body' => 'This is my actual experience with enough context to help someone else.',
                 ])->assertSessionHasNoErrors()->assertRedirect();
@@ -292,9 +295,10 @@ class ExperiencesTest extends TestCase
         $method = Method::factory()->create();
         $this->actingAs(User::factory()->create());
         for ($attempt = 0; $attempt < 20; $attempt++) {
-            $this->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))->assertRedirect();
+            $experience = Experience::query()->first();
+            $this->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, ExperienceRevision::token($experience)))->assertRedirect();
         }
-        $this->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))->assertStatus(429);
+        $this->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, ExperienceRevision::token(Experience::query()->first())))->assertStatus(429);
         $this->assertDatabaseCount('experiences', 1);
     }
 }

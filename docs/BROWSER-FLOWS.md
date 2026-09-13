@@ -63,6 +63,16 @@ Backend: [ExperiencesTest.php](../tests/Feature/ExperiencesTest.php) and
 [ExperienceFiltersTest.php](../tests/Feature/ExperienceFiltersTest.php).
 Ownership, one experience per member/method and validation also have backend tests.
 
+The editor also submits its own response revision on save and removal. The `new`
+marker means the member opened a form with no response; an existing response uses
+a token covering its identity, result, text, formatting and evidence. Old or missing
+tokens cannot overwrite, remove or recreate a different current response. A failed
+or repeated stale submission leaves the draft in the editor until an explicit
+reload; no automatic merge is attempted. Checks cover same-second changes and
+recreated rows, alongside the existing ownership and method-preservation rules.
+See [ExperienceRevisionTest.php](../tests/Feature/ExperienceRevisionTest.php) and
+[experience-conflict.spec.ts](../tests/e2e/experience-conflict.spec.ts).
+
 ### Inline photos, evidence and avatars
 
 Routes: `POST /editor/images`, profile/avatar upload/delete and experience image

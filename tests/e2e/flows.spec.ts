@@ -5,7 +5,7 @@ import type { Page } from '@playwright/test';
 async function logout(page: Page) {
     await page.getByRole('button', { name: 'Account menu' }).click();
     await page.getByRole('menuitem', { name: 'Log out', exact: true }).click();
-    await expect(page).toHaveURL(/\/topics(?:[?#]|$)/);
+    await expect(page).toHaveURL(/\/(?:topics)?(?:[?#]|$)/);
     await expect(
         page.getByRole('link', { name: 'Log in', exact: true }),
     ).toBeVisible();

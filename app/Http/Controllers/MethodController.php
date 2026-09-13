@@ -12,6 +12,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
+use App\Support\ExperienceRevision;
 use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -66,16 +67,19 @@ class MethodController extends Controller
             ->where('user_id', $request->user()->getAuthIdentifier())
             ->first();
 
+        $hidden = $request->user() === null || $own !== null ? null : Experience::withoutGlobalScopes()
+            ->where('method_id', $method->id)->where('user_id', $request->user()->getAuthIdentifier())
+            ->whereNotNull('hidden_at')->first();
+
         return Inertia::render('topics/method-show', [
             'topic' => $topic->only(['id', 'title', 'slug']),
             'method' => $this->serializeMethod($method),
             'canonicalUrl' => route('methods.show', [$topic, $method]),
             'experiences' => $experiences,
             'outcome' => $outcome,
-            'ownExperience' => $own ? $this->serializeExperience($own) : null,
-            'ownExperienceHidden' => $request->user() !== null && Experience::withoutGlobalScopes()
-                ->where('method_id', $method->id)->where('user_id', $request->user()->getAuthIdentifier())
-                ->whereNotNull('hidden_at')->exists(),
+            'ownExperience' => $own ? [...$this->serializeExperience($own), 'revision' => ExperienceRevision::token($own)] : null,
+            'ownExperienceHidden' => $hidden !== null,
+            'ownExperienceHiddenRevision' => $hidden !== null ? ExperienceRevision::token($hidden) : null,
             'summary' => [
                 'worked' => (int) $counts->get('worked', 0),
                 'partly' => (int) $counts->get('partly', 0),

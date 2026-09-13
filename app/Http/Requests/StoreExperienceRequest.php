@@ -30,6 +30,7 @@ class StoreExperienceRequest extends FormRequest
     {
         return [
             'method_revision' => ['required', 'string', 'size:64'],
+            'experience_revision' => ['required', 'string', 'max:64'],
             'body_document' => ['nullable', 'array'],
             'outcome' => ['required', Rule::in(['worked', 'partly', 'did_not_work'])],
             'body' => ['required', 'string', 'max:5000'],
