@@ -153,7 +153,7 @@ export function TopicCard({
                         href={`/topics/${topic.slug}`}
                         className="wb-card-first-method"
                     >
-                        Share the first method <ArrowRight />
+                        Create the first method <ArrowRight />
                     </Link>
                 )}
                 <SaveTopicButton

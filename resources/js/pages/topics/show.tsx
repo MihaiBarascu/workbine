@@ -130,7 +130,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                 <Button asChild>
                                     <Link href={contributionUrl}>
                                         <Plus aria-hidden="true" />
-                                        Share a method
+                                        Create a method
                                     </Link>
                                 </Button>
                             </div>
@@ -330,7 +330,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                     </p>
                                     <Button asChild className="mt-6">
                                         <Link href={contributionUrl}>
-                                            Share the first method
+                                            Create the first method
                                             <ArrowUpRight aria-hidden="true" />
                                         </Link>
                                     </Button>

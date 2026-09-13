@@ -131,7 +131,7 @@ test('three members complete one topic, methods, feedback and reputation journey
                     `${methodTitle} explains the steps and the context where they worked.`,
                 );
             await page
-                .getByRole('button', { name: 'Share method', exact: true })
+                .getByRole('button', { name: 'Create method', exact: true })
                 .click();
             await expect(page).toHaveURL(new RegExp(`${topicUrl}$`));
             const article = page.getByRole('article').filter({

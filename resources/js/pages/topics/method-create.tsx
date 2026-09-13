@@ -16,7 +16,7 @@ type Props = {
 export default function MethodCreate({ topic }: Props) {
     return (
         <PublicShell>
-            <Head title={`Share what worked - ${topic.title}`} />
+            <Head title={`Create a method - ${topic.title}`} />
 
             <main className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
                 <Button asChild variant="ghost" className="mb-6 -ml-3">
@@ -29,7 +29,7 @@ export default function MethodCreate({ topic }: Props) {
                 <div className="mb-9">
                     <div className="bg-muted text-muted-foreground mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium">
                         <Lightbulb className="size-4" />
-                        Share what worked
+                        Create a method
                     </div>
                     <h1 className="text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
                         How did you actually do it?
@@ -64,7 +64,7 @@ export default function MethodCreate({ topic }: Props) {
                                     disabled={processing}
                                 >
                                     {processing && <Spinner />}
-                                    Share method
+                                    Create method
                                 </Button>
                                 <Button asChild variant="ghost" size="lg">
                                     <Link href={`/topics/${topic.slug}`}>

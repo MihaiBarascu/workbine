@@ -88,7 +88,7 @@ const verifyAccount = require('./verify-account.cjs');
         );
         await contributor.goto(topicUrl);
         await contributor
-            .getByRole('link', { name: 'Share a method', exact: true })
+            .getByRole('link', { name: 'Create a method', exact: true })
             .click();
         await contributor
             .locator('input[name="title"]')
@@ -122,7 +122,7 @@ const verifyAccount = require('./verify-account.cjs');
             });
         await contributor.locator('.wb-editor img').waitFor();
         await contributor
-            .getByRole('button', { name: 'Share method', exact: true })
+            .getByRole('button', { name: 'Create method', exact: true })
             .click();
         await contributor
             .getByRole('heading', {
