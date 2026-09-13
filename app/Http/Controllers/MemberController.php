@@ -98,7 +98,7 @@ class MemberController extends Controller
                         'worked' => (int) $item->getAttribute('feedback_worked'),
                         'partly' => (int) $item->getAttribute('feedback_partly'),
                         'did_not_work' => (int) $item->getAttribute('feedback_did_not_work'),
-                        'url' => route('methods.show', [$method->topic, $method], false).'#experiences',
+                        'url' => route('methods.show', [$method->topic, $method], false),
                     ] : null,
                 ];
             });

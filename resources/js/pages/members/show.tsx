@@ -299,7 +299,7 @@ export default function MemberProfile({
                                     {entry.feedback && (
                                         <div className="my-3 flex flex-wrap gap-x-4 gap-y-2 text-sm">
                                             <Link
-                                                href={entry.feedback.url}
+                                                href={`${entry.feedback.url}#experiences`}
                                                 className="text-primary inline-flex min-h-10 items-center"
                                             >
                                                 {entry.feedback.total}{' '}
@@ -309,7 +309,7 @@ export default function MemberProfile({
                                             </Link>
                                             {entry.feedback.worked > 0 && (
                                                 <Link
-                                                    href={`${entry.feedback.url}?outcome=worked`}
+                                                    href={`${entry.feedback.url}?outcome=worked#experiences`}
                                                     className="text-primary inline-flex min-h-10 items-center font-medium"
                                                 >
                                                     {entry.feedback.worked}{' '}
@@ -318,7 +318,7 @@ export default function MemberProfile({
                                             )}
                                             {entry.feedback.partly > 0 && (
                                                 <Link
-                                                    href={`${entry.feedback.url}?outcome=partly`}
+                                                    href={`${entry.feedback.url}?outcome=partly#experiences`}
                                                     className="text-primary inline-flex min-h-10 items-center"
                                                 >
                                                     {entry.feedback.partly}{' '}
@@ -328,7 +328,7 @@ export default function MemberProfile({
                                             {entry.feedback.did_not_work >
                                                 0 && (
                                                 <Link
-                                                    href={`${entry.feedback.url}?outcome=did_not_work`}
+                                                    href={`${entry.feedback.url}?outcome=did_not_work#experiences`}
                                                     className="text-muted-foreground inline-flex min-h-10 items-center"
                                                 >
                                                     {
