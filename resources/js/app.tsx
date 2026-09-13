@@ -14,7 +14,7 @@ void createInertiaApp({
         switch (true) {
             case name === 'welcome' ||
                 name.startsWith('topics/') ||
-                name.startsWith('experiences/') ||
+                name.startsWith('legal/') ||
                 name.startsWith('errors/') ||
                 name.startsWith('members/') ||
                 name.startsWith('saved/') ||
