@@ -9,7 +9,6 @@ use App\Models\ModerationReview;
 use App\Models\Topic;
 use App\Models\User;
 use App\Support\ContributionRevision;
-use App\Support\ContributionRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request;
