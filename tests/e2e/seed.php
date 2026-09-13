@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 require __DIR__.'/../../vendor/autoload.php';
 $app = require __DIR__.'/../../bootstrap/app.php';
@@ -34,7 +35,7 @@ DB::transaction(function () use ($argv, $token): void {
         $topic = Topic::query()->where('slug', 'client-workflow-'.$token)->firstOrFail();
         $method = $topic->methods()->oldest('id')->firstOrFail();
         $update = $method->updates()->create([
-            'submission_id' => (string) \Illuminate\Support\Str::uuid(),
+            'submission_id' => (string) Str::uuid(),
             'body' => 'A dated note reached from a legacy bookmark.',
         ]);
         echo json_encode(['updateId' => $update->id], JSON_THROW_ON_ERROR);
