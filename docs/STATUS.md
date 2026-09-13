@@ -25,11 +25,20 @@ or preserve an untried method. The browser already sends this token. Tests for
 notifications, moderation, reports, images and preservation submit it explicitly
 so those checks still reach their intended behavior.
 
-Use the current PR's recorded local gate for this change. Older CI failures on
-#40's initial source reflected incomplete request fixtures; passing UI checks on
-that source were not a passing release gate. Historical branch names, squash-merge
-ancestry and old PR comments do not identify unfinished product work. Inspect the
-current source and final PR status before resuming another agent's branch.
+The complete local Docker gate passed on `52869eb25c8f031a0bbfa5a1d3b41f85a80ee979`,
+with all 398 tracked files matching the test snapshot: frontend build/checks and
+TypeScript, Pint, PHPStan, 351 tests / 3857 assertions on each SQLite and PostgreSQL,
+13 Python tests, all existing browser scripts and 30 Playwright checks in 141.5
+seconds (no failures, skips or flaky results). Protected-method desktop and
+retry-conflict mobile captures were reviewed. Only this validation note changed
+after the passing source. Snapshot SHA-256:
+`ef66d0c3ca88d53eaeb068e77df908919325447114ad83a397334ec7ecb3585d`.
+
+Older CI failures on #40's initial source reflected incomplete request fixtures;
+passing UI checks on that source were not a passing release gate. Historical
+branch names, squash-merge ancestry and old PR comments do not identify unfinished
+product work. Inspect current source and final PR status before resuming another
+agent's branch.
 
 ## Preserving tried methods
 
