@@ -229,6 +229,9 @@ test('an experienced method stays intact while its author can add dated updates'
         // Removing the only experience is a UI mutation, but preservation is
         // permanent and the author still sees the append-only editor.
         await contributor.goto(experienceUrl);
+        await contributor
+            .getByRole('link', { name: 'Edit my experience', exact: true })
+            .click();
         contributor.once('dialog', (dialog) => dialog.accept());
         await contributor
             .getByRole('button', { name: 'Remove my response', exact: true })

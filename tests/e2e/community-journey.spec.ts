@@ -115,7 +115,10 @@ test('three members complete one topic, methods, feedback and reputation journey
         const ownerMethodHref = await ownerMethod
             .getByRole('link', { name: /experiences$/ })
             .getAttribute('href');
-        const ownerMethodId = ownerMethodHref!.match(/methods\/(\d+)/)![1];
+        const ownerMethodId = new URL(
+            ownerMethodHref!,
+            owner.url(),
+        ).pathname.match(/methods\/(\d+)/)![1];
 
         async function publishMethod(page: Page, methodTitle: string) {
             await page.goto(`${topicUrl}/methods/create`);
@@ -148,7 +151,9 @@ test('three members complete one topic, methods, feedback and reputation journey
                 .getAttribute('href');
             return {
                 article,
-                id: href!.match(/methods\/(\d+)/)![1],
+                id: new URL(href!, page.url()).pathname.match(
+                    /methods\/(\d+)/,
+                )![1],
             };
         }
 

@@ -11,15 +11,15 @@ test('guest public pages expose accessible policy footer and GitHub link', async
         for (const path of ['/topics', '/privacy', '/terms']) {
             await page.goto(path);
             await expect(page.locator('main h1')).toHaveCount(1);
-            await expect(page.locator('footer')).toBeVisible();
+            await expect(page.getByRole('contentinfo')).toBeVisible();
             await expect(
                 page
-                    .locator('footer')
+                    .getByRole('contentinfo')
                     .getByRole('link', { name: 'Privacy', exact: true }),
             ).toHaveAttribute('href', '/privacy');
             await expect(
                 page
-                    .locator('footer')
+                    .getByRole('contentinfo')
                     .getByRole('link', { name: 'Terms', exact: true }),
             ).toHaveAttribute('href', '/terms');
             await expect(

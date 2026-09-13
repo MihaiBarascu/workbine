@@ -246,7 +246,10 @@ const { chromium } = browserRequire('playwright');
             .getByRole('link', { name: '0 experiences', exact: true })
             .click();
         await page
-            .getByText('You shared this method.', { exact: false })
+            .getByRole('heading', {
+                name: 'Reserve one small repeatable task',
+                exact: true,
+            })
             .waitFor();
         assert.equal(await page.locator('select[name="outcome"]').count(), 0);
         console.log(

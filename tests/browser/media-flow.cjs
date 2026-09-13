@@ -358,7 +358,16 @@ const { chromium } = requireBrowser('playwright');
         const evidencePage = `${root}${new URL(experienceUrl).pathname}`;
         await hideUploadControlsOnVisits(evidencePage);
         await page
-            .getByRole('link', { name: 'Back to the method', exact: true })
+            .getByRole('link', {
+                name: 'How do you find the first customer for a small SaaS?',
+                exact: true,
+            })
+            .click();
+        await page
+            .getByRole('link', {
+                name: 'Watch one person do the work before writing more code',
+                exact: true,
+            })
             .click();
         await page
             .getByRole('link', { name: 'Edit my experience', exact: true })
