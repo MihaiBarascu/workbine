@@ -40,9 +40,8 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                     replace: true,
                 });
             else if (update)
-                router.visit(
+                window.location.replace(
                     `/topics/${topic.slug}/method-updates/${update[1]}`,
-                    { replace: true },
                 );
         };
         openLegacyLink();

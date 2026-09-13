@@ -32,6 +32,12 @@ DB::transaction(function () use ($argv, $token): void {
     }
     if (($argv[1] ?? '') === 'add-method-pages') {
         $topic = Topic::query()->where('slug', 'client-workflow-'.$token)->firstOrFail();
+        $method = $topic->methods()->oldest('id')->firstOrFail();
+        $update = $method->updates()->create([
+            'submission_id' => (string) \Illuminate\Support\Str::uuid(),
+            'body' => 'A dated note reached from a legacy bookmark.',
+        ]);
+        echo json_encode(['updateId' => $update->id], JSON_THROW_ON_ERROR);
         for ($index = 0; $index < 10; $index++) {
             Method::factory()->create([
                 'user_id' => $topic->user_id,
