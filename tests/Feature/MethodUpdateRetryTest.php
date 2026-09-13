@@ -106,6 +106,32 @@ class MethodUpdateRetryTest extends TestCase
         $this->assertSame($originalMethod, $method->refresh()->getAttributes());
     }
 
+    public function test_json_conflicting_retry_returns_validation_errors_instead_of_success(): void
+    {
+        $method = Method::factory()->create(['protected_at' => now()]);
+        $originalMethod = $method->refresh()->getAttributes();
+        $submissionId = (string) Str::uuid();
+        $update = MethodUpdate::query()->create([
+            'method_id' => $method->id,
+            'submission_id' => $submissionId,
+            'body' => 'An immutable published update.',
+        ]);
+        $original = $update->refresh()->getAttributes();
+
+        $this->actingAs($method->user)
+            ->postJson(route('methods.updates.store', [$method->topic, $method]), [
+                'submission_id' => $submissionId,
+                'body' => 'Different text must not be silently discarded.',
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('submission_id')
+            ->assertJsonPath('errors.submission_id.0', 'An earlier version of this update was already published. Your current text has not been published. You can use this draft for a new update.');
+
+        $this->assertDatabaseCount('method_updates', 1);
+        $this->assertSame($original, $update->refresh()->getAttributes());
+        $this->assertSame($originalMethod, $method->refresh()->getAttributes());
+    }
+
     public function test_submission_id_reuse_on_another_method_does_not_create_a_false_conflict(): void
     {
         $first = Method::factory()->create(['protected_at' => now()]);

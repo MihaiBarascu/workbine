@@ -44,7 +44,7 @@ class RichTextTest extends TestCase
         $this->assertSame('Here is how I made this work.', $method->body);
         $this->assertSame([['type' => 'bold']], $method->body_document['content'][0]['content'][0]['marks']);
         $member = User::factory()->create();
-        $this->actingAs($member)->put(route('experiences.store', [$topic, $method]), ['outcome' => 'worked', 'body_document' => $this->richDocument('Worked for me.')])->assertSessionHasNoErrors();
+        $this->actingAs($member)->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body_document' => $this->richDocument('Worked for me.')])->assertSessionHasNoErrors();
         $this->get(route('experiences.index', [$topic, $method]))->assertInertia(fn (Assert $page) => $page->has('experiences.data.0.body_document')->where('experiences.data.0.body', 'Worked for me.'));
     }
 
@@ -110,7 +110,7 @@ class RichTextTest extends TestCase
         $draft = $this->editorImage($user);
         $image = $this->editorImage($user);
         $method = Method::factory()->create();
-        $this->put(route('experiences.store', [$method->topic, $method]), ['outcome' => 'partly', 'body_document' => $this->richDocument(extra: [['type' => 'image', 'attrs' => ['imageId' => $image->id]]])])->assertSessionHasNoErrors();
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'partly', 'body_document' => $this->richDocument(extra: [['type' => 'image', 'attrs' => ['imageId' => $image->id]]])])->assertSessionHasNoErrors();
         $this->travel(2)->hours();
         app(ImageUploads::class)->prune();
         Storage::disk('public')->assertMissing($draft->path);

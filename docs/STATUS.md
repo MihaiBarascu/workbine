@@ -7,6 +7,39 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Current integration handoff
+
+The merged baseline includes shared navigation (#39, `a0402d9`) and method-update
+retry recovery (#37, `0626f26`), alongside releases #25–#36 described below. The
+sidebar now collapses on desktop and uses an accessible mobile drawer across
+community and account pages; see [SHARED-NAVIGATION.md](SHARED-NAVIGATION.md).
+Lost-response retries preserve the draft, distinguish an already published note
+from conflicting text, and require explicit publication of a new dated update.
+The duplicate #38 was closed; its additional JSON conflict regression is retained
+in `MethodUpdateRetryTest` without restoring the superseded editor implementation.
+
+Experience writes require the method content revision, including updates to an
+existing response. Missing tokens fail validation; stale tokens are rejected under
+the same method lock used by editing. Rejected submissions cannot create a response
+or preserve an untried method. The browser already sends this token. Tests for
+notifications, moderation, reports, images and preservation submit it explicitly
+so those checks still reach their intended behavior.
+
+The complete local Docker gate passed on `52869eb25c8f031a0bbfa5a1d3b41f85a80ee979`,
+with all 398 tracked files matching the test snapshot: frontend build/checks and
+TypeScript, Pint, PHPStan, 351 tests / 3857 assertions on each SQLite and PostgreSQL,
+13 Python tests, all existing browser scripts and 30 Playwright checks in 141.5
+seconds (no failures, skips or flaky results). Protected-method desktop and
+retry-conflict mobile captures were reviewed. Only this validation note changed
+after the passing source. Snapshot SHA-256:
+`ef66d0c3ca88d53eaeb068e77df908919325447114ad83a397334ec7ecb3585d`.
+
+Older CI failures on #40's initial source reflected incomplete request fixtures;
+passing UI checks on that source were not a passing release gate. Historical
+branch names, squash-merge ancestry and old PR comments do not identify unfinished
+product work. Inspect current source and final PR status before resuming another
+agent's branch.
+
 ## Preserving tried methods
 
 The first experience from another member permanently preserves a method's original
@@ -105,8 +138,9 @@ attest production uploads or external-service configuration.
 ## Current application state
 
 Workbine is deployed at https://workbine.com. The repository baseline now includes
-the wider layout (#16), member usernames (#17), R2 image integration (#18), launch
-support (#20) and the human-first discovery/topic flow (#21). Repository state,
+the shared navigation (#39), retry recovery (#37), preserved methods (#36),
+connected discovery (#33), rich-text contributions (#30), moderation (#28/#29),
+verified accounts (#26), images (#18) and launch support (#20). Repository state,
 isolated test evidence and a particular production deployment are separate facts;
 use the read-only production verification in [TESTING.md](TESTING.md) when the live
 frontend release must be established before another merge. A feature being in

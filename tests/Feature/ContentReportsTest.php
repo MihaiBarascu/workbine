@@ -9,6 +9,7 @@ use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
 use App\Services\ImageUploads;
+use App\Support\ContributionRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -137,7 +138,7 @@ class ContentReportsTest extends TestCase
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Reviewed unsafe instructions.'])->assertSuccessful();
         $this->get(route('topics.show', $method->topic))->assertInertia(fn (Assert $page) => $page->has('methods', 0)->where('topic.methods_count', 0));
         $this->actingAs($method->user)->get(route('methods.edit', [$method->topic, $method]))->assertNotFound();
-        $this->put(route('experiences.store', [$method->topic, $method]), ['outcome' => 'worked', 'body' => 'A trial with enough practical context.'])->assertNotFound();
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'A trial with enough practical context.'])->assertNotFound();
         $this->assertDatabaseCount('experiences', 1);
     }
 
@@ -149,7 +150,7 @@ class ContentReportsTest extends TestCase
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Reviewed harassment.'])->assertSuccessful();
         $this->actingAs($experience->user)->get(route('experiences.index', [$method->topic, $method]))
             ->assertInertia(fn (Assert $page) => $page->has('experiences.data', 0)->where('ownExperience', null)->where('ownExperienceHidden', true)->where('summary.partly', 0));
-        $this->put(route('experiences.store', [$method->topic, $method]), ['outcome' => 'worked', 'body' => 'Trying to replace a hidden experience with another.'])->assertForbidden();
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'Trying to replace a hidden experience with another.'])->assertForbidden();
         $this->assertDatabaseCount('experiences', 1);
         $this->delete(route('experiences.destroy', [$method->topic, $method]))->assertRedirect();
         $this->assertDatabaseCount('experiences', 0);

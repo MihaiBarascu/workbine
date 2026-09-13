@@ -26,7 +26,10 @@ The application is intentionally kept as a single deployable monolith for fast p
 
 Start with [docs/STATUS.md](docs/STATUS.md) for the dated production state, owner
 decisions, completed releases and validation evidence.
-The wider design, member usernames and image uploads are deployed. Production
+The repository includes shared collapsible navigation, protected tried methods,
+recoverable dated-note retries and reusable browser scenarios. See
+[shared navigation](docs/SHARED-NAVIGATION.md) and the
+[browser inventory](docs/BROWSER-FLOWS.md) before repeating completed work. Production
 runs through Docker/Dokploy; images use Cloudflare R2 and the public media domain.
 
 The profile-photo upload/delete/upload flow, R2 cleanup and public cache

@@ -7,6 +7,7 @@ use App\Models\MediaImage;
 use App\Models\Method;
 use App\Models\User;
 use App\Services\ImageUploads;
+use App\Support\ContributionRevision;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -40,10 +41,11 @@ class ImageUploadsTest extends TestCase
         return $user->refresh()->avatarImage;
     }
 
-    private function experiencePayload(array $overrides = []): array
+    private function experiencePayload(Method $method, array $overrides = []): array
     {
         return [...[
             '_method' => 'put',
+            'method_revision' => ContributionRevision::token($method),
             'outcome' => 'worked',
             'body' => 'I tried this approach for two weeks and the practical result was useful.',
         ], ...$overrides];
@@ -226,19 +228,19 @@ class ImageUploadsTest extends TestCase
         $method = Method::factory()->create();
         $user = User::factory()->create();
         $route = route('experiences.store', [$method->topic, $method]);
-        $this->actingAs($user)->post($route, $this->experiencePayload(['evidence_image' => UploadedFile::fake()->image('evidence.png', 2000, 1000)]))
+        $this->actingAs($user)->post($route, $this->experiencePayload($method, ['evidence_image' => UploadedFile::fake()->image('evidence.png', 2000, 1000)]))
             ->assertSessionHasNoErrors()->assertRedirect();
         $experience = Experience::query()->firstOrFail();
         $image = $experience->evidenceImage;
         $this->assertSame(1600, $image->width);
         $this->assertSame(800, $image->height);
-        $this->post($route, $this->experiencePayload(['body' => 'Here is my updated experience, keeping the same supporting photograph.']))->assertRedirect();
+        $this->post($route, $this->experiencePayload($method, ['body' => 'Here is my updated experience, keeping the same supporting photograph.']))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame($image->id, $experience->refresh()->evidence_image_id);
         $this->get(route('experiences.index', [$method->topic, $method]))->assertInertia(fn (Assert $page) => $page
             ->where('experiences.data.0.evidence_image', $image->publicData())
             ->missing('experiences.data.0.evidence_image.path')->missing('experiences.data.0.evidence_image.disk'));
         config(['media.enabled' => false]);
-        $this->post($route, $this->experiencePayload(['remove_evidence_image' => true]))->assertRedirect();
+        $this->post($route, $this->experiencePayload($method, ['remove_evidence_image' => true]))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertNull($experience->refresh()->evidence_image_id);
         Storage::disk('public')->assertMissing($image->path);
     }
@@ -247,12 +249,12 @@ class ImageUploadsTest extends TestCase
     {
         $method = Method::factory()->create();
         $route = route('experiences.store', [$method->topic, $method]);
-        $this->actingAs($method->user)->post($route, $this->experiencePayload(['evidence_image' => UploadedFile::fake()->image('self.png')]))
+        $this->actingAs($method->user)->post($route, $this->experiencePayload($method, ['evidence_image' => UploadedFile::fake()->image('self.png')]))
             ->assertForbidden();
         $this->assertDatabaseCount('media_images', 0);
         $other = User::factory()->create();
         $image = $this->avatar($other);
-        $this->actingAs(User::factory()->create())->post($route, $this->experiencePayload(['evidence_image_id' => $image->id]))->assertRedirect();
+        $this->actingAs(User::factory()->create())->post($route, $this->experiencePayload($method, ['evidence_image_id' => $image->id]))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertNull(Experience::query()->firstOrFail()->evidence_image_id);
     }
 
@@ -261,9 +263,9 @@ class ImageUploadsTest extends TestCase
         $method = Method::factory()->create();
         $user = User::factory()->create();
         $avatar = $this->avatar($user);
-        $this->post(route('experiences.store', [$method->topic, $method]), $this->experiencePayload(['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertRedirect();
+        $this->post(route('experiences.store', [$method->topic, $method]), $this->experiencePayload($method, ['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertSessionHasNoErrors()->assertRedirect();
         $image = Experience::query()->firstOrFail()->evidenceImage;
-        $this->delete(route('experiences.destroy', [$method->topic, $method]))->assertRedirect();
+        $this->delete(route('experiences.destroy', [$method->topic, $method]))->assertSessionHasNoErrors()->assertRedirect();
         Storage::disk('public')->assertMissing($image->path);
         Storage::disk('public')->assertExists($avatar->path);
         $this->assertDatabaseCount('media_images', 1);
@@ -275,7 +277,7 @@ class ImageUploadsTest extends TestCase
         $avatar = $this->avatar($owner);
         $method = Method::factory()->create(['user_id' => $owner->id]);
         $other = User::factory()->create();
-        $this->actingAs($other)->post(route('experiences.store', [$method->topic, $method]), $this->experiencePayload(['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertRedirect();
+        $this->actingAs($other)->post(route('experiences.store', [$method->topic, $method]), $this->experiencePayload($method, ['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertSessionHasNoErrors()->assertRedirect();
         $evidence = Experience::query()->firstOrFail()->evidenceImage;
         $reservation = app(ImageUploads::class)->store($owner, UploadedFile::fake()->image('pending.jpg'), 'avatar');
         $this->actingAs($owner)->delete(route('profile.destroy'), ['password' => 'password'])->assertRedirect(route('home'));
@@ -295,7 +297,7 @@ class ImageUploadsTest extends TestCase
         $method = Method::factory()->create();
         $user = User::factory()->create();
         $avatar = $this->avatar($user);
-        $this->post(route('experiences.store', [$method->topic, $method]), $this->experiencePayload(['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertRedirect();
+        $this->post(route('experiences.store', [$method->topic, $method]), $this->experiencePayload($method, ['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertSessionHasNoErrors()->assertRedirect();
         $evidence = Experience::query()->firstOrFail()->evidenceImage;
         $method->topic->delete();
         $this->travel(61)->minutes();
@@ -313,8 +315,8 @@ class ImageUploadsTest extends TestCase
         $this->avatar($user);
         $method = Method::factory()->create();
         $route = route('experiences.store', [$method->topic, $method]);
-        $this->post($route, $this->experiencePayload(['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertStatus(429)->assertHeader('Retry-After');
-        $this->post($route, $this->experiencePayload())->assertRedirect();
+        $this->post($route, $this->experiencePayload($method, ['evidence_image' => UploadedFile::fake()->image('evidence.jpg')]))->assertStatus(429)->assertHeader('Retry-After');
+        $this->post($route, $this->experiencePayload($method))->assertSessionHasNoErrors()->assertRedirect();
         $this->assertDatabaseCount('media_images', 1);
     }
 

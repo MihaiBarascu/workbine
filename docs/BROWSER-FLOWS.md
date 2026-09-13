@@ -326,8 +326,12 @@ errors/old input, a fresh server-issued ID and per-method submission scoping.
 The feature test carries the response session cookie into the redirected GET.
 These are coverage contracts; consult the current PR for execution results.
 
-The browser submits the method content token with an experience; a stale token
-requires reviewing the current method before retrying. This is conflict detection,
+The browser submits the required method content token with every experience write,
+including response edits. The server rejects a missing token before writing; a
+stale token requires reviewing the current method before retrying.
+`ExperiencesTest` covers missing tokens for both creation and replacement, and
+`MethodUpdateRetryTest` also checks JSON 422 conflicts without changing a published
+note. This is conflict detection,
 not a version archive. Backfill preserves current methods with existing responses,
 including hidden ones; it cannot reconstruct earlier edits or deleted responses.
 Experience authors can still change their own result, and current-record reputation
