@@ -7,6 +7,17 @@ releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
 
+## Experience editor conflicts
+
+Saving or removing an experience requires the revision of the member's own
+response, in addition to the existing method-content revision on publication.
+An old editor cannot overwrite a newer response, recreate a deleted response or
+remove a response that changed after the editor opened. Conflicts keep the draft
+available for copying before an explicit reload. The same protection covers
+removing a hidden response. No revision archive or database migration is added.
+Browser and backend coverage is listed in [BROWSER-FLOWS.md](BROWSER-FLOWS.md);
+execution and deployment evidence must be recorded separately.
+
 ## Individual method pages
 
 Methods have a public detail page at `/topics/{topic}/methods/{method}`. Topics

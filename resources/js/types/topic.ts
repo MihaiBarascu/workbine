@@ -75,6 +75,10 @@ export type ExperienceSummary = {
     user: PublicMember;
 };
 
+export type OwnExperience = ExperienceSummary & {
+    revision: string;
+};
+
 export type PaginatedExperiences = {
     data: ExperienceSummary[];
     total: number;

@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Services\ContentModeration;
 use App\Services\ImageUploads;
 use App\Support\ContributionRevision;
+use App\Support\ExperienceRevision;
 use App\Support\RichText;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,8 +50,12 @@ class ExperienceController extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
-        abort_if(Experience::withoutGlobalScopes()->where('method_id', $method->id)
-            ->where('user_id', $user->id)->whereNotNull('hidden_at')->exists(), 403);
+        $existing = Experience::withoutGlobalScopes()->where('method_id', $method->id)
+            ->where('user_id', $user->id)->first();
+        abort_if($existing?->hidden_at !== null, 403);
+        // Reject stale drafts before moderation or staging an upload, then check
+        // again under the write locks in case the response changes meanwhile.
+        ExperienceRevision::assertMatches($existing, $data['experience_revision']);
         app(ContentModeration::class)->text($user, Arr::only($data, ['body', 'evidence_url']), 'experience:'.$method->id, 'body');
 
         $image = $request->hasFile('evidence_image') ? $uploads->store($user, $request->file('evidence_image'), 'evidence_image') : null;
@@ -66,6 +71,7 @@ class ExperienceController extends Controller
                 }
                 $experience = Experience::withoutGlobalScopes()->lockForUpdate()->firstOrNew(['method_id' => $method->id, 'user_id' => $user->id]);
                 abort_if($experience->hidden_at !== null, 403);
+                ExperienceRevision::assertMatches($experience, $data['experience_revision']);
                 $previous = null;
 
                 if ($image !== null || $request->boolean('remove_evidence_image')) {
@@ -101,9 +107,13 @@ class ExperienceController extends Controller
     {
         /** @var User $user */
         $user = $request->user();
-        $previous = DB::transaction(function () use ($user, $method): ?MediaImage {
+        $data = $request->validate(['experience_revision' => ['required', 'string', 'max:64']]);
+        $previous = DB::transaction(function () use ($user, $method, $data): ?MediaImage {
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
-            $experience = $method->experiences()->withoutGlobalScopes()->where('user_id', $user->id)->first();
+            Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
+            $experience = Experience::withoutGlobalScopes()->where('method_id', $method->id)
+                ->where('user_id', $user->id)->lockForUpdate()->first();
+            ExperienceRevision::assertMatches($experience, $data['experience_revision']);
             $previous = $experience?->evidenceImage;
             $experience?->delete();
             $previous?->update(['pending_deletion' => true]);

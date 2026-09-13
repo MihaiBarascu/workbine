@@ -8,6 +8,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ImageUploads;
 use App\Support\ContributionRevision;
+use App\Support\ExperienceRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -44,7 +45,7 @@ class RichTextTest extends TestCase
         $this->assertSame('Here is how I made this work.', $method->body);
         $this->assertSame([['type' => 'bold']], $method->body_document['content'][0]['content'][0]['marks']);
         $member = User::factory()->create();
-        $this->actingAs($member)->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body_document' => $this->richDocument('Worked for me.')])->assertSessionHasNoErrors();
+        $this->actingAs($member)->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'experience_revision' => 'new', 'outcome' => 'worked', 'body_document' => $this->richDocument('Worked for me.')])->assertSessionHasNoErrors();
         $this->get(route('methods.show', [$topic, $method]))->assertInertia(fn (Assert $page) => $page->has('experiences.data.0.body_document')->where('experiences.data.0.body', 'Worked for me.'));
     }
 
@@ -59,7 +60,7 @@ class RichTextTest extends TestCase
         $method = $topic->methods()->firstOrFail();
         $this->assertStringContainsString('mailto:contact@example.com', $method->body);
         $this->assertSame('mailto:contact@example.com', $method->body_document['content'][0]['content'][1]['marks'][1]['attrs']['href']);
-        $this->actingAs(User::factory()->create())->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body_document' => $document])->assertSessionHasNoErrors();
+        $this->actingAs(User::factory()->create())->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'experience_revision' => 'new', 'outcome' => 'worked', 'body_document' => $document])->assertSessionHasNoErrors();
         $this->assertSame($method->body_document, $method->experiences()->firstOrFail()->body_document);
     }
 
@@ -157,12 +158,12 @@ class RichTextTest extends TestCase
         $draft = $this->editorImage($user);
         $image = $this->editorImage($user);
         $method = Method::factory()->create();
-        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'partly', 'body_document' => $this->richDocument(extra: [['type' => 'image', 'attrs' => ['imageId' => $image->id]]])])->assertSessionHasNoErrors();
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'experience_revision' => 'new', 'outcome' => 'partly', 'body_document' => $this->richDocument(extra: [['type' => 'image', 'attrs' => ['imageId' => $image->id]]])])->assertSessionHasNoErrors();
         $this->travel(2)->hours();
         app(ImageUploads::class)->prune();
         Storage::disk('public')->assertMissing($draft->path);
         Storage::disk('public')->assertExists($image->path);
-        $this->delete(route('experiences.destroy', [$method->topic, $method]))->assertRedirect();
+        $this->delete(route('experiences.destroy', [$method->topic, $method]), ['experience_revision' => ExperienceRevision::token($method->experiences()->firstOrFail())])->assertRedirect();
         app(ImageUploads::class)->prune();
         Storage::disk('public')->assertMissing($image->path);
     }

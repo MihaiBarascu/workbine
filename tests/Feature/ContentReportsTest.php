@@ -10,6 +10,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\ImageUploads;
 use App\Support\ContributionRevision;
+use App\Support\ExperienceRevision;
 use App\Support\ReportTargets;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -161,7 +162,7 @@ class ContentReportsTest extends TestCase
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Reviewed unsafe instructions.'])->assertSuccessful();
         $this->get(route('topics.show', $method->topic))->assertInertia(fn (Assert $page) => $page->has('methods.data', 0)->where('topic.methods_count', 0));
         $this->actingAs($method->user)->get(route('methods.edit', [$method->topic, $method]))->assertNotFound();
-        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'A trial with enough practical context.'])->assertNotFound();
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'experience_revision' => 'new', 'outcome' => 'worked', 'body' => 'A trial with enough practical context.'])->assertNotFound();
         $this->assertDatabaseCount('experiences', 1);
     }
 
@@ -171,11 +172,12 @@ class ContentReportsTest extends TestCase
         $experience = $this->experience($method);
         $report = $this->report($experience, 'experience');
         $this->artisan('reports:review', ['id' => $report->id, '--action' => 'hide', '--note' => 'Reviewed harassment.'])->assertSuccessful();
+        $revision = ExperienceRevision::token($experience->refresh());
         $this->actingAs($experience->user)->get(route('methods.show', [$method->topic, $method]))
-            ->assertInertia(fn (Assert $page) => $page->has('experiences.data', 0)->where('ownExperience', null)->where('ownExperienceHidden', true)->where('summary.partly', 0));
-        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body' => 'Trying to replace a hidden experience with another.'])->assertForbidden();
+            ->assertInertia(fn (Assert $page) => $page->has('experiences.data', 0)->where('ownExperience', null)->missing('ownExperience.body')->where('ownExperienceHidden', true)->where('ownExperienceHiddenRevision', $revision)->where('summary.partly', 0));
+        $this->put(route('experiences.store', [$method->topic, $method]), ['method_revision' => ContributionRevision::token($method), 'experience_revision' => ExperienceRevision::token($experience), 'outcome' => 'worked', 'body' => 'Trying to replace a hidden experience with another.'])->assertForbidden();
         $this->assertDatabaseCount('experiences', 1);
-        $this->delete(route('experiences.destroy', [$method->topic, $method]))->assertRedirect();
+        $this->delete(route('experiences.destroy', [$method->topic, $method]), ['experience_revision' => $revision])->assertRedirect();
         $this->assertDatabaseCount('experiences', 0);
     }
 

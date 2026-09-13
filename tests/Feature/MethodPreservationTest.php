@@ -10,6 +10,7 @@ use App\Models\Topic;
 use App\Models\User;
 use App\Services\Reputation;
 use App\Support\ContributionRevision;
+use App\Support\ExperienceRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -27,10 +28,11 @@ class MethodPreservationTest extends TestCase
         ], $overrides);
     }
 
-    private function requestPayload(Method $method, array $overrides = []): array
+    private function requestPayload(Method $method, string $experienceRevision, array $overrides = []): array
     {
         return $this->experiencePayload(array_merge([
             'method_revision' => ContributionRevision::token($method),
+            'experience_revision' => $experienceRevision,
         ], $overrides));
     }
 
@@ -49,18 +51,18 @@ class MethodPreservationTest extends TestCase
         $params = [$method->topic, $method];
 
         $this->actingAs($supporter)
-            ->put(route('experiences.store', $params), $this->requestPayload($method))
+            ->put(route('experiences.store', $params), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors()->assertRedirect();
 
         $protectedAt = $method->refresh()->protected_at;
         $this->assertNotNull($protectedAt);
 
-        $this->delete(route('experiences.destroy', $params))->assertRedirect();
+        $this->delete(route('experiences.destroy', $params), ['experience_revision' => ExperienceRevision::token(Experience::query()->where('user_id', $supporter->id)->firstOrFail())])->assertRedirect();
         $this->assertNotNull($method->refresh()->protected_at);
 
         $replacement = User::factory()->create();
         $this->actingAs($replacement)
-            ->put(route('experiences.store', $params), $this->requestPayload($method, ['outcome' => 'partly']))
+            ->put(route('experiences.store', $params), $this->requestPayload($method, 'new', ['outcome' => 'partly']))
             ->assertSessionHasNoErrors()->assertRedirect();
         $experience = Experience::query()->where('user_id', $replacement->id)->firstOrFail();
         $experience->forceFill(['hidden_at' => now()])->save();
@@ -81,7 +83,7 @@ class MethodPreservationTest extends TestCase
         $method->update(['title' => 'Changed while the result was being written']);
 
         $this->actingAs($supporter)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, [
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new', [
                 'method_revision' => $revision,
             ]))
             ->assertSessionHasErrors('method_revision');
@@ -95,7 +97,7 @@ class MethodPreservationTest extends TestCase
         $method = Method::factory()->create();
         $supporter = User::factory()->create();
         $this->actingAs($supporter)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors()->assertRedirect();
 
         $original = $method->refresh()->getAttributes();
@@ -122,7 +124,7 @@ class MethodPreservationTest extends TestCase
         $method = Method::factory()->create();
         $supporter = User::factory()->create();
         $this->actingAs($supporter)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors()->assertRedirect();
         $original = $method->refresh()->getAttributes();
         $submissionId = (string) Str::uuid();
@@ -170,11 +172,11 @@ class MethodPreservationTest extends TestCase
         $this->assertDatabaseCount('method_updates', 0);
 
         $this->actingAs($supporter)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors()->assertRedirect();
 
         $this->actingAs($supporter)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, ExperienceRevision::token(Experience::query()->where('user_id', $supporter->id)->firstOrFail())))
             ->assertSessionHasNoErrors()->assertRedirect();
 
         $this->actingAs($method->user)
@@ -221,7 +223,7 @@ class MethodPreservationTest extends TestCase
         $supporter = User::factory()->create();
         $params = [$method->topic, $method];
         $this->actingAs($supporter)
-            ->put(route('experiences.store', $params), $this->requestPayload($method))
+            ->put(route('experiences.store', $params), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors()->assertRedirect();
         $reputation = app(Reputation::class);
         $before = $reputation->forMember($method->user);
@@ -234,7 +236,7 @@ class MethodPreservationTest extends TestCase
         $this->assertSame($updatedAt, $method->refresh()->updated_at?->toIso8601String());
 
         $this->actingAs($supporter)
-            ->put(route('experiences.store', $params), $this->requestPayload($method, ['outcome' => 'partly']))
+            ->put(route('experiences.store', $params), $this->requestPayload($method, ExperienceRevision::token(Experience::query()->where('user_id', $supporter->id)->firstOrFail()), ['outcome' => 'partly']))
             ->assertSessionHasNoErrors()->assertRedirect();
         $this->assertSame(2, $reputation->forMember($method->user)['score']);
     }
@@ -244,7 +246,7 @@ class MethodPreservationTest extends TestCase
         $method = Method::factory()->create();
         $supporter = User::factory()->create();
         $this->actingAs($supporter)
-            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method))
+            ->put(route('experiences.store', [$method->topic, $method]), $this->requestPayload($method, 'new'))
             ->assertSessionHasNoErrors()->assertRedirect();
         $body = 'A dated preservation note visible to moderators with the report.';
         $this->actingAs($method->user)
