@@ -15,7 +15,7 @@ export function SaveTopicButton({
     saved,
     authenticated,
     className,
-    compact = false,
+    compact = true,
 }: Props) {
     const form = useForm({});
     const action = `/topics/${topicSlug}/saved`;
@@ -27,7 +27,7 @@ export function SaveTopicButton({
                 variant="outline"
                 className={`${className ?? ''} ${compact ? 'wb-save-compact' : ''}`}
             >
-                <Link href={`/topics/${topicSlug}/save`}>
+                <Link href={`/topics/${topicSlug}/save`} title="Log in to save">
                     <Bookmark aria-hidden="true" />
                     <span className={compact ? 'sr-only' : undefined}>
                         Log in to save
@@ -42,6 +42,7 @@ export function SaveTopicButton({
             type="button"
             variant="outline"
             className={`${className ?? ''} ${compact ? 'wb-save-compact' : ''}`}
+            title={saved ? 'Remove saved topic' : 'Save topic'}
             aria-pressed={saved}
             aria-label={saved ? 'Remove saved topic' : 'Save topic'}
             disabled={form.processing}

@@ -2,7 +2,7 @@ import { RichTextContent } from '@/components/rich-text-content';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
-import { CopyLinkButton } from '@/components/copy-link-button';
+import { ShareLinkButton } from '@/components/share-link-button';
 import { ExperienceForm } from '@/components/experience-form';
 import { ReportLink } from '@/components/report-link';
 import { PublicShell } from '@/components/public-shell';
@@ -92,7 +92,7 @@ export default function ExperiencesIndex({
                             </p>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                            <CopyLinkButton
+                            <ShareLinkButton
                                 path={
                                     outcome === 'all'
                                         ? experiencesUrl

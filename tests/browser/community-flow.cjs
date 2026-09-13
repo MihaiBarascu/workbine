@@ -188,7 +188,7 @@ const { chromium } = browserRequire('playwright');
             /\/topics\/how-do-you-keep-one-useful-weekly-habit$/,
         );
         await page
-            .getByRole('link', { name: 'Share a method', exact: true })
+            .getByRole('link', { name: 'Create a method', exact: true })
             .click();
         await page
             .locator('input[name="title"]')
@@ -199,7 +199,7 @@ const { chromium } = browserRequire('playwright');
                 'I reserve twenty minutes for one repeatable task, write down the result, and stop before adding another task.',
             );
         await page
-            .getByRole('button', { name: 'Share method', exact: true })
+            .getByRole('button', { name: 'Create method', exact: true })
             .click();
         await page
             .getByRole('heading', {
@@ -214,7 +214,8 @@ const { chromium } = browserRequire('playwright');
             0,
         );
         await page
-            .getByRole('button', { name: 'Copy link', exact: true })
+            .locator('.wb-topic-tools')
+            .getByRole('button', { name: 'Share link', exact: true })
             .click();
         await page
             .getByRole('status')

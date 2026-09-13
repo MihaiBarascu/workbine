@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { MemberLink } from '@/components/community';
 import { SaveTopicButton } from '@/components/save-topic-button';
-import { CopyLinkButton } from '@/components/copy-link-button';
+import { ShareLinkButton } from '@/components/share-link-button';
 import { ReportLink } from '@/components/report-link';
 
 import type { TopicSummary, User } from '@/types';
@@ -153,7 +153,7 @@ export function TopicCard({
                         href={`/topics/${topic.slug}`}
                         className="wb-card-first-method"
                     >
-                        Share the first method <ArrowRight />
+                        Create the first method <ArrowRight />
                     </Link>
                 )}
                 <SaveTopicButton
@@ -171,7 +171,7 @@ export function TopicCard({
                     </summary>
 
                     <div className="wb-card-options-panel">
-                        <CopyLinkButton path={`/topics/${topic.slug}`} />
+                        <ShareLinkButton path={`/topics/${topic.slug}`} />
                         <div className="mt-2 flex flex-col gap-2">
                             <ReportLink type="topic" id={topic.id} />
                             {auth.user?.id === topic.user.id && (

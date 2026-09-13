@@ -16,7 +16,6 @@
 }
 .wb-detail-back svg,
 .wb-topic-tools svg,
-.wb-method-permalink svg,
 .wb-method-source svg,
 .wb-method-footer svg,
 .wb-detail-text-link svg {
@@ -138,20 +137,6 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-}
-.wb-method-permalink {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    color: var(--muted-foreground);
-}
-.wb-method-permalink:hover {
-    background: var(--muted);
-    color: var(--foreground);
 }
 .wb-method-article h3 {
     max-width: 52ch;
