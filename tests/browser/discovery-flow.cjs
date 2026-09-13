@@ -154,6 +154,7 @@ const verifyAccount = require('./verify-account.cjs');
         await capture(owner, 'discovery-mobile', 375);
         await capture(owner, 'discovery-small-dark', 320, 'dark');
         await owner
+            .getByRole('navigation', { name: 'Main navigation' })
             .getByRole('link', { name: 'Notifications, 1 unread', exact: true })
             .click();
         await owner
@@ -165,6 +166,7 @@ const verifyAccount = require('./verify-account.cjs');
         await owner.locator('.wb-notification-item').click();
         await owner.waitForURL(/#method-\d+$/);
         await owner
+            .getByRole('navigation', { name: 'Main navigation' })
             .getByRole('link', { name: 'Notifications', exact: true })
             .waitFor();
         await owner
@@ -192,6 +194,7 @@ const verifyAccount = require('./verify-account.cjs');
             .getByRole('button', { name: 'Mark all as read', exact: true })
             .click();
         await contributor
+            .getByRole('navigation', { name: 'Main navigation' })
             .getByRole('link', { name: 'Notifications', exact: true })
             .waitFor();
         assert.equal(
