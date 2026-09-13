@@ -377,7 +377,7 @@ const { chromium } = browserRequire('playwright');
             .waitFor();
         await page
             .getByRole('link', {
-                name: 'Log in to share how it went',
+                name: 'I tried this',
                 exact: true,
             })
             .waitFor();
