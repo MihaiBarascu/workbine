@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreMethodRequest;
 use App\Http\Requests\UpdateMethodRequest;
 use App\Models\CommunityNotification;
+use App\Models\Experience;
 use App\Models\Method;
 use App\Models\MethodUpdate;
 use App\Models\Topic;
@@ -34,7 +35,7 @@ class MethodController extends Controller
         return redirect()->to(route('methods.show', [$topic, $methodUpdate->method_id]).'#method-update-'.$methodUpdate->id);
     }
 
-    public function show(Topic $topic, Method $method): Response
+    public function show(Request $request, Topic $topic, Method $method): Response
     {
         $method->load(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'updates'])
             ->loadCount([
@@ -43,10 +44,43 @@ class MethodController extends Controller
                 'experiences as partly_count' => fn ($query) => $query->where('outcome', 'partly'),
             ]);
 
+        $outcomeInput = $request->query('outcome');
+        $outcome = is_string($outcomeInput) && in_array($outcomeInput, ['worked', 'partly', 'did_not_work'], true) ? $outcomeInput : 'all';
+        $experiences = $method->experiences()
+            ->when($outcome !== 'all', fn ($query) => $query->where('outcome', $outcome))
+            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
+            ->latest('updated_at')
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->appends($outcome === 'all' ? [] : ['outcome' => $outcome])
+            ->through(fn (Experience $experience): array => $this->serializeExperience($experience));
+
+        $counts = $method->experiences()
+            ->select('outcome')
+            ->selectRaw('COUNT(*) as total')
+            ->groupBy('outcome')
+            ->pluck('total', 'outcome');
+
+        $own = $request->user() === null ? null : $method->experiences()
+            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
+            ->where('user_id', $request->user()->getAuthIdentifier())
+            ->first();
+
         return Inertia::render('topics/method-show', [
             'topic' => $topic->only(['id', 'title', 'slug']),
             'method' => $this->serializeMethod($method),
             'canonicalUrl' => route('methods.show', [$topic, $method]),
+            'experiences' => $experiences,
+            'outcome' => $outcome,
+            'ownExperience' => $own ? $this->serializeExperience($own) : null,
+            'ownExperienceHidden' => $request->user() !== null && Experience::withoutGlobalScopes()
+                ->where('method_id', $method->id)->where('user_id', $request->user()->getAuthIdentifier())
+                ->whereNotNull('hidden_at')->exists(),
+            'summary' => [
+                'worked' => (int) $counts->get('worked', 0),
+                'partly' => (int) $counts->get('partly', 0),
+                'did_not_work' => (int) $counts->get('did_not_work', 0),
+            ],
         ]);
     }
 
@@ -188,6 +222,7 @@ class MethodController extends Controller
             'source_url' => $method->source_url,
             'created_at' => $method->created_at?->toIso8601String(),
             'updated_at' => $method->updated_at?->toIso8601String(),
+            'revision' => ContributionRevision::token($method),
             'experiences_count' => $method->experiences_count ?? 0,
             'worked_count' => $method->worked_count ?? 0,
             'partly_count' => $method->partly_count ?? 0,
@@ -197,6 +232,23 @@ class MethodController extends Controller
                 'username' => $method->user->username,
                 'avatar_url' => $method->user->avatarUrl(),
             ],
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function serializeExperience(Experience $experience): array
+    {
+        return [
+            'id' => $experience->id,
+            'outcome' => $experience->outcome,
+            'body' => $experience->body,
+            'body_document' => $experience->body_document,
+            'evidence_url' => $experience->evidence_url,
+            'evidence_image' => $experience->evidenceImage?->publicData(),
+            'tried_on' => $experience->tried_on?->toDateString(),
+            'created_at' => $experience->created_at?->toIso8601String(),
+            'updated_at' => $experience->updated_at?->toIso8601String(),
+            'user' => ['id' => $experience->user->id, 'name' => $experience->user->name, 'username' => $experience->user->username, 'avatar_url' => $experience->user->avatarUrl()],
         ];
     }
 }

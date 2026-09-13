@@ -12,11 +12,15 @@ export default function VerifyEmail({ status }: { status?: string | null }) {
         <>
             <Head title="Email verification" />
 
-            <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+            <p className="text-muted-foreground mb-3 text-sm leading-relaxed">
                 Check the inbox for{' '}
                 <span className="break-all">{auth.user.email}</span> and follow
                 the verification link. Confirm your address before publishing or
                 saving topics. You can keep browsing while you wait.
+            </p>
+
+            <p className="text-muted-foreground mb-6 text-sm">
+                Can’t find the email? Check your spam folder.
             </p>
 
             {status === 'verification-link-sent' && (

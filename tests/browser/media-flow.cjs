@@ -267,7 +267,7 @@ const { chromium } = requireBrowser('playwright');
         await page
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
-        await page.waitForURL(/\/experiences#share$/);
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+#share$/);
         await page.locator('select[name="outcome"]').selectOption('worked');
         const experienceBody =
             'I tested this approach with a small weekly batch and documented the outcome in this synthetic public evidence image.';
@@ -318,6 +318,10 @@ const { chromium } = requireBrowser('playwright');
         assert.match(response.headers()['content-type'], /^image\/webp/);
         const experienceUrl = page.url();
         await page.reload();
+        await page
+            .getByRole('link', { name: 'Edit my experience', exact: true })
+            .click();
+        await page.waitForURL(/#share$/);
         await loaded(evidence);
         assert.equal(await evidence.getAttribute('src'), imageUrl);
         await responsiveCaptures('media-experience');
@@ -354,10 +358,19 @@ const { chromium } = requireBrowser('playwright');
         const evidencePage = `${root}${new URL(experienceUrl).pathname}`;
         await hideUploadControlsOnVisits(evidencePage);
         await page
-            .getByRole('link', { name: 'Back to the method', exact: true })
+            .getByRole('link', {
+                name: 'How do you find the first customer for a small SaaS?',
+                exact: true,
+            })
             .click();
         await page
-            .getByRole('link', { name: 'I tried this', exact: true })
+            .getByRole('link', {
+                name: 'Watch one person do the work before writing more code',
+                exact: true,
+            })
+            .click();
+        await page
+            .getByRole('link', { name: 'Edit my experience', exact: true })
             .click();
         assert.equal(
             await page

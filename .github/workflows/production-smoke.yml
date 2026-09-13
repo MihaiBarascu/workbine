@@ -147,7 +147,8 @@ jobs:
                           assert detail.get('props', {}).get('canonicalUrl') == base + method_path, 'Method canonical URL failed'
                           method_pages_checked += 1
                           experience = read_page(method_path + '/experiences')
-                          assert experience.get('component') == 'experiences/index', 'Public experiences page failed'
+                          assert experience.get('component') == 'topics/method-show', 'Legacy experience link failed'
+                          assert isinstance(experience.get('props', {}).get('experiences', {}).get('data'), list), 'Integrated experiences missing'
                           experience_pages_checked += 1
 
                   coverage = {

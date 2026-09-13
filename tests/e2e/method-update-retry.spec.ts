@@ -34,7 +34,7 @@ for (const changedDraft of [false, true]) {
                     })
                     .click();
                 await expect(contributor).toHaveURL(
-                    new RegExp(`${methodUrl}/experiences$`),
+                    new RegExp(`${methodUrl}#experiences$`),
                 );
 
                 await login(page, actors.owner);

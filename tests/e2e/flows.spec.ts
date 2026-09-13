@@ -134,7 +134,7 @@ test('a second member can share an experience and notify the method recipient', 
         const contributorPage = await contributorContext.newPage();
         await login(contributorPage, actors.contributor);
         await contributorPage.goto(
-            `/topics/${actors.topic.slug}/methods/${actors.method.id}/experiences`,
+            `/topics/${actors.topic.slug}/methods/${actors.method.id}`,
         );
         await contributorPage
             .getByRole('link', { name: 'I tried this', exact: true })
@@ -146,21 +146,47 @@ test('a second member can share an experience and notify the method recipient', 
             .getByRole('textbox', { name: 'How did it go?' })
             .fill('The method worked in my own context and saved useful time.');
         await contributorPage
+            .getByRole('button', { name: 'Close response form', exact: true })
+            .click();
+        await expect(
+            contributorPage.getByRole('textbox', { name: 'How did it go?' }),
+        ).toBeHidden();
+        await contributorPage
+            .getByRole('link', { name: 'I tried this', exact: true })
+            .click();
+        await expect(
+            contributorPage.getByRole('textbox', { name: 'How did it go?' }),
+        ).toHaveText(
+            'The method worked in my own context and saved useful time.',
+        );
+        await expect(
+            contributorPage.getByLabel('What was your result?'),
+        ).toHaveValue('worked');
+        await contributorPage
             .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
         await expect(
             contributorPage.getByRole('heading', { name: /1 experience/ }),
         ).toBeVisible();
+        await expect(contributorPage.locator('#experiences')).toBeVisible();
+        await expect(
+            contributorPage.locator('#experiences').getByRole('heading', {
+                name: '1 experience',
+                level: 2,
+                exact: true,
+            }),
+        ).toBeVisible();
 
         await contributorPage.reload();
-        await expect(
-            contributorPage
-                .getByRole('article')
-                .getByText(
-                    'The method worked in my own context and saved useful time.',
-                    { exact: true },
-                ),
-        ).toBeVisible();
+        const experienceArticle = contributorPage.getByRole('article').filter({
+            hasText:
+                'The method worked in my own context and saved useful time.',
+        });
+        await expect(experienceArticle).toBeVisible();
+        await expect(experienceArticle).toHaveAttribute(
+            'id',
+            /^experience-\d+$/,
+        );
         const ownerPage = await ownerContext.newPage();
         await login(ownerPage, actors.owner);
         await ownerPage
@@ -186,7 +212,7 @@ test('a second member can share an experience and notify the method recipient', 
             .click();
         await expect(ownerPage).toHaveURL(
             new RegExp(
-                `/topics/${actors.topic.slug}/methods/${actors.method.id}/experiences(?:\\?page=\\d+)?#experience-\\d+$`,
+                `/topics/${actors.topic.slug}/methods/${actors.method.id}(?:\\?page=\\d+)?#experience-\\d+$`,
             ),
         );
         await expect(

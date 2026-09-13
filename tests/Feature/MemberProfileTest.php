@@ -61,8 +61,32 @@ class MemberProfileTest extends TestCase
             ->where('contributions.data.0.id', $experience->id)
             ->where('contributions.data.0.title', $method->title)
             ->where('contributions.data.0.outcome', 'partly')
-            ->where('contributions.data.0.href', route('experiences.index', [$method->topic, $method], false))
+            ->where('contributions.data.0.href', route('methods.show', [$method->topic, $method, 'outcome' => 'partly'], false).'#experience-'.$experience->id)
             ->missing('contributions.data.0.method'));
+    }
+
+    public function test_member_experience_link_uses_the_filtered_page_for_older_results(): void
+    {
+        $user = User::factory()->create();
+        $method = Method::factory()->create();
+        $experiences = [];
+        foreach (range(1, 11) as $index) {
+            $experiences[] = Experience::query()->create([
+                'user_id' => $index === 1 ? $user->id : User::factory()->create()->id, 'method_id' => $method->id,
+                'outcome' => 'partly', 'body' => 'A practical result with enough context to be useful.',
+            ]);
+        }
+        foreach (range(1, 10) as $index) {
+            Experience::query()->create([
+                'user_id' => User::factory()->create()->id, 'method_id' => $method->id,
+                'outcome' => 'worked', 'body' => 'A different outcome with enough context to be useful.',
+            ]);
+        }
+
+        $target = $experiences[0];
+        $this->get(route('members.show', [$user->username, 'view' => 'experiences']))
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('contributions.data.0.href', route('methods.show', [$method->topic, $method, 'outcome' => 'partly', 'page' => 2], false).'#experience-'.$target->id));
     }
 
     public function test_public_profile_pagination_preserves_its_tab(): void

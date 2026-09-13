@@ -5,13 +5,16 @@ import { PublicShell } from '@/components/public-shell';
 import { ReportLink } from '@/components/report-link';
 import { RichTextContent } from '@/components/rich-text-content';
 import { ShareLinkButton } from '@/components/share-link-button';
-import { Button } from '@/components/ui/button';
+import {
+    MethodExperiences,
+    type MethodExperienceProps,
+} from '@/components/method-experiences';
 import type { MethodSummary, User } from '@/types';
 import '../../../css/topic-detail.css';
 
-type Props = {
+type Props = MethodExperienceProps & {
     topic: { id: number; title: string; slug: string };
-    method: MethodSummary;
+    method: MethodSummary & { revision: string };
     canonicalUrl: string;
 };
 
@@ -24,7 +27,12 @@ function formatDate(value: string): string {
     }).format(new Date(value));
 }
 
-export default function MethodShow({ topic, method, canonicalUrl }: Props) {
+export default function MethodShow({
+    topic,
+    method,
+    canonicalUrl,
+    ...experienceProps
+}: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
     const methodUrl = `/topics/${topic.slug}/methods/${method.id}`;
     const description = method.body.replace(/\s+/g, ' ').trim().slice(0, 180);
@@ -179,27 +187,23 @@ export default function MethodShow({ topic, method, canonicalUrl }: Props) {
                                 </span>
                             </Link>
                         )}
-                        <Link
-                            href={`/topics/${topic.slug}/methods/${method.id}/experiences`}
-                        >
+                        <Link href="#experiences">
                             {method.experiences_count}{' '}
                             {method.experiences_count === 1
                                 ? 'experience'
                                 : 'experiences'}
                             <ArrowUpRight aria-hidden="true" />
                         </Link>
-                        {auth.user?.id !== method.user.id && (
-                            <Button asChild variant="outline" size="sm">
-                                <Link
-                                    href={`/topics/${topic.slug}/methods/${method.id}/experiences/create`}
-                                >
-                                    I tried this
-                                </Link>
-                            </Button>
-                        )}
                         <ReportLink type="method" id={method.id} />
                     </footer>
                 </article>
+                <MethodExperiences
+                    key={method.id}
+                    base={methodUrl}
+                    authorId={method.user.id}
+                    methodRevision={method.revision}
+                    {...experienceProps}
+                />
             </main>
         </PublicShell>
     );

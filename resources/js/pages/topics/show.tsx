@@ -210,7 +210,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                             </p>
                                             <footer className="wb-method-footer">
                                                 <Link
-                                                    href={`/topics/${topic.slug}/methods/${method.id}/experiences`}
+                                                    href={`/topics/${topic.slug}/methods/${method.id}#experiences`}
                                                 >
                                                     {method.experiences_count}{' '}
                                                     {method.experiences_count ===

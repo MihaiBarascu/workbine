@@ -69,7 +69,7 @@ const { chromium } = browserRequire('playwright');
             .locator('input[name="password"]')
             .fill('preview-only-password');
         await page.getByRole('button', { name: 'Log in', exact: true }).click();
-        await page.waitForURL(/\/experiences#share$/);
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+#share$/);
         assert.equal(
             await page.locator('[data-slot="sidebar-trigger"]').count(),
             0,
@@ -94,11 +94,22 @@ const { chromium } = browserRequire('playwright');
         await page
             .getByRole('heading', { name: '1 experience', exact: true })
             .waitFor();
-        await page
+        const experienceArticle = page
             .locator('main article')
-            .getByText('I tested this', { exact: false })
-            .waitFor();
+            .filter({ hasText: 'I tested this' });
+        await experienceArticle.waitFor();
+        assert.match(
+            await experienceArticle.getAttribute('id'),
+            /^experience-\d+$/,
+        );
         const experienceUrl = page.url().split('#')[0];
+        await page.goto(`${experienceUrl}/experiences`);
+        await page.waitForURL(new RegExp(`${experienceUrl}$`));
+        assert.equal(new URL(page.url()).hash, '');
+        await page
+            .getByRole('link', { name: 'Edit my experience', exact: true })
+            .click();
+        await page.waitForURL(new RegExp(`${experienceUrl}#share$`));
         await checkLayout();
         console.log(
             'PASS intended login and real browser experience submission',
@@ -117,7 +128,7 @@ const { chromium } = browserRequire('playwright');
             .locator('main article')
             .getByText('After adding one validation step', { exact: false })
             .waitFor();
-        assert.equal(await page.locator('main article').count(), 1);
+        assert.equal(await page.locator('main article').count(), 2);
         page.once('dialog', (dialog) => dialog.accept());
         await page
             .getByRole('button', { name: 'Remove my response', exact: true })
@@ -127,6 +138,10 @@ const { chromium } = browserRequire('playwright');
             .waitFor();
         console.log('PASS experience update and removal without duplicates');
 
+        await page
+            .getByRole('link', { name: 'I tried this', exact: true })
+            .click();
+        await page.waitForURL(/#share$/);
         await page
             .locator('select[name="outcome"]')
             .selectOption('did_not_work');
@@ -231,7 +246,10 @@ const { chromium } = browserRequire('playwright');
             .getByRole('link', { name: '0 experiences', exact: true })
             .click();
         await page
-            .getByText('You shared this method.', { exact: false })
+            .getByRole('heading', {
+                name: 'Reserve one small repeatable task',
+                exact: true,
+            })
             .waitFor();
         assert.equal(await page.locator('select[name="outcome"]').count(), 0);
         console.log(
@@ -359,7 +377,7 @@ const { chromium } = browserRequire('playwright');
             .waitFor();
         await page
             .getByRole('link', {
-                name: 'Log in to share how it went',
+                name: 'I tried this',
                 exact: true,
             })
             .waitFor();

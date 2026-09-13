@@ -45,7 +45,7 @@ class RichTextTest extends TestCase
         $this->assertSame([['type' => 'bold']], $method->body_document['content'][0]['content'][0]['marks']);
         $member = User::factory()->create();
         $this->actingAs($member)->put(route('experiences.store', [$topic, $method]), ['method_revision' => ContributionRevision::token($method), 'outcome' => 'worked', 'body_document' => $this->richDocument('Worked for me.')])->assertSessionHasNoErrors();
-        $this->get(route('experiences.index', [$topic, $method]))->assertInertia(fn (Assert $page) => $page->has('experiences.data.0.body_document')->where('experiences.data.0.body', 'Worked for me.'));
+        $this->get(route('methods.show', [$topic, $method]))->assertInertia(fn (Assert $page) => $page->has('experiences.data.0.body_document')->where('experiences.data.0.body', 'Worked for me.'));
     }
 
     public function test_email_links_survive_saving_a_method_and_an_experience(): void

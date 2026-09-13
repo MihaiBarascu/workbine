@@ -218,7 +218,7 @@ class MemberUsernameTest extends TestCase
         $this->get(route('topics.show', $topic))->assertInertia(fn (Assert $page) => $page
             ->where('topic.user.username', 'public-author')
             ->where('methods.data.0.user.username', 'public-author')->missing('methods.data.0.user.email'));
-        $this->get(route('experiences.index', [$topic, $method]))->assertInertia(fn (Assert $page) => $page
+        $this->get(route('methods.show', [$topic, $method]))->assertInertia(fn (Assert $page) => $page
             ->where('method.user.username', 'public-author')
             ->where('experiences.data.0.user.username', 'public-author')->missing('experiences.data.0.user.email'));
     }

@@ -8,6 +8,7 @@ use App\Models\SavedTopic;
 use App\Models\Topic;
 use App\Models\User;
 use App\Services\Reputation;
+use App\Support\ReportTargets;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -87,7 +88,7 @@ class MemberController extends Controller
                     'title' => $method->title,
                     'excerpt' => Str::limit($item->body, 240),
                     'href' => $item instanceof Experience
-                        ? route('experiences.index', [$method->topic, $method], false)
+                        ? ReportTargets::url($item)
                         : route('methods.show', [$method->topic, $method], false),
                     'created_at' => $item->created_at?->toIso8601String(),
                     'outcome' => $item instanceof Experience ? $item->outcome : null,
@@ -97,7 +98,7 @@ class MemberController extends Controller
                         'worked' => (int) $item->getAttribute('feedback_worked'),
                         'partly' => (int) $item->getAttribute('feedback_partly'),
                         'did_not_work' => (int) $item->getAttribute('feedback_did_not_work'),
-                        'url' => route('experiences.index', [$method->topic, $method], false),
+                        'url' => route('methods.show', [$method->topic, $method], false),
                     ] : null,
                 ];
             });

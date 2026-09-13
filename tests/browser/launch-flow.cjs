@@ -427,6 +427,17 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await supporterPage
             .getByRole('heading', { name: '1 experience', exact: true })
             .waitFor();
+        await supporterPage.locator('select[name="outcome"]').waitFor();
+        await supporterPage.reload();
+        assert.equal(
+            await supporterPage.locator('select[name="outcome"]').isVisible(),
+            false,
+            'A hard reload closes the experience form',
+        );
+        await supporterPage
+            .getByRole('link', { name: 'Edit my experience', exact: true })
+            .click();
+        await supporterPage.waitForURL(/#share$/);
         const impactExperienceUrl = supporterPage.url().split('#')[0];
         await checkImpact(1, 1, 0);
         await capture('impact-profile-desktop', 1440, 'light', publicProfile);
@@ -540,7 +551,10 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .getByRole('heading', { name: 'Keep useful topics close' })
             .waitFor();
         await checkImpact(0, 0, 1);
-        await supporterPage.goto(impactExperienceUrl);
+        await supporterPage.goto(`${impactExperienceUrl}#experiences`);
+        await supporterPage
+            .getByRole('link', { name: 'Edit my experience', exact: true })
+            .click();
         supporterPage.once('dialog', (dialog) => dialog.accept());
         await supporterPage
             .getByRole('button', { name: 'Remove my response', exact: true })

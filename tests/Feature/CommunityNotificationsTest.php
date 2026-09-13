@@ -81,7 +81,7 @@ class CommunityNotificationsTest extends TestCase
         for ($i = 0; $i < 11; $i++) {
             $method->experiences()->create(['user_id' => User::factory()->create()->id, 'outcome' => 'partly', 'body' => 'A newer response.']);
         }
-        $destination = route('experiences.index', [$method->topic, $method, 'page' => 2]).'#experience-'.$response->id;
+        $destination = route('methods.show', [$method->topic, $method, 'page' => 2]).'#experience-'.$response->id;
         $this->actingAs($method->user)->post('/notifications/'.$item->id.'/open')->assertRedirect($destination);
         $this->get($destination)->assertInertia(fn (Assert $page) => $page->where('experiences.current_page', 2)->where('experiences.data.1.id', $response->id));
         $response->forceFill(['hidden_at' => now()])->save();
