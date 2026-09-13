@@ -244,8 +244,8 @@ class ExperiencesTest extends TestCase
                 ->where('summary.partly', 11)
                 ->where('ownExperience.user.id', $users->last()->id));
 
-        $this->get(route('topics.show', $method->topic))->assertInertia(fn (Assert $page) => $page
-            ->where('methods.0.experiences_count', 11));
+        $this->get(route('methods.show', [$method->topic, $method]))->assertInertia(fn (Assert $page) => $page
+            ->where('method.experiences_count', 11));
     }
 
     public function test_deleting_a_method_removes_its_experiences(): void

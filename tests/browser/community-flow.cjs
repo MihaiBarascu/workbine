@@ -56,6 +56,8 @@ const { chromium } = browserRequire('playwright');
         console.log('PASS search, filter composition and empty-state recovery');
 
         await page.goto(`${root}/topics/preview-first-customer`);
+        await page.locator('main article a[href*="/methods/"]').first().click();
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
         await page
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
@@ -212,6 +214,9 @@ const { chromium } = browserRequire('playwright');
                 .getByRole('link', { name: 'I tried this', exact: true })
                 .count(),
             0,
+        );
+        await page.goto(
+            `${root}/topics/how-do-you-keep-one-useful-weekly-habit`,
         );
         await page
             .locator('.wb-topic-tools')

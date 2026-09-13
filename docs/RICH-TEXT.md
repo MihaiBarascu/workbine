@@ -62,3 +62,7 @@ photo/source/evidence URL rules remain HTTP/HTTPS. The server independently
 validates submitted documents, names rejected links, and gives specific recovery
 instructions for photo limits, descriptions and excessive formatting. Validation
 keeps the mounted draft available for correction. No arbitrary HTML is rendered.
+
+The formatting toolbar and link controls remain reachable while scrolling a long
+explanation and stop at the editor boundary. The editor continues to own text
+selection; no separate formatting state or scrolling service is introduced.

@@ -55,7 +55,7 @@ test('an experienced method stays intact while its author can add dated updates'
         await owner
             .getByRole('button', { name: 'Save changes', exact: true })
             .click();
-        await expect(owner).toHaveURL(new RegExp(`${topicUrl}(?:#.*)?$`));
+        await expect(owner).toHaveURL(new RegExp(`${methodUrl}$`));
         await expect(
             owner.getByRole('heading', {
                 name: 'Preserved browser method',
@@ -185,9 +185,7 @@ test('an experienced method stays intact while its author can add dated updates'
         await staleEditor
             .getByRole('button', { name: 'Publish update', exact: true })
             .click();
-        await expect(staleEditor).toHaveURL(
-            new RegExp(`${topicUrl}#method-${actors.method.id}$`),
-        );
+        await expect(staleEditor).toHaveURL(new RegExp(`${methodUrl}$`));
         const updateSection = staleEditor.getByRole('region', {
             name: 'Author updates',
         });
@@ -240,7 +238,7 @@ test('an experienced method stays intact while its author can add dated updates'
             }),
         ).toBeVisible();
 
-        await owner.goto(topicUrl);
+        await owner.goto(methodUrl);
         const methodArticle = owner.getByRole('article').filter({
             has: owner.getByRole('heading', {
                 name: 'Preserved browser method',

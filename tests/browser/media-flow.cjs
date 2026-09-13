@@ -262,6 +262,8 @@ const { chromium } = requireBrowser('playwright');
         );
 
         await page.goto(`${root}/topics/preview-first-customer`);
+        await page.locator('main article a[href*="/methods/"]').first().click();
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
         await page
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
@@ -461,7 +463,14 @@ const { chromium } = requireBrowser('playwright');
                 exact: true,
             })
             .click();
-        await page.waitForURL(/sharing-a-clear-visual-method$/);
+        await page.waitForURL(/\/topics\/sharing-a-clear-visual-method$/);
+        await page
+            .getByRole('link', {
+                name: 'Keep the explanation beside the photo',
+                exact: true,
+            })
+            .click();
+        await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
         const methodArticle = page
             .locator('article')
             .filter({ hasText: 'Keep the explanation beside the photo' });

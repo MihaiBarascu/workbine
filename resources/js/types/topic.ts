@@ -37,6 +37,8 @@ export type TopicSummary = {
 };
 
 export type MethodSummary = {
+    worked_count?: number;
+    partly_count?: number;
     protected_at?: string | null;
     updates?: { id: number; body: string; created_at: string }[];
     id: number;
@@ -75,6 +77,15 @@ export type ExperienceSummary = {
 
 export type PaginatedExperiences = {
     data: ExperienceSummary[];
+    total: number;
+    current_page: number;
+    last_page: number;
+    prev_page_url: string | null;
+    next_page_url: string | null;
+};
+
+export type PaginatedMethods = {
+    data: MethodSummary[];
     total: number;
     current_page: number;
     last_page: number;

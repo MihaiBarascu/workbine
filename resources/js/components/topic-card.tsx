@@ -150,7 +150,7 @@ export function TopicCard({
                 </Link>
                 {topic.methods_count === 0 && (
                     <Link
-                        href={`/topics/${topic.slug}`}
+                        href={`/topics/${topic.slug}/methods/create`}
                         className="wb-card-first-method"
                     >
                         Create the first method <ArrowRight />

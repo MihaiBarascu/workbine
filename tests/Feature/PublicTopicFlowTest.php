@@ -103,10 +103,10 @@ class PublicTopicFlowTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('topics/show')
-                ->has('methods', 1)
-                ->where('methods.0.id', $method->id)
+                ->has('methods.data', 1)
+                ->where('methods.data.0.id', $method->id)
                 ->where('topic.methods_count', 1)
-                ->missing('methods.0.user.email')
+                ->missing('methods.data.0.user.email')
                 ->missing('topic.user.email'));
     }
 
@@ -138,13 +138,13 @@ class PublicTopicFlowTest extends TestCase
                 'title' => 'Start with one real customer',
                 'body' => 'I asked one customer to walk me through their process, then automated the repeated step.',
             ])
-            ->assertRedirect(route('topics.show', $topic));
+            ->assertRedirect(route('methods.show', [$topic, Method::query()->where('topic_id', $topic->id)->sole()]));
 
         $this->get(route('topics.show', $topic))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->has('methods', 1)
-                ->where('methods.0.user.id', $user->id)
+                ->has('methods.data', 1)
+                ->where('methods.data.0.user.id', $user->id)
                 ->where('topic.methods_count', 1));
 
         $this->get(route('topics.index', ['view' => 'unanswered']))

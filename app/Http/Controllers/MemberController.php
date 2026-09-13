@@ -88,7 +88,7 @@ class MemberController extends Controller
                     'excerpt' => Str::limit($item->body, 240),
                     'href' => $item instanceof Experience
                         ? route('experiences.index', [$method->topic, $method], false)
-                        : route('topics.show', $method->topic, false).'#method-'.$method->id,
+                        : route('methods.show', [$method->topic, $method], false),
                     'created_at' => $item->created_at?->toIso8601String(),
                     'outcome' => $item instanceof Experience ? $item->outcome : null,
                     'saves_count' => null,

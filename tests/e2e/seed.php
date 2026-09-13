@@ -30,6 +30,19 @@ DB::transaction(function () use ($argv, $token): void {
 
         return;
     }
+    if (($argv[1] ?? '') === 'add-method-pages') {
+        $topic = Topic::query()->where('slug', 'client-workflow-'.$token)->firstOrFail();
+        for ($index = 0; $index < 10; $index++) {
+            Method::factory()->create([
+                'user_id' => $topic->user_id,
+                'topic_id' => $topic->id,
+                'title' => 'Pagination method '.$index,
+                'body' => 'A complete practical method for pagination check '.$index.'.',
+            ]);
+        }
+
+        return;
+    }
     if (($argv[1] ?? '') !== 'create') {
         throw new InvalidArgumentException('Unknown fixture action.');
     }

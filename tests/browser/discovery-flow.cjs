@@ -164,7 +164,7 @@ const verifyAccount = require('./verify-account.cjs');
         await capture(owner, 'notifications-unread-mobile', 375);
         await capture(owner, 'notifications-unread-desktop', 1440);
         await owner.locator('.wb-notification-item').click();
-        await owner.waitForURL(/#method-\d+$/);
+        await owner.waitForURL(/\/topics\/[^/]+\/methods\/\d+$/);
         await owner
             .getByRole('navigation', { name: 'Main navigation' })
             .getByRole('link', { name: 'Notifications', exact: true })
@@ -202,7 +202,9 @@ const verifyAccount = require('./verify-account.cjs');
             0,
         );
         await contributor.locator('.wb-notification-item').click();
-        await contributor.waitForURL(/#experience-\d+$/);
+        await contributor.waitForURL(
+            /\/topics\/[^/]+\/methods\/\d+\/experiences(?:\?page=\d+)?#experience-\d+$/,
+        );
         assert.ok(
             await contributor
                 .locator(new URL(contributor.url()).hash)

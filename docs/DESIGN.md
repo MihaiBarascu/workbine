@@ -96,3 +96,19 @@ experience lists. It opens native sharing when available, falls back to clipboar
 copy and exposes a selectable URL when clipboard access fails. Cancelling native
 sharing does not copy anything. Method links target that specific method, while
 topic sharing keeps the topic URL. Create a method is distinct from sharing a link.
+
+## Topics and individual methods
+
+A topic compares approaches using ten server-paginated previews per page. Previews
+include author, a bounded text excerpt and reported experience counts; full rich
+text, images and author updates load on the individual method page. Method titles
+open `/topics/{topic}/methods/{method}`, which is also the canonical share URL.
+The detail page reuses the contribution renderer and editing/experience actions.
+Public HTML includes escaped method-specific title, description and sharing
+metadata even when JavaScript rendering is unavailable.
+
+Existing topic links ending in `#method-ID` and `#method-update-ID` still reach
+the intended visible method or note. Pagination does not require fetching every
+method to resolve a legacy bookmark. Hidden or mismatched contributions remain
+unavailable. No hierarchy, ranking change, new database schema or separate service
+is introduced.

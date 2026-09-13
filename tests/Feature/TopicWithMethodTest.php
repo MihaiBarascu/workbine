@@ -39,8 +39,8 @@ class TopicWithMethodTest extends TestCase
 
         $this->get(route('topics.show', $topic))->assertInertia(fn (Assert $page) => $page
             ->where('topic.methods_count', 1)
-            ->has('methods', 1)
-            ->where('methods.0.id', $method->id));
+            ->has('methods.data', 1)
+            ->where('methods.data.0.id', $method->id));
         $this->get(route('topics.index', ['view' => 'unanswered']))->assertInertia(fn (Assert $page) => $page
             ->has('topics.data', 1)
             ->where('topics.data.0.id', $unrelated->id));

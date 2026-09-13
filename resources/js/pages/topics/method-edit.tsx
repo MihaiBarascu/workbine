@@ -58,7 +58,7 @@ export default function MethodEdit({
     const [updateSubmissionId, setUpdateSubmissionId] = useState(submissionId);
     const updateBodyRef = useRef<HTMLTextAreaElement>(null);
     const methodUrl = `/topics/${topic.slug}/methods/${method.id}`;
-    const returnUrl = `/topics/${topic.slug}#method-${method.id}`;
+    const returnUrl = `/topics/${topic.slug}/methods/${method.id}`;
 
     if (initiallyProtected) {
         return (

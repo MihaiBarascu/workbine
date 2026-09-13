@@ -40,7 +40,7 @@ class MethodUpdateFeedbackTest extends TestCase
                 'submission_id' => $submissionId,
                 'body' => 'The original note was saved before its response was lost.',
             ])
-            ->assertRedirect(route('topics.show', $method->topic).'#method-'.$method->id)
+            ->assertRedirect(route('methods.show', [$method->topic, $method]))
             ->assertInertiaFlash('toast.message', 'Update added.')
             ->assertCookie($cookie);
         $update = MethodUpdate::query()->firstOrFail();

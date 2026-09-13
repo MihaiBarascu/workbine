@@ -327,167 +327,180 @@ export function RichTextEditor({
                 data-empty={editor?.isEmpty ?? true}
                 data-invalid={invalid || Boolean(error)}
             >
-                <div
-                    className="wb-editor-toolbar"
-                    role="group"
-                    aria-label="Text formatting"
-                >
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Bold"
-                        aria-pressed={selection?.bold}
-                        disabled={!editor || uploading}
-                        onClick={() =>
-                            editor?.chain().focus().toggleBold().run()
-                        }
+                <div className="wb-editor-sticky-tools">
+                    <div
+                        className="wb-editor-toolbar"
+                        role="group"
+                        aria-label="Text formatting"
                     >
-                        <Bold />
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Bulleted list"
-                        aria-pressed={selection?.bullet}
-                        disabled={!editor || uploading}
-                        onClick={() =>
-                            editor?.chain().focus().toggleBulletList().run()
-                        }
-                    >
-                        <List />
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Numbered steps"
-                        aria-pressed={selection?.ordered}
-                        disabled={!editor || uploading}
-                        onClick={() =>
-                            editor?.chain().focus().toggleOrderedList().run()
-                        }
-                    >
-                        <ListOrdered />
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Add link"
-                        aria-expanded={linkOpen}
-                        disabled={!editor || uploading}
-                        onClick={() => {
-                            setHref(
-                                String(
-                                    editor?.getAttributes('link').href ?? '',
-                                ),
-                            );
-                            setLinkOpen(!linkOpen);
-                        }}
-                    >
-                        <Link2 />
-                    </Button>
-                    {media?.enabled && (
                         <Button
                             type="button"
                             variant="ghost"
+                            size="icon"
+                            aria-label="Bold"
+                            aria-pressed={selection?.bold}
                             disabled={!editor || uploading}
-                            onClick={() => fileInput.current?.click()}
+                            onClick={() =>
+                                editor?.chain().focus().toggleBold().run()
+                            }
                         >
-                            <ImagePlus />
-                            {uploading ? 'Uploading…' : 'Photo'}
+                            <Bold />
                         </Button>
-                    )}
-                    <input
-                        ref={fileInput}
-                        type="file"
-                        className="sr-only"
-                        tabIndex={-1}
-                        aria-label="Upload photo"
-                        accept="image/jpeg,image/png,image/webp"
-                        disabled={uploading || !media?.enabled}
-                        onChange={(event) => {
-                            const file = event.target.files?.[0];
-                            if (file) uploadHandler.current(file);
-                            event.target.value = '';
-                        }}
-                    />
-                </div>
-                {linkOpen && (
-                    <div className="wb-editor-options">
-                        <Label htmlFor={`${id}-link`}>Link address</Label>
-                        <Input
-                            id={`${id}-link`}
-                            type="text"
-                            value={href}
-                            placeholder="https://…"
-                            onChange={(event) => setHref(event.target.value)}
-                            autoFocus
-                        />
-                        <div className="flex gap-2">
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Bulleted list"
+                            aria-pressed={selection?.bullet}
+                            disabled={!editor || uploading}
+                            onClick={() =>
+                                editor?.chain().focus().toggleBulletList().run()
+                            }
+                        >
+                            <List />
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Numbered steps"
+                            aria-pressed={selection?.ordered}
+                            disabled={!editor || uploading}
+                            onClick={() =>
+                                editor
+                                    ?.chain()
+                                    .focus()
+                                    .toggleOrderedList()
+                                    .run()
+                            }
+                        >
+                            <ListOrdered />
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Add link"
+                            aria-expanded={linkOpen}
+                            disabled={!editor || uploading}
+                            onClick={() => {
+                                setHref(
+                                    String(
+                                        editor?.getAttributes('link').href ??
+                                            '',
+                                    ),
+                                );
+                                setLinkOpen(!linkOpen);
+                            }}
+                        >
+                            <Link2 />
+                        </Button>
+                        {media?.enabled && (
                             <Button
                                 type="button"
-                                size="sm"
-                                onClick={() => {
-                                    if (!validEditorLink(href)) {
-                                        setError(editorLinkHelp);
-                                        return;
-                                    }
-                                    if (
-                                        editor?.state.selection.empty &&
-                                        !editor.isActive('link')
-                                    )
-                                        editor
-                                            .chain()
-                                            .focus()
-                                            .insertContent({
-                                                type: 'text',
-                                                text: href,
-                                                marks: [
-                                                    {
-                                                        type: 'link',
-                                                        attrs: { href },
-                                                    },
-                                                ],
-                                            })
-                                            .run();
-                                    else
+                                variant="ghost"
+                                disabled={!editor || uploading}
+                                onClick={() => fileInput.current?.click()}
+                            >
+                                <ImagePlus />
+                                {uploading ? 'Uploading…' : 'Photo'}
+                            </Button>
+                        )}
+                        <input
+                            ref={fileInput}
+                            type="file"
+                            className="sr-only"
+                            tabIndex={-1}
+                            aria-label="Upload photo"
+                            accept="image/jpeg,image/png,image/webp"
+                            disabled={uploading || !media?.enabled}
+                            onChange={(event) => {
+                                const file = event.target.files?.[0];
+                                if (file) uploadHandler.current(file);
+                                event.target.value = '';
+                            }}
+                        />
+                    </div>
+                    {linkOpen && (
+                        <div className="wb-editor-options">
+                            <Label htmlFor={`${id}-link`}>Link address</Label>
+                            <Input
+                                id={`${id}-link`}
+                                type="text"
+                                value={href}
+                                placeholder="https://…"
+                                onChange={(event) =>
+                                    setHref(event.target.value)
+                                }
+                                autoFocus
+                            />
+                            <div className="flex gap-2">
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (!validEditorLink(href)) {
+                                            setError(editorLinkHelp);
+                                            return;
+                                        }
+                                        if (
+                                            editor?.state.selection.empty &&
+                                            !editor.isActive('link')
+                                        )
+                                            editor
+                                                .chain()
+                                                .focus()
+                                                .insertContent({
+                                                    type: 'text',
+                                                    text: href,
+                                                    marks: [
+                                                        {
+                                                            type: 'link',
+                                                            attrs: { href },
+                                                        },
+                                                    ],
+                                                })
+                                                .run();
+                                        else
+                                            editor
+                                                ?.chain()
+                                                .focus()
+                                                .extendMarkRange('link')
+                                                .setLink({ href })
+                                                .run();
+                                        setLinkOpen(false);
+                                        setError('');
+                                    }}
+                                >
+                                    Apply link
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
                                         editor
                                             ?.chain()
                                             .focus()
-                                            .extendMarkRange('link')
-                                            .setLink({ href })
+                                            .unsetLink()
                                             .run();
-                                    setLinkOpen(false);
-                                    setError('');
-                                }}
-                            >
-                                Apply link
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                    editor?.chain().focus().unsetLink().run();
-                                    setLinkOpen(false);
-                                }}
-                            >
-                                Remove link
-                            </Button>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setLinkOpen(false)}
-                            >
-                                Cancel
-                            </Button>
+                                        setLinkOpen(false);
+                                    }}
+                                >
+                                    Remove link
+                                </Button>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setLinkOpen(false)}
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
+                </div>
                 <EditorContent editor={editor} />
                 {selection?.image && (
                     <div className="wb-editor-options">

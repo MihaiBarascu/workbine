@@ -62,6 +62,10 @@ test('three members complete one topic, methods, feedback and reputation journey
             owner.getByRole('heading', { name: title, exact: true }),
         ).toBeVisible();
         const topicUrl = new URL(owner.url()).pathname;
+        await owner
+            .getByRole('link', { name: 'Owner baseline method', exact: true })
+            .click();
+        await expect(owner).toHaveURL(/\/topics\/[^/]+\/methods\/\d+$/);
         const ownerMethod = owner.getByRole('article').filter({
             has: owner.getByRole('heading', {
                 name: 'Owner baseline method',
@@ -133,7 +137,7 @@ test('three members complete one topic, methods, feedback and reputation journey
             await page
                 .getByRole('button', { name: 'Create method', exact: true })
                 .click();
-            await expect(page).toHaveURL(new RegExp(`${topicUrl}$`));
+            await expect(page).toHaveURL(/\/topics\/[^/]+\/methods\/\d+$/);
             const article = page.getByRole('article').filter({
                 has: page.getByRole('heading', {
                     name: methodTitle,
