@@ -9,6 +9,7 @@ import type { RichTextNode } from '@/components/rich-text-content';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { editorLinkHelp, validEditorLink } from '@/lib/editor-links';
 
 const UploadedImage = Image.extend({
     addAttributes() {
@@ -34,7 +35,7 @@ const extensions = [
         horizontalRule: false,
         strike: false,
         underline: false,
-        link: { openOnClick: false, protocols: ['http', 'https'] },
+        link: { openOnClick: false, isAllowedUri: validEditorLink },
     }),
     UploadedImage,
 ];
@@ -68,6 +69,7 @@ export function RichTextEditor({
     const [uploading, setUploading] = useState(false);
     const busy = useRef(false);
     const [error, setError] = useState('');
+    const [pasteNotice, setPasteNotice] = useState('');
     const [linkOpen, setLinkOpen] = useState(false);
     const [href, setHref] = useState('');
     const wrapper = useRef<HTMLDivElement>(null);
@@ -87,6 +89,67 @@ export function RichTextEditor({
                 'aria-invalid': String(Boolean(invalid)),
                 class: 'wb-rich-text wb-editor-content',
                 'data-placeholder': placeholder,
+            },
+            transformPastedHTML: (html) => {
+                // Let Tiptap parse its supported formatting; adapt only lossy cases.
+                const pasted = new DOMParser().parseFromString(
+                    html,
+                    'text/html',
+                );
+                const notices: string[] = [];
+                if (
+                    pasted.querySelector(
+                        'h1,h2,h3,h4,h5,h6,pre,code,blockquote,table,hr,s,del,u',
+                    )
+                ) {
+                    notices.push(
+                        'Pasted formatting was simplified to match this editor. Review the text before publishing.',
+                    );
+                }
+                for (const block of pasted.querySelectorAll('pre')) {
+                    const lines = (block.textContent || '')
+                        .split('\n')
+                        .map((line) => {
+                            const paragraph = pasted.createElement('p');
+                            paragraph.textContent = line;
+                            return paragraph;
+                        });
+                    block.replaceWith(...lines);
+                }
+                for (const row of pasted.querySelectorAll('tr')) {
+                    const paragraph = pasted.createElement('p');
+                    for (const [index, cell] of Array.from(
+                        row.cells,
+                    ).entries()) {
+                        if (index) paragraph.append(' | ');
+                        paragraph.append(...Array.from(cell.childNodes));
+                    }
+                    row.replaceWith(paragraph);
+                }
+                for (const image of pasted.querySelectorAll('img')) {
+                    image.replaceWith(
+                        pasted.createTextNode(image.getAttribute('alt') || ''),
+                    );
+                    if (
+                        !notices.includes(
+                            'Copied images were not uploaded. Use Photo to add them.',
+                        )
+                    ) {
+                        notices.push(
+                            'Copied images were not uploaded. Use Photo to add them.',
+                        );
+                    }
+                }
+                for (const link of pasted.querySelectorAll('a')) {
+                    if (!validEditorLink(link.getAttribute('href') || '')) {
+                        notices.push(
+                            `The link on “${(link.textContent || '').slice(0, 80)}” was removed; its text was kept. ${editorLinkHelp}`,
+                        );
+                        link.replaceWith(...Array.from(link.childNodes));
+                    }
+                }
+                setPasteNotice([...new Set(notices)].join(' '));
+                return pasted.body.innerHTML;
             },
             handlePaste: (_view, event) => {
                 const file = Array.from(event.clipboardData?.files ?? []).find(
@@ -357,7 +420,7 @@ export function RichTextEditor({
                         <Label htmlFor={`${id}-link`}>Link address</Label>
                         <Input
                             id={`${id}-link`}
-                            type="url"
+                            type="text"
                             value={href}
                             placeholder="https://…"
                             onChange={(event) => setHref(event.target.value)}
@@ -368,13 +431,8 @@ export function RichTextEditor({
                                 type="button"
                                 size="sm"
                                 onClick={() => {
-                                    if (
-                                        !/^https?:\/\//i.test(href) ||
-                                        !URL.canParse(href)
-                                    ) {
-                                        setError(
-                                            'Use a complete link starting with https:// or http://.',
-                                        );
+                                    if (!validEditorLink(href)) {
+                                        setError(editorLinkHelp);
                                         return;
                                     }
                                     if (
@@ -459,6 +517,11 @@ export function RichTextEditor({
                     </div>
                 )}
             </div>
+            {pasteNotice && (
+                <p role="status" className="text-muted-foreground text-sm">
+                    {pasteNotice}
+                </p>
+            )}
             <p
                 id={`${id}-status`}
                 role={error ? 'alert' : 'status'}
