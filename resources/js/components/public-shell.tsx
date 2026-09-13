@@ -247,9 +247,6 @@ export function PublicShell({ children, discovery }: Props) {
                                             />
                                         )}
                                     </Link>
-                                    <a href="mailto:hello@workbine.com">
-                                        Contact
-                                    </a>
                                     {!composingTopic && (
                                         <Button
                                             asChild
