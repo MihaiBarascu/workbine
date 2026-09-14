@@ -83,7 +83,13 @@ class TopicController extends Controller
             'tag' => $tag,
             'sort' => $sort,
             'scope' => $scope,
-            'categories' => TopicDiscovery::categories(),
+            'categories' => array_intersect_key(
+                TopicDiscovery::categories(),
+                array_fill_keys([
+                    ...Topic::query()->whereNotNull('category')->distinct()->pluck('category')->all(),
+                    ...($category !== '' ? [$category] : []),
+                ], true),
+            ),
             'availableTags' => TopicTag::query()->whereHas('topic')->select('name')->distinct()->orderBy('name')->limit(40)->pluck('name'),
             'categoryCounts' => Topic::query()->whereNotNull('category')->select('category')->selectRaw('COUNT(*) as total')->groupBy('category')->pluck('total', 'category'),
             'people' => $scope !== 'people' ? null : User::query()->when($search !== '', fn ($query) => $query->where(fn ($query) => $query

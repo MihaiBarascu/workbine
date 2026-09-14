@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Topic;
 use App\Models\User;
-use App\Support\TopicDiscovery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -12,10 +12,14 @@ class CommunityNavigationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_pages_share_the_public_catalog_and_default_navigation_preference(): void
+    public function test_guest_pages_share_only_categories_with_visible_topics_and_default_navigation_preference(): void
     {
+        Topic::factory()->create(['category' => 'ai']);
+        $hidden = Topic::factory()->create(['category' => 'ecommerce']);
+        $hidden->forceFill(['hidden_at' => now()])->save();
+
         $this->get('/login')->assertOk()->assertInertia(fn (Assert $page) => $page
-            ->where('communityCategories', TopicDiscovery::categories())
+            ->where('communityCategories', ['ai' => 'AI in Practice'])
             ->where('sidebarOpen', true)
             ->where('auth.user', null));
     }
@@ -28,7 +32,7 @@ class CommunityNavigationTest extends TestCase
         $this->actingAs($user)->withUnencryptedCookie('sidebar_state', 'false')
             ->get('/settings/profile')->assertOk()->assertInertia(fn (Assert $page) => $page
             ->where('sidebarOpen', false)
-            ->where('communityCategories', TopicDiscovery::categories()));
+            ->where('communityCategories', []));
 
         $this->assertSame($original, $user->refresh()->getAttributes());
     }
