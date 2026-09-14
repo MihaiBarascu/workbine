@@ -6,6 +6,11 @@
     <url>
         <loc>{{ route('community.guide') }}</loc>
     </url>
+    @foreach ($members as $member)
+        <url>
+            <loc>{{ route('members.show', ['username' => $member->username]) }}</loc>
+        </url>
+    @endforeach
     @foreach ($topics as $topic)
         <url>
             <loc>{{ route('topics.show', $topic) }}</loc>

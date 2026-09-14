@@ -42,6 +42,15 @@
             @php
                 $appName = config('app.name', 'Workbine');
                 $component = $page['component'];
+                $jsonLd = static fn (array $data): string => json_encode(
+                    $data,
+                    JSON_UNESCAPED_SLASHES
+                        | JSON_UNESCAPED_UNICODE
+                        | JSON_HEX_TAG
+                        | JSON_HEX_AMP
+                        | JSON_HEX_APOS
+                        | JSON_HEX_QUOT,
+                ) ?: '{}';
             @endphp
 
             @if ($component === 'topics/method-show')
@@ -66,6 +75,34 @@
                         ? mb_substr(\Illuminate\Support\Str::squish($topic['description']), 0, 180)
                         : mb_substr('See practical methods people shared for '.$topic['title'].', plus real experiences from people who tried them.', 0, 180);
                     $canonicalUrl = route('topics.show', $topic['slug']);
+                    $profileUrl = route('members.show', ['username' => $topic['user']['username']]);
+                    $structuredData = [
+                        '@context' => 'https://schema.org',
+                        '@type' => 'DiscussionForumPosting',
+                        'url' => $canonicalUrl,
+                        'mainEntityOfPage' => $canonicalUrl,
+                        'headline' => $topic['title'],
+                        'text' => filled($topic['description'] ?? null)
+                            ? \Illuminate\Support\Str::squish($topic['description'])
+                            : $topic['title'],
+                        'author' => [
+                            '@type' => 'Person',
+                            'name' => $topic['user']['name'],
+                            'url' => $profileUrl,
+                        ],
+                        'datePublished' => $topic['created_at'],
+                        'commentCount' => (int) ($topic['methods_count'] ?? 0),
+                    ];
+                    if (filled($topic['updated_at'] ?? null) && $topic['updated_at'] !== $topic['created_at']) {
+                        $structuredData['dateModified'] = $topic['updated_at'];
+                    }
+                    if (($topic['likes_count'] ?? 0) > 0) {
+                        $structuredData['interactionStatistic'] = [
+                            '@type' => 'InteractionCounter',
+                            'interactionType' => 'https://schema.org/LikeAction',
+                            'userInteractionCount' => (int) $topic['likes_count'],
+                        ];
+                    }
                 @endphp
                 <title>{{ $topic['title'] }} - {{ $appName }}</title>
                 <meta name="description" content="{{ $description }}" inertia="description">
@@ -77,6 +114,60 @@
                 <meta property="og:type" content="article" inertia="og:type">
                 <meta property="og:site_name" content="{{ $appName }}" inertia="og:site_name">
                 <meta name="twitter:card" content="summary" inertia="twitter:card">
+                <script type="application/ld+json" inertia="structured-data">{!! $jsonLd($structuredData) !!}</script>
+            @elseif ($component === 'members/show')
+                @php
+                    $member = $page['props']['member'];
+                    $view = $page['props']['view'] ?? 'methods';
+                    $impact = $page['props']['impact'] ?? '';
+                    $currentPage = (int) data_get($page['props'], 'contributions.current_page', 1);
+                    $indexable = $view === 'methods' && $impact === '' && $currentPage === 1;
+                    $canonicalUrl = route('members.show', ['username' => $member['username']]);
+                    $description = filled($member['bio'] ?? null)
+                        ? mb_substr(\Illuminate\Support\Str::squish($member['bio']), 0, 180)
+                        : mb_substr('Practical methods and real experiences shared by '.$member['name'].' on Workbine.', 0, 180);
+                    $postCount = (int) data_get($member, 'counts.topics', 0)
+                        + (int) data_get($member, 'counts.methods', 0)
+                        + (int) data_get($member, 'counts.experiences', 0);
+                    $person = [
+                        '@type' => 'Person',
+                        '@id' => $canonicalUrl.'#member',
+                        'name' => $member['name'],
+                        'alternateName' => $member['username'],
+                        'identifier' => (string) $member['id'],
+                        'url' => $canonicalUrl,
+                    ];
+                    if (filled($member['bio'] ?? null)) {
+                        $person['description'] = \Illuminate\Support\Str::squish($member['bio']);
+                    }
+                    if (filled($member['avatar_url'] ?? null)) {
+                        $person['image'] = $member['avatar_url'];
+                    }
+                    if ($postCount > 0) {
+                        $person['agentInteractionStatistic'] = [
+                            '@type' => 'InteractionCounter',
+                            'interactionType' => 'https://schema.org/WriteAction',
+                            'userInteractionCount' => $postCount,
+                        ];
+                    }
+                    $structuredData = [
+                        '@context' => 'https://schema.org',
+                        '@type' => 'ProfilePage',
+                        'url' => $canonicalUrl,
+                        'mainEntity' => $person,
+                    ];
+                @endphp
+                <title>{{ $member['name'] }} — Community profile - {{ $appName }}</title>
+                <meta name="description" content="{{ $description }}" inertia="description">
+                <link rel="canonical" href="{{ $canonicalUrl }}" inertia="canonical">
+                <meta name="robots" content="{{ $indexable ? 'index,follow' : 'noindex,follow' }}" inertia="robots">
+                <meta property="og:title" content="{{ $member['name'] }} — Community profile" inertia="og:title">
+                <meta property="og:description" content="{{ $description }}" inertia="og:description">
+                <meta property="og:url" content="{{ $canonicalUrl }}" inertia="og:url">
+                <meta property="og:type" content="profile" inertia="og:type">
+                <meta property="og:site_name" content="{{ $appName }}" inertia="og:site_name">
+                <meta name="twitter:card" content="summary" inertia="twitter:card">
+                <script type="application/ld+json" inertia="structured-data">{!! $jsonLd($structuredData) !!}</script>
             @elseif ($component === 'topics/index')
                 @php
                     $props = $page['props'];
