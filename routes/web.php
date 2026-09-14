@@ -6,12 +6,14 @@ use App\Http\Controllers\EditorImageController;
 use App\Http\Controllers\ExperienceController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MethodController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\TopicLikeController;
 use App\Http\Middleware\ThrottleImageUploads;
 use Illuminate\Support\Facades\Route;
 use Inertia\Middleware\EncryptHistory;
 
+Route::get('sitemap.xml', SitemapController::class)->name('sitemap');
 Route::inertia('community/guide', 'community/guide')->name('community.guide');
 Route::inertia('privacy', 'legal/privacy')->name('privacy');
 Route::inertia('terms', 'legal/terms')->name('terms');
