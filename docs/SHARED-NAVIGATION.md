@@ -49,18 +49,24 @@ switching to desktop releases the drawer. Mobile opening does not overwrite the
 desktop preference.
 
 Active links match the actual route and category instead of highlighting Explore
-on every page. Categories reuse the public `TopicDiscovery` catalog through shared
-Inertia props; no category counts, private activity or extra SQL are loaded for
-navigation. Account and contribution destinations retain their existing guards.
+on every page. The full `TopicDiscovery` catalog remains available when creating
+or editing topics, while public navigation includes only categories that currently
+have visible topics. The shared sidebar derives that compact list with a distinct
+query on the indexed topic category; it loads no category counts or private
+activity. Discovery keeps the explicitly selected category in page context even
+when an old/direct URL points to a category that is currently empty. Account and
+contribution destinations retain their existing guards.
 
 ## Validation
 
-`tests/Feature/CommunityNavigationTest.php` checks public catalog sharing and the
-existing sidebar preference. `tests/e2e/community-navigation.spec.ts` exercises
-desktop persistence, reclaimed space, active destinations, mobile modal behavior,
-keyboard focus and page reflow. It captures representative 320px and desktop
-account pages plus mobile dark appearance. Existing contribution, account and
-security browser checks remain required.
+`tests/Feature/CommunityNavigationTest.php` checks visible-category sharing and the
+existing sidebar preference. `tests/Feature/ConnectedDiscoveryTest.php` verifies
+that discovery promotes active categories, excludes inactive ones and keeps a
+direct empty-category filter understandable. `tests/e2e/community-navigation.spec.ts`
+exercises desktop persistence, reclaimed space, active destinations, mobile modal
+behavior, keyboard focus and page reflow. It captures representative 320px and
+desktop account pages plus mobile dark appearance. Existing contribution, account
+and security browser checks remain required.
 
 Use the environment selection and full release gate in [TESTING.md](TESTING.md).
 Record actual tested revisions and outcomes in the PR; this file describes the
