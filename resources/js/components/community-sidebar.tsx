@@ -18,6 +18,7 @@ import {
     Sprout,
     X,
     Settings,
+    MessageCircle,
 } from 'lucide-react';
 import { WorkbineBrand } from '@/components/community';
 import type { User } from '@/types';
@@ -51,9 +52,11 @@ export function CommunitySidebar({
     const { props, url } = usePage<{
         auth: { user: User | null };
         unreadNotifications: number;
+        unreadMessages: number;
     }>();
     const user = props.auth?.user;
     const unread = props.unreadNotifications ?? 0;
+    const unreadMessages = props.unreadMessages ?? 0;
     const [path, query = ''] = url.split('?');
     const discovery = path === '/' || path === '/topics';
     const ownTopics = Boolean(
@@ -124,6 +127,24 @@ export function CommunitySidebar({
                         <Bookmark aria-hidden="true" />
                         Bookmarks
                     </Link>
+                    {user && (
+                        <Link
+                            href="/messages"
+                            onClick={onClose}
+                            aria-current={path.startsWith('/messages') ? 'page' : undefined}
+                        >
+                            <MessageCircle aria-hidden="true" />
+                            Messages
+                            {unreadMessages > 0 && (
+                                <span
+                                    className="wb-sidebar-count"
+                                    aria-label={`${unreadMessages} unread messages`}
+                                >
+                                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                                </span>
+                            )}
+                        </Link>
+                    )}
                     <Link
                         href="/notifications"
                         onClick={onClose}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { ExperienceForm } from '@/components/experience-form';
 import InputError from '@/components/input-error';
+import { MemberMessageLink } from '@/components/member-message-link';
 import { ReportLink } from '@/components/report-link';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Button } from '@/components/ui/button';
@@ -360,7 +361,17 @@ export function MethodExperiences({
                                     </span>
                                 </a>
                             )}
-                            <div className="mt-4">
+                            <div className="mt-4 flex flex-wrap items-center gap-2">
+                                <MemberMessageLink
+                                    memberId={experience.user.id}
+                                    username={experience.user.username}
+                                    context={{
+                                        type: 'experience',
+                                        id: experience.id,
+                                    }}
+                                    label="Message member"
+                                    compact
+                                />
                                 <ReportLink
                                     type="experience"
                                     id={experience.id}

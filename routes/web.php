@@ -65,6 +65,7 @@ require __DIR__.'/settings.php';
 require __DIR__.'/contributions.php';
 require __DIR__.'/saved.php';
 require __DIR__.'/reports.php';
+require __DIR__.'/messages.php';
 
 require __DIR__.'/moderation.php';
 

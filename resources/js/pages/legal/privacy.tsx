@@ -32,8 +32,8 @@ export default function Privacy() {
                     </li>
                     <li>
                         <strong>Private activity:</strong> saved topics,
-                        notifications, content reports and messages you send to
-                        our contact address.
+                        notifications, private conversations, content reports and
+                        messages you send to our contact address.
                     </li>
                     <li>
                         <strong>Security information:</strong> session
@@ -53,9 +53,13 @@ export default function Privacy() {
                 </p>
                 <p>
                     Your account email, sign-in credentials, saved-topic list,
-                    notifications and reports are not shown on your public
-                    profile. Aggregate save counts are public. Information you
-                    include yourself in a public contribution is public too.
+                    notifications, private conversations and reports are not
+                    shown on your public profile. A private message is shown to
+                    the two conversation participants. If a participant reports
+                    a message, the reported message and report details can be
+                    reviewed by authorized moderators. Aggregate save counts are
+                    public. Information you include yourself in a public
+                    contribution is public too.
                 </p>
             </section>
             <section>
@@ -63,9 +67,10 @@ export default function Privacy() {
                 <p>
                     We use account and contribution data to provide the service
                     you request: sign-in, publishing, saved topics,
-                    notifications and account recovery. Where GDPR applies, this
-                    processing is based on performing the service agreement
-                    described in our <Link href="/terms">Terms</Link>.
+                    notifications, private conversations and account recovery.
+                    Where GDPR applies, this processing is based on performing
+                    the service agreement described in our{' '}
+                    <Link href="/terms">Terms</Link>.
                 </p>
                 <p>
                     Security, abuse prevention and moderation support our
@@ -104,7 +109,10 @@ export default function Privacy() {
                         moderation is enabled, public text and processed images
                         may be sent to OpenAI for checking before publication. A
                         flagged submission can be held privately for human
-                        review; you can contact us about a decision.
+                        review; you can contact us about a decision. Private
+                        conversations are not sent through automated content
+                        checks by this feature; a message can be exposed to a
+                        human moderator when a participant reports it.
                     </li>
                 </ul>
                 <p>
@@ -135,35 +143,39 @@ export default function Privacy() {
                 <p>
                     Account information is kept while your account is active.
                     Contributions remain available until removed through account
-                    deletion or moderation. You can remove your own experiences
-                    and saved topics, and edit the profile fields available in
-                    settings.
+                    deletion or moderation. Private messages remain available to
+                    the participants while the conversation exists. You can
+                    remove your own experiences and saved topics, and edit the
+                    profile fields available in settings.
                 </p>
                 <p>
                     Deleting your account in Profile settings removes your
-                    profile and contributions from the application. Deleting a
-                    topic or method also removes dependent contributions. Image
-                    deletion is attempted during cleanup, with failed deletions
-                    retained for retry. Copies already cached or downloaded
-                    elsewhere may remain available.
+                    profile, contributions and conversations involving your
+                    account from the application. Deleting a topic or method
+                    also removes dependent contributions. Image deletion is
+                    attempted during cleanup, with failed deletions retained for
+                    retry. Copies already cached or downloaded elsewhere may
+                    remain available.
                 </p>
                 <p>
                     Held moderation records become eligible for cleanup after 30
-                    days. Logs, security records, contact correspondence and any
-                    backup copies follow separate operational or provider
-                    retention arrangements; deleting an account does not
-                    guarantee immediate removal from every such system. Contact
-                    us for a request concerning those records.
+                    days. Reports about messages are moderation records and may
+                    outlive a conversation for the applicable moderation
+                    retention period. Logs, security records, contact
+                    correspondence and any backup copies follow separate
+                    operational or provider retention arrangements; deleting an
+                    account does not guarantee immediate removal from every such
+                    system. Contact us for a request concerning those records.
                 </p>
             </section>
             <section>
                 <h2>Your choices and rights</h2>
                 <p>
                     You can browse without an account, choose which optional
-                    profile details to share and delete your account through
-                    settings. For access to your information, a copy,
-                    correction, erasure, restriction or an objection to
-                    processing, email{' '}
+                    profile details to share, block another member from private
+                    messaging and delete your account through settings. For
+                    access to your information, a copy, correction, erasure,
+                    restriction or an objection to processing, email{' '}
                     <a href="mailto:hello@workbine.com">hello@workbine.com</a>.
                     These rights apply subject to the conditions in the
                     applicable law. We may need to verify that a request

@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, ArrowUpRight, ExternalLink, Pencil } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
+import { MemberMessageLink } from '@/components/member-message-link';
 import { PublicShell } from '@/components/public-shell';
 import { ReportLink } from '@/components/report-link';
 import { RichTextContent } from '@/components/rich-text-content';
@@ -187,6 +188,13 @@ export default function MethodShow({
                                 </span>
                             </Link>
                         )}
+                        <MemberMessageLink
+                            memberId={method.user.id}
+                            username={method.user.username}
+                            context={{ type: 'method', id: method.id }}
+                            label="Message author"
+                            compact
+                        />
                         <Link href="#experiences">
                             {method.experiences_count}{' '}
                             {method.experiences_count === 1

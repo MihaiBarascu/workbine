@@ -5,7 +5,7 @@ export function ReportLink({
     type,
     id,
 }: {
-    type: 'topic' | 'method' | 'experience';
+    type: 'topic' | 'method' | 'experience' | 'message';
     id: number;
 }) {
     const { reportsEnabled } = usePage<{ reportsEnabled: boolean }>().props;
