@@ -160,21 +160,28 @@ export default function TopicsIndex({
     return (
         <PublicShell discovery={{ categories, category, search: searchForm }}>
             <Head
-                title={search ? `Search: ${search}` : 'Explore the community'}
+                title={
+                    search
+                        ? `Search: ${search}`
+                        : 'Practical knowledge from real experience'
+                }
             />
             <main className="wb-notebook wb-discovery wb-connected-discovery">
                 <header className="wb-notebook-masthead">
                     <div>
                         <p className="wb-welcome-kicker">
-                            Real people. Real progress.
+                            Practical knowledge. Real experience.
                         </p>
-                        <h1>Explore the community</h1>
-                        <p>Connect. Discover. Build together.</p>
+                        <h1>Find methods people actually use</h1>
+                        <p>
+                            Explore a topic, compare different approaches, and
+                            see what happened when others tried them.
+                        </p>
                     </div>
                     <div className="wb-globe-links">
                         <Link href="/topics#topics">
                             <Lightbulb />
-                            Ideas
+                            Topics
                         </Link>
                         <Link href="/topics?scope=people#topics">
                             <Users />
@@ -182,7 +189,7 @@ export default function TopicsIndex({
                         </Link>
                         <Link href="/topics/create">
                             <Sparkles />
-                            Share knowledge
+                            Start a topic
                         </Link>
                         <span>
                             Knowledge
@@ -243,7 +250,9 @@ export default function TopicsIndex({
                             >
                                 {previousTitle !== null && (
                                     <>
-                                        <span>Idea added. Make it yours.</span>
+                                        <span>
+                                            Starting point added. Make it yours.
+                                        </span>
                                         <button
                                             type="button"
                                             onClick={undoStarter}
