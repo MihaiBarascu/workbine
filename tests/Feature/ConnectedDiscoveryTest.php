@@ -22,11 +22,23 @@ class ConnectedDiscoveryTest extends TestCase
         $topic = Topic::query()->firstOrFail();
         $this->assertSame('ai', $topic->category);
         $this->assertSame(['small-habits', 'practice'], $topic->tags->pluck('name')->all());
-        $this->get('/topics?category=ai&tag=practice')->assertInertia(fn (Assert $page) => $page->has('topics.data', 1)->where('topics.data.0.category', 'ai')->where('topics.data.0.tags.0', 'small-habits')->where('categoryCounts.ai', 1));
-        $this->get('/topics?category=ecommerce')->assertInertia(fn (Assert $page) => $page->has('topics.data', 0));
+        $this->get('/topics?category=ai&tag=practice')->assertInertia(fn (Assert $page) => $page
+            ->has('topics.data', 1)
+            ->where('topics.data.0.category', 'ai')
+            ->where('topics.data.0.tags.0', 'small-habits')
+            ->where('categories.ai', 'AI in Practice')
+            ->missing('categories.ecommerce')
+            ->where('categoryCounts.ai', 1));
+        $this->get('/topics?category=ecommerce')->assertInertia(fn (Assert $page) => $page
+            ->has('topics.data', 0)
+            ->where('categories.ecommerce', 'E-commerce')
+            ->missing('categoryCounts.ecommerce'));
         $this->get('/topics?tag=missing')->assertInertia(fn (Assert $page) => $page->has('topics.data', 0));
         $topic->forceFill(['hidden_at' => now()])->save();
-        $this->get('/topics')->assertInertia(fn (Assert $page) => $page->has('availableTags', 0)->missing('categoryCounts.ai'));
+        $this->get('/topics')->assertInertia(fn (Assert $page) => $page
+            ->has('categories', 0)
+            ->has('availableTags', 0)
+            ->missing('categoryCounts.ai'));
     }
 
     public function test_classification_edits_participate_in_conflict_detection_and_can_be_cleared(): void
