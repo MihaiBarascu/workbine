@@ -11,7 +11,23 @@ import { SaveTopicButton } from '@/components/save-topic-button';
 import { ShareLinkButton } from '@/components/share-link-button';
 import { ReportLink } from '@/components/report-link';
 
-import type { TopicSummary, User } from '@/types';
+import type { MethodSummary, TopicSummary, User } from '@/types';
+
+function methodOutcomeSummary(method: MethodSummary): string {
+    const worked = method.worked_count ?? 0;
+    const partly = method.partly_count ?? 0;
+    const didNotWork = Math.max(
+        0,
+        method.experiences_count - worked - partly,
+    );
+    const outcomes = [
+        worked > 0 ? `${worked} worked` : null,
+        partly > 0 ? `${partly} partly` : null,
+        didNotWork > 0 ? `${didNotWork} did not work` : null,
+    ].filter(Boolean);
+
+    return `${method.experiences_count} ${method.experiences_count === 1 ? 'experience' : 'experiences'}${outcomes.length ? ` · ${outcomes.join(' · ')}` : ''}`;
+}
 
 export function LikeTopicButton({ topic }: { topic: TopicSummary }) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
@@ -122,6 +138,26 @@ export function TopicCard({
                                     #{tag}
                                 </Link>
                             ))}
+                        </div>
+                    )}
+                    {topic.method_preview && (
+                        <div className="border-border/70 mt-4 border-l-2 pl-3">
+                            <p className="text-muted-foreground text-xs font-medium">
+                                A method with real experience
+                            </p>
+                            <Link
+                                href={`/topics/${topic.slug}/methods/${topic.method_preview.id}`}
+                                className="mt-1 inline-flex items-center gap-1 font-medium hover:underline"
+                            >
+                                {topic.method_preview.title}
+                                <ArrowRight className="size-3.5" />
+                            </Link>
+                            <p className="text-muted-foreground mt-1 text-sm leading-6">
+                                {topic.method_preview.body}
+                            </p>
+                            <p className="text-muted-foreground mt-2 text-xs">
+                                {methodOutcomeSummary(topic.method_preview)}
+                            </p>
                         </div>
                     )}
                 </div>
