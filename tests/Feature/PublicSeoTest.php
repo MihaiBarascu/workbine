@@ -175,7 +175,7 @@ class PublicSeoTest extends TestCase
     private function structuredData(TestResponse $response, string $key = 'structured-data'): array
     {
         $matched = preg_match(
-            '/<script type="application\\/ld\\+json" inertia="'.preg_quote($key, '/').'">(.*?)<\\/script>/s',
+            '#<script type="application/ld\+json" inertia="'.preg_quote($key, '#').'">(.*?)</script>#s',
             $response->getContent(),
             $matches,
         );
