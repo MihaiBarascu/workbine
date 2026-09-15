@@ -142,7 +142,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                             <div className="wb-detail-section-heading">
                                 <div>
                                     <h2 id="methods-heading">
-                                        What worked for people
+                                        Methods people shared
                                     </h2>
                                     <p>
                                         {methods.data.length > 0
