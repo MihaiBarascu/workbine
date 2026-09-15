@@ -1,5 +1,11 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { ArrowUpRight, Globe, LockKeyhole } from 'lucide-react';
+import {
+    ArrowUpRight,
+    Globe,
+    LockKeyhole,
+    Plus,
+    Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
@@ -8,8 +14,9 @@ import { ProfilePhoto } from '@/components/profile-photo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { socialPlatforms } from '@/lib/social-links';
 import { send } from '@/routes/verification';
-import type { Auth } from '@/types';
+import type { Auth, SocialLink, SocialPlatform } from '@/types/auth';
 
 export default function Profile({
     mustVerifyEmail,
@@ -20,6 +27,39 @@ export default function Profile({
 }) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const [username, setUsername] = useState(auth.user.username);
+    const [socialLinks, setSocialLinks] = useState<SocialLink[]>(
+        auth.user.social_links ?? [],
+    );
+
+    const addSocialLink = () => {
+        if (socialLinks.length >= 5) return;
+        const platform = socialPlatforms.find(
+            ({ value }) => !socialLinks.some((link) => link.platform === value),
+        )?.value;
+        if (!platform) return;
+        setSocialLinks((links) => [...links, { platform, url: '' }]);
+    };
+
+    const updateSocialLink = (
+        index: number,
+        field: 'platform' | 'url',
+        value: string,
+    ) => {
+        setSocialLinks((links) =>
+            links.map((link, position) =>
+                position === index
+                    ? {
+                          ...link,
+                          [field]:
+                              field === 'platform'
+                                  ? (value as SocialPlatform)
+                                  : value,
+                      }
+                    : link,
+            ),
+        );
+    };
+
     return (
         <>
             <Head title="Profile settings" />
@@ -32,6 +72,11 @@ export default function Profile({
             >
                 {({ processing, errors, recentlySuccessful }) => (
                     <>
+                        <input
+                            type="hidden"
+                            name="social_links_present"
+                            value="1"
+                        />
                         <section className="wb-panel">
                             <div className="wb-panel-heading">
                                 <div>
@@ -195,6 +240,196 @@ export default function Profile({
                                             message={errors.website}
                                         />
                                     </div>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="public_email">
+                                        Public contact email (optional)
+                                    </Label>
+                                    <Input
+                                        id="public_email"
+                                        name="public_email"
+                                        type="email"
+                                        maxLength={255}
+                                        defaultValue={
+                                            auth.user.public_email ?? ''
+                                        }
+                                        placeholder="hello@example.com"
+                                        autoComplete="off"
+                                        aria-invalid={Boolean(
+                                            errors.public_email,
+                                        )}
+                                        aria-describedby="public-email-help public-email-error"
+                                    />
+                                    <p
+                                        id="public-email-help"
+                                        className="text-muted-foreground text-xs leading-5"
+                                    >
+                                        Separate from your account email. If you
+                                        add it, anyone can see, copy or index it.
+                                        Use an address you are comfortable
+                                        publishing.
+                                    </p>
+                                    <InputError
+                                        id="public-email-error"
+                                        message={errors.public_email}
+                                    />
+                                </div>
+                                <div className="grid gap-3">
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                            <Label>Social links (optional)</Label>
+                                            <p className="text-muted-foreground mt-1 text-xs leading-5">
+                                                Add up to five places where
+                                                people can find you outside
+                                                Workbine.
+                                            </p>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={addSocialLink}
+                                            disabled={socialLinks.length >= 5}
+                                            data-test="add-social-link"
+                                        >
+                                            <Plus aria-hidden="true" />
+                                            Add link
+                                        </Button>
+                                    </div>
+                                    {socialLinks.length === 0 ? (
+                                        <p className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+                                            No social links added.
+                                        </p>
+                                    ) : (
+                                        <div className="grid gap-4">
+                                            {socialLinks.map((link, index) => (
+                                                <div
+                                                    key={`${link.platform}-${index}`}
+                                                    className="grid gap-3 rounded-lg border p-4 sm:grid-cols-[minmax(9rem,0.35fr)_minmax(0,1fr)_auto] sm:items-end"
+                                                >
+                                                    <div className="grid gap-2">
+                                                        <Label
+                                                            htmlFor={`social-platform-${index}`}
+                                                        >
+                                                            Network
+                                                        </Label>
+                                                        <select
+                                                            id={`social-platform-${index}`}
+                                                            name={`social_links[${index}][platform]`}
+                                                            value={link.platform}
+                                                            onChange={(event) =>
+                                                                updateSocialLink(
+                                                                    index,
+                                                                    'platform',
+                                                                    event.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            className="border-input bg-background ring-offset-background focus-visible:ring-ring h-9 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                                                            data-test={`social-platform-${index}`}
+                                                        >
+                                                            {socialPlatforms.map(
+                                                                (platform) => (
+                                                                    <option
+                                                                        key={
+                                                                            platform.value
+                                                                        }
+                                                                        value={
+                                                                            platform.value
+                                                                        }
+                                                                        disabled={
+                                                                            platform.value !==
+                                                                                link.platform &&
+                                                                            socialLinks.some(
+                                                                                (
+                                                                                    item,
+                                                                                ) =>
+                                                                                    item.platform ===
+                                                                                    platform.value,
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            platform.label
+                                                                        }
+                                                                    </option>
+                                                                ),
+                                                            )}
+                                                        </select>
+                                                        <InputError
+                                                            message={
+                                                                errors[
+                                                                    `social_links.${index}.platform`
+                                                                ]
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="grid gap-2">
+                                                        <Label
+                                                            htmlFor={`social-url-${index}`}
+                                                        >
+                                                            Profile URL
+                                                        </Label>
+                                                        <Input
+                                                            id={`social-url-${index}`}
+                                                            name={`social_links[${index}][url]`}
+                                                            type="url"
+                                                            maxLength={2048}
+                                                            value={link.url}
+                                                            onChange={(event) =>
+                                                                updateSocialLink(
+                                                                    index,
+                                                                    'url',
+                                                                    event.target
+                                                                        .value,
+                                                                )
+                                                            }
+                                                            placeholder="https://..."
+                                                            data-test={`social-url-${index}`}
+                                                            aria-invalid={Boolean(
+                                                                errors[
+                                                                    `social_links.${index}.url`
+                                                                ],
+                                                            )}
+                                                        />
+                                                        <InputError
+                                                            message={
+                                                                errors[
+                                                                    `social_links.${index}.url`
+                                                                ]
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() =>
+                                                            setSocialLinks(
+                                                                (links) =>
+                                                                    links.filter(
+                                                                        (
+                                                                            _,
+                                                                            position,
+                                                                        ) =>
+                                                                            position !==
+                                                                            index,
+                                                                    ),
+                                                            )
+                                                        }
+                                                        aria-label={`Remove ${link.platform} link`}
+                                                    >
+                                                        <Trash2
+                                                            aria-hidden="true"
+                                                        />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <InputError
+                                        message={errors.social_links}
+                                    />
                                 </div>
                             </div>
                             <Link

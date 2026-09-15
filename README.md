@@ -18,12 +18,6 @@ outcome filters live directly below each method, with an inline response editor.
 
 Public profiles use `/members/{username}`. Usernames are assigned automatically and can be changed in Profile settings. Each member has one current username; previous usernames are available for reuse. Legacy numeric links redirect to the current profile.
 
-Profiles foreground methods and the reported outcomes behind them. Verified members
-can start a private one-to-one conversation from a profile, method or experience;
-contribution context is carried into the first message when available. Messaging is
-a private bridge between members, not a marketplace, public post type or reputation
-signal. See [docs/MESSAGING.md](docs/MESSAGING.md).
-
 ## Stack
 
 Laravel 13 + React 19 + Inertia 3 + TypeScript + PostgreSQL.

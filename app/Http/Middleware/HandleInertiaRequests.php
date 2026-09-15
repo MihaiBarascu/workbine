@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use App\Models\CommunityNotification;
-use App\Models\Message;
 use App\Models\Topic;
 use App\Services\ImageUploads;
 use App\Support\TopicDiscovery;
@@ -50,7 +49,6 @@ class HandleInertiaRequests extends Middleware
                 array_flip(Topic::query()->whereNotNull('category')->distinct()->pluck('category')->all()),
             ),
             'unreadNotifications' => fn () => $user === null ? 0 : CommunityNotification::query()->visible()->where('user_id', $user->id)->whereNull('read_at')->count(),
-            'unreadMessages' => fn () => $user === null ? 0 : Message::query()->unreadFor($user)->count(),
             'canModerate' => $user?->can('moderate') ?? false,
             'reportsEnabled' => (bool) config('community.reports_enabled'),
             'auth' => [

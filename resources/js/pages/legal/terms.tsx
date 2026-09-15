@@ -45,29 +45,12 @@ export default function Terms() {
                     accounts as your own lived experience.
                 </p>
                 <p>
-                    Do not post or send scams, spam, threats, hateful attacks,
+                    Do not post scams, spam, threats, hateful attacks,
                     pornography, graphic abuse, dangerous instructions or
                     someone else’s private information. Only upload material you
                     have permission to share. Our{' '}
                     <Link href="/community/guide">Community guide</Link>{' '}
                     explains the expected contribution style.
-                </p>
-            </section>
-            <section>
-                <h2>Private conversations</h2>
-                <p>
-                    Verified members can start one-to-one conversations from a
-                    member profile, method or experience. Messages are private
-                    between the two participants and are not public
-                    contributions, ratings or endorsements. Do not use private
-                    messaging for unsolicited bulk outreach or harassment.
-                </p>
-                <p>
-                    Either participant can block the other member, which pauses
-                    new messages in both directions until the blocker reverses
-                    that choice. A recipient can report a specific message. An
-                    authorized moderator may then review that message and the
-                    report details and can hide the message when appropriate.
                 </p>
             </section>
             <section>
@@ -95,16 +78,14 @@ export default function Terms() {
                     another member tries it. Its original content then stays
                     intact; the author can add dated updates. You can edit or
                     remove your own experiences. Account deletion removes your
-                    profile, contributions and private conversations and can also
-                    remove other contributions attached to your topics or
-                    methods.
+                    contributions and can also remove other contributions
+                    attached to your topics or methods.
                 </p>
                 <p>
                     We may hold submissions for review, hide content or restrict
                     accounts to address rule violations, abuse or legal
-                    requirements. Automated checks may assist this process for
-                    public submissions. Use the report action where available,
-                    or contact{' '}
+                    requirements. Automated checks may assist this process. Use
+                    the report action where available, or contact{' '}
                     <a href="mailto:hello@workbine.com">hello@workbine.com</a>{' '}
                     to report a concern, request content removal or ask for a
                     human review of a decision. Include the relevant link and
