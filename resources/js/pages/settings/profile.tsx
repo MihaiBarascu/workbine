@@ -1,11 +1,5 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import {
-    ArrowUpRight,
-    Globe,
-    LockKeyhole,
-    Plus,
-    Trash2,
-} from 'lucide-react';
+import { ArrowUpRight, Globe, LockKeyhole, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
@@ -265,8 +259,8 @@ export default function Profile({
                                         className="text-muted-foreground text-xs leading-5"
                                     >
                                         Separate from your account email. If you
-                                        add it, anyone can see, copy or index it.
-                                        Use an address you are comfortable
+                                        add it, anyone can see, copy or index
+                                        it. Use an address you are comfortable
                                         publishing.
                                     </p>
                                     <InputError
@@ -277,7 +271,9 @@ export default function Profile({
                                 <div className="grid gap-3">
                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                         <div>
-                                            <Label>Social links (optional)</Label>
+                                            <Label>
+                                                Social links (optional)
+                                            </Label>
                                             <p className="text-muted-foreground mt-1 text-xs leading-5">
                                                 Add up to five places where
                                                 people can find you outside
@@ -316,7 +312,9 @@ export default function Profile({
                                                         <select
                                                             id={`social-platform-${index}`}
                                                             name={`social_links[${index}][platform]`}
-                                                            value={link.platform}
+                                                            value={
+                                                                link.platform
+                                                            }
                                                             onChange={(event) =>
                                                                 updateSocialLink(
                                                                     index,
@@ -419,17 +417,13 @@ export default function Profile({
                                                         }
                                                         aria-label={`Remove ${link.platform} link`}
                                                     >
-                                                        <Trash2
-                                                            aria-hidden="true"
-                                                        />
+                                                        <Trash2 aria-hidden="true" />
                                                     </Button>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
-                                    <InputError
-                                        message={errors.social_links}
-                                    />
+                                    <InputError message={errors.social_links} />
                                 </div>
                             </div>
                             <Link
