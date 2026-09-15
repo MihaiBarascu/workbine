@@ -38,10 +38,7 @@ test('public contact details can be added and are visible on the member profile'
             name: 'LinkedIn (opens in a new tab)',
             exact: true,
         }),
-    ).toHaveAttribute(
-        'href',
-        'https://www.linkedin.com/in/workbine-example',
-    );
+    ).toHaveAttribute('href', 'https://www.linkedin.com/in/workbine-example');
     await expect(
         page.getByRole('link', {
             name: 'GitHub (opens in a new tab)',
