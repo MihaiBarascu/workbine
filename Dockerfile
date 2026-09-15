@@ -7,6 +7,7 @@ RUN apt-get update \
         libjpeg62-turbo-dev libpng-dev libwebp-dev libicu-dev \
         libpq-dev \
         libzip-dev \
+        supervisor \
         unzip \
     && docker-php-ext-configure gd --with-jpeg --with-webp \
     && docker-php-ext-install -j"$(nproc)" bcmath exif gd intl opcache pdo_pgsql zip \
@@ -25,20 +26,23 @@ COPY . .
 
 RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
     && php artisan wayfinder:generate --with-form --no-interaction \
-    && npm install \
+    && npm ci \
     && npm run build \
-    && rm -rf node_modules /usr/local/lib/node_modules /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx \
+    && npm prune --omit=dev \
+    && rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx \
     && chown -R www-data:www-data storage bootstrap/cache
 
 COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/supervisord.conf /etc/supervisor/conf.d/workbine.conf
 COPY docker/entrypoint.sh /usr/local/bin/workbine-entrypoint
 RUN chmod +x /usr/local/bin/workbine-entrypoint
 
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD php -r '$$c=@file_get_contents("http://127.0.0.1/up"); exit($$c===false ? 1 : 0);'
+    CMD php -r '$$c=@file_get_contents("http://127.0.0.1/up"); exit($$c===false ? 1 : 0);' \
+        && php artisan inertia:check-ssr >/dev/null 2>&1
 
 ENTRYPOINT ["workbine-entrypoint"]
-CMD ["apache2-foreground"]
+CMD ["supervisord", "-n", "-c", "/etc/supervisor/conf.d/workbine.conf"]
