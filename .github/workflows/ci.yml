@@ -144,7 +144,7 @@ jobs:
           docker run --rm --entrypoint sh workbine-production-ssr -c '
             set -eu
             node --version
-            test -f bootstrap/ssr/ssr.mjs
+            test -f bootstrap/ssr/app.js
             supervisord -n -c /etc/supervisor/conf.d/workbine.conf > /tmp/supervisord.log 2>&1 &
             supervisor_pid=$!
             cleanup() {
