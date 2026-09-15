@@ -77,9 +77,9 @@ export default function CommunityGuide() {
                     </h2>
                     <p className="mt-4 leading-7">
                         <strong>A method:</strong> “I keep five reliable dinners
-                        on a short list, plan four of them, and leave one evening
-                        flexible. I shop from the same base ingredients so unused
-                        food can move to another meal.”
+                        on a short list, plan four of them, and leave one
+                        evening flexible. I shop from the same base ingredients
+                        so unused food can move to another meal.”
                     </p>
                     <p className="mt-3 leading-7">
                         <strong>A response:</strong> “It worked for three weeks.
