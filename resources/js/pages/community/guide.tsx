@@ -13,9 +13,9 @@ export default function CommunityGuide() {
                     Something you’ve learned could help someone else.
                 </h1>
                 <p className="text-muted-foreground mt-5 text-lg leading-8">
-                    Share practical ways to earn through useful work: AI,
-                    services, products and businesses. Explain what you did,
-                    what it cost, and what actually happened.
+                    Share practical ways to solve real problems, build things,
+                    learn skills, or improve how you work. Explain what you did,
+                    the context, and what actually happened.
                 </p>
                 <div className="my-8 flex flex-wrap gap-3">
                     <Button asChild>
@@ -73,30 +73,30 @@ export default function CommunityGuide() {
                         A simple example · illustration only
                     </p>
                     <h2 className="mt-3 text-xl font-semibold">
-                        Finding the first client for an AI service
+                        Keeping a weekly meal plan simple
                     </h2>
                     <p className="mt-4 leading-7">
-                        <strong>A method:</strong> “I spoke to four local shops
-                        about a repeated task, showed a demo using sample data,
-                        and offered one small paid pilot with a clear scope.”
+                        <strong>A method:</strong> “I keep five reliable dinners
+                        on a short list, plan four of them, and leave one evening
+                        flexible. I shop from the same base ingredients so unused
+                        food can move to another meal.”
                     </p>
                     <p className="mt-3 leading-7">
-                        <strong>A response:</strong> “One shop agreed to a
-                        pilot. Setup took longer than expected. I would include
-                        that time in the next quote and offer ongoing support
-                        separately.”
+                        <strong>A response:</strong> “It worked for three weeks.
+                        I wasted less food, but I needed one faster backup meal
+                        for busy days.”
                     </p>
                 </section>
                 <section className="mt-9 space-y-3 leading-7">
                     <h2 className="text-xl font-semibold">
-                        Explain the work behind the result
+                        Explain the context behind the result
                     </h2>
                     <p>
-                        Say what you sold, who needed it, how you found the
-                        client, and the time and money involved. Distinguish
-                        revenue from profit. If you share numbers, explain the
-                        period and context. Describe setbacks and limitations;
-                        income claims alone are not a method.
+                        Say what you were trying to do, the constraints you had,
+                        the tools or materials involved, and any meaningful time
+                        or cost. Describe what changed, what surprised you, and
+                        what you would do differently. A result without context
+                        is much harder for someone else to use.
                     </p>
                 </section>
                 <section className="mt-9 space-y-3 leading-7">
