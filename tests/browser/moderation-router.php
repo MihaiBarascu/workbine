@@ -19,6 +19,7 @@ require $root.'/vendor/autoload.php';
 $app = require $root.'/bootstrap/app.php';
 $app->booted(function () {
     config([
+        'inertia.ssr.enabled' => false,
         'moderation.enabled' => true,
         'moderation.api_key' => 'browser-test-only',
         'moderation.admin_user_ids' => [(string) User::query()->where('email', 'preview-moderator@example.test')->value('id')],
