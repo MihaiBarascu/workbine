@@ -154,7 +154,7 @@ class PublicSeoTest extends TestCase
         $hiddenMethodAuthor = $hiddenMethod->user;
         $hiddenMethod->forceFill(['hidden_at' => now()])->save();
 
-        $this->get(route('sitemap'))
+        $response = $this->get(route('sitemap'))
             ->assertOk()
             ->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
             ->assertSee('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', false)
@@ -169,6 +169,11 @@ class PublicSeoTest extends TestCase
             ->assertDontSee(route('members.show', ['username' => $hiddenMethodAuthor->username]), false)
             ->assertDontSee(route('topics.show', $hiddenTopic), false)
             ->assertDontSee(route('methods.show', [$topic, $hiddenMethod]), false);
+
+        $this->assertStringStartsWith(
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+            trim($response->getContent()),
+        );
     }
 
     /** @return array<string, mixed> */
