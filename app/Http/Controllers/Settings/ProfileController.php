@@ -48,7 +48,7 @@ class ProfileController extends Controller
             app(ContentModeration::class)->text($user, [
                 ...$user->only(['name', 'username', 'bio', 'location', 'website', 'public_email']),
                 'social_links' => collect($user->social_links ?? [])
-                    ->map(fn (array $link): string => ($link['platform'] ?? '').' '.($link['url'] ?? ''))
+                    ->map(fn (array $link): string => $link['platform'].' '.$link['url'])
                     ->implode("\n"),
             ], 'profile', 'name');
         }
