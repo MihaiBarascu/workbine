@@ -33,6 +33,7 @@ RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --opt
     && chown -R www-data:www-data storage bootstrap/cache
 
 COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+COPY docker/security.ini /usr/local/etc/php/conf.d/security.ini
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/workbine.conf
 COPY docker/entrypoint.sh /usr/local/bin/workbine-entrypoint
