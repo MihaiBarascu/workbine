@@ -143,10 +143,10 @@ export function TopicCard({
                 <Link
                     href={`/topics/${topic.slug}#methods-heading`}
                     className="wb-card-methods"
-                    aria-label={`${topic.methods_count} methods`}
                 >
                     <MessageSquare aria-hidden="true" />
-                    {topic.methods_count}
+                    {topic.methods_count}{' '}
+                    {topic.methods_count === 1 ? 'method' : 'methods'}
                 </Link>
                 {topic.methods_count === 0 && (
                     <Link
