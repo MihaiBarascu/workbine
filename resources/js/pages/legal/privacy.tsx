@@ -140,8 +140,8 @@ export default function Privacy() {
                     Account information is kept while your account is active.
                     Contributions remain available until removed through account
                     deletion or moderation. You can remove your own experiences
-                    and saved topics, and edit or clear the public profile fields
-                    available in settings.
+                    and saved topics, and edit or clear the public profile
+                    fields available in settings.
                 </p>
                 <p>
                     Deleting your account in Profile settings removes your
