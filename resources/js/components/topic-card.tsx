@@ -16,10 +16,7 @@ import type { MethodSummary, TopicSummary, User } from '@/types';
 function methodOutcomeSummary(method: MethodSummary): string {
     const worked = method.worked_count ?? 0;
     const partly = method.partly_count ?? 0;
-    const didNotWork = Math.max(
-        0,
-        method.experiences_count - worked - partly,
-    );
+    const didNotWork = Math.max(0, method.experiences_count - worked - partly);
     const outcomes = [
         worked > 0 ? `${worked} worked` : null,
         partly > 0 ? `${partly} partly` : null,
