@@ -22,9 +22,9 @@ export default function Privacy() {
                 <ul>
                     <li>
                         <strong>Account details:</strong> your email, display
-                        name, username and sign-in credentials. Optional profile
-                        details include a photo, biography, location and
-                        website.
+                        name, username and sign-in credentials. Optional public
+                        profile details include a photo, biography, location,
+                        website, separate contact email and social links.
                     </li>
                     <li>
                         <strong>Contributions:</strong> topics, methods, dated
@@ -46,16 +46,19 @@ export default function Privacy() {
                 <h2>What other people can see</h2>
                 <p>
                     Your profile, contributions, uploaded contribution images
-                    and aggregate impact are public. Public content can be
-                    indexed by search engines and copied or shared by others.
-                    Check images and text for private information before
-                    publishing.
+                    and aggregate impact are public. Any contact email or social
+                    links you add to the public-profile section are public too
+                    and can be indexed, copied or shared by others. Only publish
+                    contact details you are comfortable making public.
                 </p>
                 <p>
                     Your account email, sign-in credentials, saved-topic list,
                     notifications and reports are not shown on your public
-                    profile. Aggregate save counts are public. Information you
-                    include yourself in a public contribution is public too.
+                    profile. The optional public contact email is stored
+                    separately from the account email, so changing one does not
+                    automatically publish or change the other. Aggregate save
+                    counts are public. Information you include yourself in a
+                    public contribution is public too.
                 </p>
             </section>
             <section>
@@ -63,9 +66,10 @@ export default function Privacy() {
                 <p>
                     We use account and contribution data to provide the service
                     you request: sign-in, publishing, saved topics,
-                    notifications and account recovery. Where GDPR applies, this
-                    processing is based on performing the service agreement
-                    described in our <Link href="/terms">Terms</Link>.
+                    notifications and account recovery. Public profile details
+                    are displayed when you choose to add them. Where GDPR
+                    applies, this processing is based on performing the service
+                    agreement described in our <Link href="/terms">Terms</Link>.
                 </p>
                 <p>
                     Security, abuse prevention and moderation support our
@@ -136,8 +140,8 @@ export default function Privacy() {
                     Account information is kept while your account is active.
                     Contributions remain available until removed through account
                     deletion or moderation. You can remove your own experiences
-                    and saved topics, and edit the profile fields available in
-                    settings.
+                    and saved topics, and edit or clear the public profile
+                    fields available in settings.
                 </p>
                 <p>
                     Deleting your account in Profile settings removes your

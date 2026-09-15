@@ -26,6 +26,8 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string|null $bio
  * @property string|null $location
  * @property string|null $website
+ * @property string|null $public_email
+ * @property array<int, array{platform: string, url: string}>|null $social_links
  * @property int|null $topics_count
  * @property int|null $methods_count
  * @property int|null $experiences_count
@@ -45,7 +47,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property-read Collection<int, Topic> $topics
  * @property-read Collection<int, Method> $methods
  */
-#[Fillable(['name', 'username', 'email', 'google_id', 'avatar', 'password', 'bio', 'location', 'website'])]
+#[Fillable(['name', 'username', 'email', 'google_id', 'avatar', 'password', 'bio', 'location', 'website', 'public_email', 'social_links'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token', 'avatarImage', 'avatar_image_id', 'publishing_suspended_at'])]
 class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
@@ -113,6 +115,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return [
             'email_verified_at' => 'datetime',
             'publishing_suspended_at' => 'datetime',
+            'social_links' => 'array',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];

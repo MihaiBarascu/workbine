@@ -4,6 +4,7 @@ import {
     ArrowUpRight,
     BookOpen,
     CalendarDays,
+    Mail,
     MapPin,
     Pencil,
 } from 'lucide-react';
@@ -11,7 +12,8 @@ import { MemberAvatar } from '@/components/community';
 import { ShareLinkButton } from '@/components/share-link-button';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
-import type { User } from '@/types';
+import { socialLabel } from '@/lib/social-links';
+import type { SocialLink, User } from '@/types/auth';
 
 type View = 'methods' | 'topics' | 'experiences';
 type Contribution = {
@@ -39,6 +41,8 @@ type Props = {
         bio: string | null;
         location: string | null;
         website: string | null;
+        public_email: string | null;
+        social_links: SocialLink[];
         joined: string | null;
         counts: Record<View | 'topic_saves', number>;
         impact: {
@@ -191,6 +195,26 @@ export default function MemberProfile({
                                     </span>
                                 </a>
                             )}
+                            {member.public_email && (
+                                <a href={`mailto:${member.public_email}`}>
+                                    <Mail aria-hidden="true" />
+                                    Email
+                                </a>
+                            )}
+                            {member.social_links.map((link) => (
+                                <a
+                                    key={link.platform}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer nofollow ugc"
+                                >
+                                    {socialLabel(link.platform)}
+                                    <ArrowUpRight aria-hidden="true" />
+                                    <span className="sr-only">
+                                        (opens in a new tab)
+                                    </span>
+                                </a>
+                            ))}
                         </div>
                     </div>
                 </section>

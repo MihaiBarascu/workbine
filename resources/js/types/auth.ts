@@ -1,3 +1,19 @@
+export type SocialPlatform =
+    | 'linkedin'
+    | 'github'
+    | 'x'
+    | 'instagram'
+    | 'youtube'
+    | 'facebook'
+    | 'tiktok'
+    | 'bluesky'
+    | 'mastodon';
+
+export type SocialLink = {
+    platform: SocialPlatform;
+    url: string;
+};
+
 export type User = {
     id: number;
     name: string;
@@ -6,6 +22,8 @@ export type User = {
     bio?: string | null;
     location?: string | null;
     website?: string | null;
+    public_email?: string | null;
+    social_links?: SocialLink[] | null;
     avatar?: string | null;
     avatar_url?: string | null;
     google_id?: string | null;

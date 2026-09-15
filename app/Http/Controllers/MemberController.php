@@ -112,6 +112,8 @@ class MemberController extends Controller
                 'bio' => $user->bio,
                 'location' => $user->location,
                 'website' => $user->website,
+                'public_email' => $user->public_email,
+                'social_links' => $user->social_links ?? [],
                 'joined' => $user->created_at?->format('F Y'),
                 'reputation' => $reputation->forMember($user),
                 'impact' => [

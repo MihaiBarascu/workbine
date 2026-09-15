@@ -34,11 +34,23 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $user->fill($request->validated());
+        $data = $request->validated();
+        if (array_key_exists('social_links', $data) && $data['social_links'] === []) {
+            $data['social_links'] = null;
+        }
+        if (array_key_exists('public_email', $data) && $data['public_email'] === '') {
+            $data['public_email'] = null;
+        }
+        $user->fill($data);
 
-        $publicFields = ['name', 'username', 'bio', 'location', 'website'];
+        $publicFields = ['name', 'username', 'bio', 'location', 'website', 'public_email', 'social_links'];
         if ($user->isDirty($publicFields)) {
-            app(ContentModeration::class)->text($user, $user->only($publicFields), 'profile', 'name');
+            app(ContentModeration::class)->text($user, [
+                ...$user->only(['name', 'username', 'bio', 'location', 'website', 'public_email']),
+                'social_links' => collect($user->social_links ?? [])
+                    ->map(fn (array $link): string => $link['platform'].' '.$link['url'])
+                    ->implode("\n"),
+            ], 'profile', 'name');
         }
 
         $emailChanged = $user->isDirty('email');
