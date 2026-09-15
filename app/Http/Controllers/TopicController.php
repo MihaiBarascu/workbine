@@ -75,6 +75,14 @@ class TopicController extends Controller
             ->appends(['view' => $view, 'q' => $search, ...array_filter(['category' => $category, 'tag' => $tag, 'sort' => $sort === 'newest' ? null : $sort, 'scope' => $scope === 'topics' ? null : $scope])])
             ->through(fn (Topic $topic): array => $this->serializeTopic($topic));
 
+        $showHomepageExample = $search === ''
+            && $view === 'latest'
+            && $sort === 'newest'
+            && $scope === 'topics'
+            && $category === ''
+            && $tag === ''
+            && $topics->currentPage() === 1;
+
         $response = Inertia::render('topics/index', [
             'topics' => $topics,
             'view' => $view,
@@ -92,6 +100,7 @@ class TopicController extends Controller
             ),
             'availableTags' => TopicTag::query()->whereHas('topic')->select('name')->distinct()->orderBy('name')->limit(40)->pluck('name'),
             'categoryCounts' => Topic::query()->whereNotNull('category')->select('category')->selectRaw('COUNT(*) as total')->groupBy('category')->pluck('total', 'category'),
+            'homepageExample' => $showHomepageExample ? $this->homepageExample() : null,
             'people' => $scope !== 'people' ? null : User::query()->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
                 ->whereRaw("LOWER(name) LIKE ? ESCAPE '!'", ['%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($search)).'%'])
                 ->orWhereRaw("LOWER(username) LIKE ? ESCAPE '!'", ['%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], mb_strtolower($search)).'%'])))
@@ -223,6 +232,34 @@ class TopicController extends Controller
                 ->where('topic_id', $topic->id)
                 ->exists(),
         ]);
+    }
+
+    /** @return array{topic: array{title: string, slug: string}, method: array<string, mixed>}|null */
+    private function homepageExample(): ?array
+    {
+        $method = Method::query()
+            ->select(['methods.id', 'methods.topic_id', 'methods.user_id', 'methods.title', 'methods.body', 'methods.source_url', 'methods.protected_at', 'methods.created_at', 'methods.updated_at'])
+            ->with(['topic:id,title,slug', 'user:id,name,username,avatar_image_id', 'user.avatarImage'])
+            ->withCount([
+                'experiences',
+                'experiences as worked_count' => fn ($query) => $query->where('outcome', 'worked'),
+                'experiences as partly_count' => fn ($query) => $query->where('outcome', 'partly'),
+            ])
+            ->latest('methods.created_at')
+            ->orderByDesc('methods.id')
+            ->first();
+
+        if ($method === null) {
+            return null;
+        }
+
+        return [
+            'topic' => [
+                'title' => $method->topic->title,
+                'slug' => $method->topic->slug,
+            ],
+            'method' => $this->serializeMethodSummary($method),
+        ];
     }
 
     /** @return array<string, mixed> */
