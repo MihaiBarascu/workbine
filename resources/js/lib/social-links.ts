@@ -14,6 +14,7 @@ export const socialPlatforms: { value: SocialPlatform; label: string }[] = [
 
 export function socialLabel(platform: SocialPlatform): string {
     return (
-        socialPlatforms.find((item) => item.value === platform)?.label ?? platform
+        socialPlatforms.find((item) => item.value === platform)?.label ??
+        platform
     );
 }
