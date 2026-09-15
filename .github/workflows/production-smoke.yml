@@ -68,6 +68,8 @@ jobs:
           import urllib.error
           import urllib.parse
           import urllib.request
+          from html.parser import HTMLParser
+          from xml.etree import ElementTree
           from tools.inertia_page import parse_page
 
           base = 'https://workbine.com'
@@ -75,7 +77,7 @@ jobs:
           expected_entry = os.environ['EXPECTED_ENTRY_ASSET']
           query = 'workbine-deploy-' + expected_source
           headers = {
-              'User-Agent': 'Workbine-Deployment-Smoke/2.0',
+              'User-Agent': 'Workbine-Deployment-Smoke/3.0',
               'Accept': 'text/html, application/xhtml+xml',
               'Cache-Control': 'no-cache',
           }
@@ -84,7 +86,36 @@ jobs:
           with open('/tmp/expected-manifest.json', encoding='utf-8') as manifest_file:
               expected_manifest = json.load(manifest_file)
 
-          def request_bytes(path, accept=None):
+          class AppRootParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.app_depth = 0
+                  self.found_app = False
+                  self.has_rendered_content = False
+
+              def handle_starttag(self, tag, attrs):
+                  if self.app_depth:
+                      self.app_depth += 1
+                      self.has_rendered_content = True
+                      return
+
+                  if dict(attrs).get('id') == 'app':
+                      self.found_app = True
+                      self.app_depth = 1
+
+              def handle_startendtag(self, tag, attrs):
+                  if self.app_depth:
+                      self.has_rendered_content = True
+
+              def handle_endtag(self, tag):
+                  if self.app_depth:
+                      self.app_depth -= 1
+
+              def handle_data(self, data):
+                  if self.app_depth and data.strip():
+                      self.has_rendered_content = True
+
+          def request_response(path, accept=None):
               global stage
               stage = path
               request_headers = dict(headers)
@@ -93,11 +124,38 @@ jobs:
               request = urllib.request.Request(base + path, headers=request_headers)
               with urllib.request.urlopen(request, timeout=15) as response:
                   assert response.status == 200, 'Public route did not return HTTP 200'
-                  return response.read(4000000), response.headers.get_content_charset() or 'utf-8'
+                  return (
+                      response.read(4000000),
+                      response.headers.get_content_charset() or 'utf-8',
+                      {key.lower(): value for key, value in response.headers.items()},
+                  )
+
+          def request_bytes(path, accept=None):
+              content, charset, _ = request_response(path, accept)
+              return content, charset
 
           def read_page(path):
               content, charset = request_bytes(path)
               return parse_page(content.decode(charset))
+
+          def confirm_ssr(html):
+              parser = AppRootParser()
+              parser.feed(html)
+              assert parser.found_app, 'Inertia application root was not found in live HTML'
+              assert parser.has_rendered_content, 'Live HTML has an empty Inertia root; SSR does not appear active'
+
+          def confirm_sitemap():
+              content, charset = request_bytes('/sitemap.xml', 'application/xml, text/xml;q=0.9, */*;q=0.8')
+              root = ElementTree.fromstring(content.decode(charset))
+              assert root.tag.rsplit('}', 1)[-1] == 'urlset', 'Sitemap root is not <urlset>'
+              urls = [
+                  element.text.strip()
+                  for element in root.iter()
+                  if element.tag.rsplit('}', 1)[-1] == 'loc' and element.text
+              ]
+              assert urls, 'Sitemap has no <loc> entries'
+              assert any(url.startswith(base + '/') for url in urls), 'Sitemap does not contain Workbine public URLs'
+              return len(urls)
 
           def confirm_frontend_fingerprint():
               try:
@@ -124,23 +182,44 @@ jobs:
 
                   fingerprint = confirm_frontend_fingerprint()
 
+                  homepage_content, homepage_charset, homepage_headers = request_response(
+                      '/', 'text/html, application/xhtml+xml'
+                  )
+                  homepage_html = homepage_content.decode(homepage_charset)
+                  powered_by = homepage_headers.get('x-powered-by', '')
+                  assert 'php' not in powered_by.lower(), 'PHP version/runtime is exposed through X-Powered-By'
+                  confirm_ssr(homepage_html)
+
+                  sitemap_url_count = confirm_sitemap()
+
                   result = read_page('/topics?q=' + urllib.parse.quote(query, safe=''))
                   assert result.get('component') == 'topics/index', 'Unexpected public page'
                   assert result.get('props', {}).get('search') == query, 'Search behavior is not visible yet'
 
                   listing = read_page('/topics')
+                  assert listing.get('component') == 'topics/index', 'Explore page failed'
                   topics = listing.get('props', {}).get('topics', {}).get('data', [])
                   topic_pages_checked = 0
                   method_pages_checked = 0
                   experience_pages_checked = 0
+                  member_pages_checked = 0
                   if topics:
-                      topic = read_page('/topics/' + urllib.parse.quote(topics[0]['slug'], safe=''))
+                      first_topic = topics[0]
+                      topic = read_page('/topics/' + urllib.parse.quote(first_topic['slug'], safe=''))
                       assert topic.get('component') == 'topics/show', 'Topic detail failed'
                       topic_pages_checked = 1
+
+                      username = (first_topic.get('user') or {}).get('username')
+                      if username:
+                          member = read_page('/members/' + urllib.parse.quote(username, safe=''))
+                          assert member.get('component') == 'members/show', 'Public member profile failed'
+                          assert member.get('props', {}).get('member', {}).get('username') == username, 'Wrong public member profile'
+                          member_pages_checked = 1
+
                       methods = topic.get('props', {}).get('methods', {}).get('data', [])
                       for method in methods[:1]:
                           assert 'experiences_count' in method, 'Experience release is not visible yet'
-                          method_path = '/topics/' + urllib.parse.quote(topics[0]['slug'], safe='') + '/methods/' + str(method['id'])
+                          method_path = '/topics/' + urllib.parse.quote(first_topic['slug'], safe='') + '/methods/' + str(method['id'])
                           detail = read_page(method_path)
                           assert detail.get('component') == 'topics/method-show', 'Public method page failed'
                           assert detail.get('props', {}).get('method', {}).get('id') == method['id'], 'Wrong method detail'
@@ -156,14 +235,22 @@ jobs:
                       'frontend_fingerprint': fingerprint,
                       'expected_entry_asset': expected_entry,
                       'health': 'HTTP 200',
+                      'ssr': 'confirmed',
+                      'sitemap': 'confirmed',
+                      'sitemap_url_count': sitemap_url_count,
+                      'php_x_powered_by': 'not exposed',
                       'search_behavior': 'confirmed',
-                      'public_listing': 'confirmed',
+                      'explore_page': 'confirmed',
                       'topic_pages_checked': topic_pages_checked,
                       'method_pages_checked': method_pages_checked,
                       'experience_pages_checked': experience_pages_checked,
+                      'member_pages_checked': member_pages_checked,
                       'public_topic_total': listing.get('props', {}).get('topics', {}).get('total'),
                   }
-                  message = 'PASS: live frontend build fingerprint, health, search behavior and public listing. No production content was created.'
+                  message = (
+                      'PASS: live frontend build fingerprint, health, SSR, sitemap, PHP header hardening, '
+                      'search behavior and public routes. No production content was created.'
+                  )
                   print(message)
                   print(json.dumps(coverage))
                   with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
@@ -174,8 +261,9 @@ jobs:
                           + json.dumps(coverage, indent=2)
                           + '\n```\n\n'
                           + 'The frontend fingerprint is built from the same Dockerfile used for production and compared with the public Vite manifest when available, with the application entry asset as a 404 fallback. '
+                          + 'SSR is confirmed from rendered content inside the Inertia application root. The sitemap must parse as XML and contain public Workbine URLs, and the homepage must not expose PHP through X-Powered-By. '
                           + 'It verifies the shipped frontend build for the expected source, but it does not prove runtime environment values, external providers, or a backend-only revision whose frontend build is unchanged. '
-                          + 'Zero sampled topic/method/experience pages is not coverage of those flows. No authenticated Google session is tested.\n'
+                          + 'Zero sampled topic/method/experience/member pages is not coverage of those flows. No authenticated Google session is tested.\n'
                       )
                   break
               except urllib.error.HTTPError as error:
