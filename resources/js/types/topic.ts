@@ -27,6 +27,7 @@ export type TopicSummary = {
     updated_at: string | null;
     methods_count: number;
     saves_count: number;
+    method_preview?: MethodSummary | null;
     category?: string | null;
     tags?: string[];
     likes_count?: number;

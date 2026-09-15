@@ -62,6 +62,39 @@ class PublicSeoTest extends TestCase
         $this->assertSame($topic->created_at?->toIso8601String(), $structuredData['datePublished']);
     }
 
+    public function test_topic_and_method_pages_expose_real_navigation_breadcrumbs(): void
+    {
+        $topic = Topic::factory()->create(['title' => 'Organize a shared workshop']);
+        $method = Method::factory()->create([
+            'topic_id' => $topic->id,
+            'title' => 'Reset the workbench after every job',
+        ]);
+        $topicUrl = route('topics.show', $topic);
+        $methodUrl = route('methods.show', [$topic, $method]);
+
+        $topicBreadcrumbs = $this->structuredData(
+            $this->get($topicUrl)->assertOk(),
+            'breadcrumbs',
+        );
+        $methodResponse = $this->get($methodUrl)
+            ->assertOk()
+            ->assertSee('<meta name="robots" content="index,follow"', false);
+        $methodBreadcrumbs = $this->structuredData($methodResponse, 'breadcrumbs');
+
+        $this->assertSame('BreadcrumbList', $topicBreadcrumbs['@type']);
+        $this->assertSame('Topics', $topicBreadcrumbs['itemListElement'][0]['name']);
+        $this->assertSame(route('topics.index'), $topicBreadcrumbs['itemListElement'][0]['item']);
+        $this->assertSame($topic->title, $topicBreadcrumbs['itemListElement'][1]['name']);
+        $this->assertSame($topicUrl, $topicBreadcrumbs['itemListElement'][1]['item']);
+
+        $this->assertSame('BreadcrumbList', $methodBreadcrumbs['@type']);
+        $this->assertSame('Topics', $methodBreadcrumbs['itemListElement'][0]['name']);
+        $this->assertSame($topic->title, $methodBreadcrumbs['itemListElement'][1]['name']);
+        $this->assertSame($topicUrl, $methodBreadcrumbs['itemListElement'][1]['item']);
+        $this->assertSame($method->title, $methodBreadcrumbs['itemListElement'][2]['name']);
+        $this->assertSame($methodUrl, $methodBreadcrumbs['itemListElement'][2]['item']);
+    }
+
     public function test_member_profile_has_indexable_metadata_and_profile_structured_data(): void
     {
         $member = User::factory()->create([
@@ -139,15 +172,15 @@ class PublicSeoTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function structuredData(TestResponse $response): array
+    private function structuredData(TestResponse $response, string $key = 'structured-data'): array
     {
         $matched = preg_match(
-            '/<script type="application\/ld\+json" inertia="structured-data">(.*?)<\/script>/s',
+            '#<script type="application/ld\+json" inertia="'.preg_quote($key, '#').'">(.*?)</script>#s',
             $response->getContent(),
             $matches,
         );
 
-        $this->assertSame(1, $matched, 'Expected one structured-data JSON-LD block.');
+        $this->assertSame(1, $matched, 'Expected structured-data JSON-LD block for '.$key.'.');
 
         return json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
     }

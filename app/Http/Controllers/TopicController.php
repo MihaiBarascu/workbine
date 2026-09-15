@@ -72,8 +72,37 @@ class TopicController extends Controller
             ->orderBy('topics.created_at', $sort === 'oldest' ? 'asc' : 'desc')
             ->orderBy('topics.id', $sort === 'oldest' ? 'asc' : 'desc')
             ->paginate(12)
-            ->appends(['view' => $view, 'q' => $search, ...array_filter(['category' => $category, 'tag' => $tag, 'sort' => $sort === 'newest' ? null : $sort, 'scope' => $scope === 'topics' ? null : $scope])])
-            ->through(fn (Topic $topic): array => $this->serializeTopic($topic));
+            ->appends(['view' => $view, 'q' => $search, ...array_filter(['category' => $category, 'tag' => $tag, 'sort' => $sort === 'newest' ? null : $sort, 'scope' => $scope === 'topics' ? null : $scope])]);
+
+        $showMethodPreview = $search === ''
+            && $view === 'latest'
+            && $sort === 'newest'
+            && $scope === 'topics'
+            && $category === ''
+            && $tag === ''
+            && $topics->currentPage() === 1;
+
+        $methodPreview = null;
+        if ($showMethodPreview && $topics->getCollection()->isNotEmpty()) {
+            $methodPreview = Method::query()
+                ->select(['methods.id', 'methods.topic_id', 'methods.user_id', 'methods.title', 'methods.body', 'methods.source_url', 'methods.protected_at', 'methods.created_at', 'methods.updated_at'])
+                ->whereIn('methods.topic_id', $topics->getCollection()->pluck('id')->all())
+                ->whereHas('experiences')
+                ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage'])
+                ->withCount([
+                    'experiences',
+                    'experiences as worked_count' => fn ($query) => $query->where('outcome', 'worked'),
+                    'experiences as partly_count' => fn ($query) => $query->where('outcome', 'partly'),
+                ])
+                ->latest('methods.created_at')
+                ->orderByDesc('methods.id')
+                ->first();
+        }
+
+        $topics->through(fn (Topic $topic): array => $this->serializeTopic(
+            $topic,
+            $methodPreview?->topic_id === $topic->id ? $methodPreview : null,
+        ));
 
         $response = Inertia::render('topics/index', [
             'topics' => $topics,
@@ -249,7 +278,7 @@ class TopicController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function serializeTopic(Topic $topic): array
+    private function serializeTopic(Topic $topic, ?Method $methodPreview = null): array
     {
         return [
             'id' => $topic->id,
@@ -266,6 +295,7 @@ class TopicController extends Controller
             'updated_at' => $topic->updated_at?->toIso8601String(),
             'methods_count' => $topic->methods_count ?? 0,
             'saves_count' => $topic->saves_count ?? 0,
+            'method_preview' => $methodPreview !== null ? $this->serializeMethodSummary($methodPreview) : null,
             'user' => [
                 'id' => $topic->user->id,
                 'name' => $topic->user->name,

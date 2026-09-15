@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,6 +25,39 @@ class TopicsTest extends TestCase
                 ->component('topics/index')
                 ->has('topics.data', 1)
                 ->where('topics.data.0.title', 'How do you build a useful SaaS with Gemini?'));
+    }
+
+    public function test_default_discovery_attaches_a_real_method_with_an_experience_to_its_topic(): void
+    {
+        $topic = Topic::factory()->create([
+            'title' => 'Keep a workshop organized',
+        ]);
+        $method = Method::factory()->create([
+            'topic_id' => $topic->id,
+            'title' => 'Reset the workbench after every job',
+            'body' => 'I keep the tools used for the current job on the bench, then put everything back before starting another one.',
+        ]);
+        $method->experiences()->create([
+            'user_id' => User::factory()->create()->id,
+            'outcome' => 'worked',
+            'body' => 'The reset made it much easier to start the next job without hunting for tools.',
+        ]);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('topics/index')
+                ->where('topics.data.0.id', $topic->id)
+                ->where('topics.data.0.method_preview.id', $method->id)
+                ->where('topics.data.0.method_preview.title', $method->title)
+                ->where('topics.data.0.method_preview.experiences_count', 1)
+                ->where('topics.data.0.method_preview.worked_count', 1));
+
+        $this->get(route('topics.index', ['q' => 'workshop']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('topics/index')
+                ->where('topics.data.0.method_preview', null));
     }
 
     public function test_anyone_can_view_a_topic(): void
