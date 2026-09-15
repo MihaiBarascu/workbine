@@ -18,7 +18,12 @@ import { PublicShell } from '@/components/public-shell';
 import { TopicCard } from '@/components/topic-card';
 import { TopicStarters } from '@/components/topic-starters';
 import { Button } from '@/components/ui/button';
-import type { PaginatedTopics, PublicMember, User } from '@/types';
+import type {
+    MethodSummary,
+    PaginatedTopics,
+    PublicMember,
+    User,
+} from '@/types';
 
 type Props = {
     topics: PaginatedTopics & { total: number };
@@ -30,6 +35,10 @@ type Props = {
     categories: Record<string, string>;
     categoryCounts: Record<string, number>;
     availableTags: string[];
+    homepageExample: {
+        topic: { title: string; slug: string };
+        method: MethodSummary;
+    } | null;
     people: {
         data: (PublicMember & {
             methods_count: number;
@@ -44,6 +53,27 @@ type Props = {
     search: string;
 };
 
+function experienceSummary(method: MethodSummary): string {
+    if (method.experiences_count === 0) {
+        return 'No experiences yet. This is where someone can share what happened after trying it.';
+    }
+
+    const worked = method.worked_count ?? 0;
+    const partly = method.partly_count ?? 0;
+    const didNotWork = Math.max(
+        0,
+        method.experiences_count - worked - partly,
+    );
+    const outcomes = [
+        `${method.experiences_count} ${method.experiences_count === 1 ? 'experience' : 'experiences'}`,
+        worked > 0 ? `${worked} worked` : null,
+        partly > 0 ? `${partly} partly` : null,
+        didNotWork > 0 ? `${didNotWork} did not work` : null,
+    ].filter(Boolean);
+
+    return outcomes.join(' · ');
+}
+
 export default function TopicsIndex({
     topics,
     view,
@@ -55,6 +85,7 @@ export default function TopicsIndex({
     categories,
     categoryCounts,
     availableTags,
+    homepageExample,
     people,
 }: Props) {
     const { auth } = usePage<{ auth: { user: User | null } }>().props;
@@ -230,7 +261,7 @@ export default function TopicsIndex({
                                     required
                                     maxLength={160}
                                     aria-describedby="new-topic-hint"
-                                    placeholder="For example: Finding the first client for an AI service"
+                                    placeholder="For example: Keeping a small garden watered while away"
                                 />
                                 <button type="submit">
                                     Create topic
@@ -499,10 +530,10 @@ export default function TopicsIndex({
                                     else.
                                 </h3>
                                 <p>
-                                    There are no topics yet. Share a useful AI
-                                    workflow, a product you built, or how you
-                                    found a paying client. Explain the steps,
-                                    costs and what you learned.
+                                    There are no topics yet. Share a workflow, a
+                                    project you built, a repair you figured out,
+                                    or a better way to do something. Explain the
+                                    steps, context, and what you learned.
                                 </p>
                                 <TopicStarters onChoose={chooseStarter} />
                             </div>
@@ -651,32 +682,73 @@ export default function TopicsIndex({
                                         </div>
                                     </li>
                                 </ol>
-                                <details className="wb-worked-example">
-                                    <summary>See a simple example</summary>
-                                    <p className="wb-example-label">
-                                        Illustration only, not a community post.
-                                    </p>
-                                    <dl>
-                                        <dt>Topic</dt>
-                                        <dd>
-                                            Finding the first client for an AI
-                                            service
-                                        </dd>
-                                        <dt>Method</dt>
-                                        <dd>
-                                            Choose one type of business, ask
-                                            about a repeated task, and offer a
-                                            small paid pilot.
-                                        </dd>
-                                        <dt>Experience</dt>
-                                        <dd>
-                                            “One of four businesses agreed to a
-                                            pilot. Setup took longer than
-                                            expected, so next time I would
-                                            narrow the scope.”
-                                        </dd>
-                                    </dl>
-                                </details>
+                                {homepageExample ? (
+                                    <details
+                                        className="wb-worked-example"
+                                        open
+                                    >
+                                        <summary>
+                                            See a real community example
+                                        </summary>
+                                        <p className="wb-example-label">
+                                            Real topic, method, and reported
+                                            outcomes.
+                                        </p>
+                                        <dl>
+                                            <dt>Topic</dt>
+                                            <dd>
+                                                <Link
+                                                    href={`/topics/${homepageExample.topic.slug}`}
+                                                >
+                                                    {homepageExample.topic.title}
+                                                </Link>
+                                            </dd>
+                                            <dt>Method</dt>
+                                            <dd>
+                                                <Link
+                                                    href={`/topics/${homepageExample.topic.slug}/methods/${homepageExample.method.id}`}
+                                                >
+                                                    {homepageExample.method.title}
+                                                </Link>{' '}
+                                                — {homepageExample.method.body}
+                                            </dd>
+                                            <dt>Experience</dt>
+                                            <dd>
+                                                {experienceSummary(
+                                                    homepageExample.method,
+                                                )}
+                                            </dd>
+                                        </dl>
+                                    </details>
+                                ) : (
+                                    <details className="wb-worked-example">
+                                        <summary>See a simple example</summary>
+                                        <p className="wb-example-label">
+                                            Illustration only, not a community
+                                            post.
+                                        </p>
+                                        <dl>
+                                            <dt>Topic</dt>
+                                            <dd>
+                                                Keeping a weekly meal plan
+                                                simple
+                                            </dd>
+                                            <dt>Method</dt>
+                                            <dd>
+                                                Keep five reliable dinners on a
+                                                short list, plan four of them,
+                                                and leave one evening flexible.
+                                            </dd>
+                                            <dt>Experience</dt>
+                                            <dd>
+                                                “It worked for three weeks. I
+                                                wasted less food, but I needed
+                                                one faster backup meal for busy
+                                                days.”
+                                            </dd>
+                                        </dl>
+                                    </details>
+                                )}
                                 <Link
                                     href="/community/guide"
                                     className="wb-guide-link"
