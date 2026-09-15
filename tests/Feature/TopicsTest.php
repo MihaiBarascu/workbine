@@ -27,7 +27,7 @@ class TopicsTest extends TestCase
                 ->where('topics.data.0.title', 'How do you build a useful SaaS with Gemini?'));
     }
 
-    public function test_default_discovery_uses_a_real_method_with_an_experience_as_its_example(): void
+    public function test_default_discovery_attaches_a_real_method_with_an_experience_to_its_topic(): void
     {
         $topic = Topic::factory()->create([
             'title' => 'Keep a workshop organized',
@@ -47,18 +47,17 @@ class TopicsTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('topics/index')
-                ->where('homepageExample.topic.title', $topic->title)
-                ->where('homepageExample.topic.slug', $topic->slug)
-                ->where('homepageExample.method.id', $method->id)
-                ->where('homepageExample.method.title', $method->title)
-                ->where('homepageExample.method.experiences_count', 1)
-                ->where('homepageExample.method.worked_count', 1));
+                ->where('topics.data.0.id', $topic->id)
+                ->where('topics.data.0.method_preview.id', $method->id)
+                ->where('topics.data.0.method_preview.title', $method->title)
+                ->where('topics.data.0.method_preview.experiences_count', 1)
+                ->where('topics.data.0.method_preview.worked_count', 1));
 
         $this->get(route('topics.index', ['q' => 'workshop']))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('topics/index')
-                ->where('homepageExample', null));
+                ->where('topics.data.0.method_preview', null));
     }
 
     public function test_anyone_can_view_a_topic(): void
