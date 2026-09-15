@@ -33,12 +33,19 @@ test('public contact details can be added and are visible on the member profile'
         'href',
         'mailto:public-contact@example.test',
     );
-    await expect(page.getByRole('link', { name: /LinkedIn/ })).toHaveAttribute(
+    await expect(
+        page.getByRole('link', {
+            name: 'LinkedIn (opens in a new tab)',
+            exact: true,
+        }),
+    ).toHaveAttribute(
         'href',
         'https://www.linkedin.com/in/workbine-example',
     );
-    await expect(page.getByRole('link', { name: /GitHub/ })).toHaveAttribute(
-        'href',
-        'https://github.com/workbine-example',
-    );
+    await expect(
+        page.getByRole('link', {
+            name: 'GitHub (opens in a new tab)',
+            exact: true,
+        }),
+    ).toHaveAttribute('href', 'https://github.com/workbine-example');
 });
