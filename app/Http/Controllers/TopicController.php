@@ -239,6 +239,7 @@ class TopicController extends Controller
     {
         $method = Method::query()
             ->select(['methods.id', 'methods.topic_id', 'methods.user_id', 'methods.title', 'methods.body', 'methods.source_url', 'methods.protected_at', 'methods.created_at', 'methods.updated_at'])
+            ->whereHas('experiences')
             ->with(['topic:id,title,slug', 'user:id,name,username,avatar_image_id', 'user.avatarImage'])
             ->withCount([
                 'experiences',
