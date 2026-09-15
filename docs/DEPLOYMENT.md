@@ -13,13 +13,15 @@ The workflow:
 - also updates the convenience tag `ghcr.io/mihaibarascu/workbine:main`;
 - records the registry digest;
 - pulls the image back by digest and verifies PHP, Node, the SSR bundle, Supervisor, Laravel and Inertia SSR;
-- does **not** deploy production.
+- does **not** invoke a Dokploy production deployment.
 
 The SHA tag or digest is the release identifier. Do not use `latest` as the production release reference.
 
 ## Current production during Phase 1
 
-Keep the existing Dokploy production application unchanged while the artifact pipeline is introduced and verified. Production still uses the current deployment path until staging exists and the promotion flow is ready.
+Keep the existing Dokploy production application unchanged while the artifact pipeline is introduced and verified. Production still uses the current source-build deployment path until staging exists and the promotion flow is ready.
+
+The existing Dokploy integration may continue to react to merges on `main` and perform its normal source-build redeploy. Phase 1 does not disable that existing behavior; the new GHCR workflow simply adds release artifact publication alongside it.
 
 ## Phase 2: Dokploy staging
 
