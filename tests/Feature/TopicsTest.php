@@ -27,7 +27,7 @@ class TopicsTest extends TestCase
                 ->where('topics.data.0.title', 'How do you build a useful SaaS with Gemini?'));
     }
 
-    public function test_default_discovery_uses_a_real_method_as_its_example(): void
+    public function test_default_discovery_uses_a_real_method_with_an_experience_as_its_example(): void
     {
         $topic = Topic::factory()->create([
             'title' => 'Keep a workshop organized',
@@ -36,6 +36,11 @@ class TopicsTest extends TestCase
             'topic_id' => $topic->id,
             'title' => 'Reset the workbench after every job',
             'body' => 'I keep the tools used for the current job on the bench, then put everything back before starting another one.',
+        ]);
+        $method->experiences()->create([
+            'user_id' => User::factory()->create()->id,
+            'outcome' => 'worked',
+            'body' => 'The reset made it much easier to start the next job without hunting for tools.',
         ]);
 
         $this->get(route('home'))
@@ -46,7 +51,8 @@ class TopicsTest extends TestCase
                 ->where('homepageExample.topic.slug', $topic->slug)
                 ->where('homepageExample.method.id', $method->id)
                 ->where('homepageExample.method.title', $method->title)
-                ->where('homepageExample.method.experiences_count', 0));
+                ->where('homepageExample.method.experiences_count', 1)
+                ->where('homepageExample.method.worked_count', 1));
 
         $this->get(route('topics.index', ['q' => 'workshop']))
             ->assertOk()
