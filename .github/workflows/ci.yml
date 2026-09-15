@@ -87,7 +87,7 @@ jobs:
           npm ci
           php artisan wayfinder:generate --with-form --no-interaction
 
-      - name: Build frontend
+      - name: Build frontend and SSR bundle
         run: npm run build
 
       - name: Run quality checks and tests
@@ -116,3 +116,52 @@ jobs:
           path: /tmp/workbine-formatting/
           if-no-files-found: ignore
           retention-days: 3
+
+  production-image:
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.label.name == 'run-remote-checks' &&
+       github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout requested source revision
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Record tested revision
+        run: |
+          git rev-parse HEAD
+          printf 'Production image source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Build production image
+        run: docker build --tag workbine-production-ssr .
+
+      - name: Verify production SSR runtime
+        run: |
+          docker run --rm --entrypoint sh workbine-production-ssr -c '
+            set -eu
+            node --version
+            test -f bootstrap/ssr/ssr.mjs
+            supervisord -n -c /etc/supervisor/conf.d/workbine.conf > /tmp/supervisord.log 2>&1 &
+            supervisor_pid=$!
+            cleanup() {
+              kill -TERM "$supervisor_pid" >/dev/null 2>&1 || true
+              wait "$supervisor_pid" >/dev/null 2>&1 || true
+            }
+            trap cleanup EXIT
+            for attempt in $(seq 1 30); do
+              if php artisan inertia:check-ssr > /dev/null 2>&1; then
+                exit 0
+              fi
+              if ! kill -0 "$supervisor_pid" 2>/dev/null; then
+                cat /tmp/supervisord.log
+                exit 1
+              fi
+              sleep 1
+            done
+            cat /tmp/supervisord.log
+            exit 1
+          '

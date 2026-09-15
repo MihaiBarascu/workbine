@@ -31,10 +31,19 @@ export DB_CONNECTION=sqlite DB_DATABASE=/tmp/workbine-preview.sqlite
 export WORKBINE_BROWSER_PILOT=1
 export MEDIA_ENABLED=true MEDIA_DISK=public
 export COMMUNITY_REPORTS_ENABLED=true APP_DEBUG=false
+export INERTIA_SSR_THROW_ON_ERROR=true
 touch "$DB_DATABASE"
 php artisan migrate --force --no-interaction
 php tools/seed-preview.php
 php artisan storage:link --no-interaction
+php artisan inertia:start-ssr > /artifacts/ssr.log 2>&1 &
+for attempt in {1..30}; do
+    if php artisan inertia:check-ssr > /dev/null 2>&1; then
+        break
+    fi
+    sleep 1
+done
+php artisan inertia:check-ssr
 php artisan serve --no-reload --host=127.0.0.1 --port=8000 > /artifacts/server.log 2>&1 &
 for attempt in {1..30}; do
     if curl --fail --silent http://127.0.0.1:8000/up > /dev/null; then
@@ -43,6 +52,7 @@ for attempt in {1..30}; do
     sleep 1
 done
 curl --fail --silent http://127.0.0.1:8000/up > /dev/null
+curl --fail --silent http://127.0.0.1:8000/ | grep --fixed-strings --quiet 'Find methods people actually use'
 mkdir -p /tmp/workbine-ui-preview
 if [[ "${WORKBINE_TEST_MODE:-full}" == browser-server ]]; then
     node tools/browser-cli-config.cjs
@@ -78,4 +88,4 @@ for attempt in {1..30}; do
 done
 node tests/browser/moderation-flow.cjs
 npm run test:browser
-printf '\nPASS: local build, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'
+printf '\nPASS: local build, SSR, lint, types, PHP, SQLite, PostgreSQL and browser flows.\n'

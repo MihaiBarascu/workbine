@@ -18,7 +18,11 @@ export default defineConfig({
                 }),
             ],
         }),
-        inertia(),
+        inertia({
+            ssr: {
+                host: '127.0.0.1',
+            },
+        }),
         react(),
         babel({
             presets: [reactCompilerPreset()],
