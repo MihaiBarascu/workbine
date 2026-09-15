@@ -20,6 +20,7 @@ require $root.'/vendor/autoload.php';
 $app = require $root.'/bootstrap/app.php';
 $app->booted(function () {
     config([
+        'inertia.ssr.enabled' => false,
         'services.turnstile.enabled' => true,
         'services.turnstile.site_key' => '1x00000000000000000000AA',
         'services.turnstile.secret_key' => 'test-only-secret',
