@@ -64,7 +64,7 @@ class GoogleAuthController extends Controller
             if ($user !== null && ! $user->hasVerifiedEmail()) {
                 // An unverified local account may have been created by someone else.
                 return to_route('login')->withErrors([
-                    'email' => __('An account already uses this email. Sign in and confirm its email in account settings before using Google sign-in. You can reset the password if needed.'),
+                    'google' => __('This email already has a Workbine account that was never confirmed. Reset its password with “Forgot your password?”: that confirms the email, and Continue with Google works after that.'),
                 ]);
             }
         }

@@ -70,7 +70,8 @@ class PasswordSessionRevocationTest extends TestCase
         $this->assertDatabaseHas('sessions', ['id' => $other]);
         $this->assertTrue(Hash::check('recovered-password-27', $user->fresh()->password));
         $this->assertNotSame('previous-remember-token', $user->fresh()->remember_token);
-        $this->assertNull($user->fresh()->email_verified_at);
+        // The emailed reset link proves the mailbox, so the reset also confirms it.
+        $this->assertNotNull($user->fresh()->email_verified_at);
 
         foreach ([$old, $legacy] as $staleSession) {
             $this->browserSession($staleSession);
@@ -210,7 +211,8 @@ class PasswordSessionRevocationTest extends TestCase
         ])->assertSessionHasNoErrors()->assertRedirect(route('login'));
 
         $user->refresh();
-        $this->assertSame($verified, $user->hasVerifiedEmail());
+        // Using the emailed reset link also proves the mailbox, so the email counts as confirmed.
+        $this->assertTrue($user->hasVerifiedEmail());
         $this->assertSame($customAvatar->id, $user->avatar_image_id);
         $this->assertDatabaseHas('passkeys', ['user_id' => $other->id]);
         if ($verified) {

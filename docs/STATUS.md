@@ -234,7 +234,8 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   password account, and Google sign-in still asks for an enabled two-factor code.
   Google always shows its account chooser, so members can switch accounts. Password changes revoke database sessions and invalidate
   authenticated sessions that carry the password-hash marker. Recovery of an
-  unverified account also removes previously enrolled login credentials; verified
+  unverified account also removes previously enrolled login credentials and
+  confirms the email; verified
   accounts retain their additional authentication factors.
 - The Resend SDK is included for transactional email delivery. See
   [EMAIL.md](EMAIL.md) for runtime configuration and delivery verification;

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
+use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Tests\TestCase;
@@ -93,13 +95,39 @@ class GoogleAuthenticationTest extends TestCase
             'email_verified' => true,
         ]));
 
-        $this->get(route('google.callback'))
+        $sessionCookie = (string) config('session.cookie');
+        $response = $this->get(route('google.callback'))
             ->assertRedirect(route('login'))
-            ->assertSessionHasErrors('email');
+            ->assertSessionHasErrors('google');
+        // Like a browser, follow the redirect with the same session: the login page shows the
+        // message next to the Google button, because its own form starts without errors.
+        $this->withCookie($sessionCookie, $response->getCookie($sessionCookie)->getValue())
+            ->withoutVite()->get(route('login'))
+            ->assertInertia(fn (Assert $page) => $page->where('errors.google', fn (string $message) => str_contains($message, 'Forgot your password?')));
 
         $this->assertGuest();
         $this->assertSame($original, $user->refresh()->getAttributes());
         $this->assertDatabaseCount('users', 1);
+    }
+
+    public function test_a_password_reset_lets_google_sign_in_to_a_previously_unconfirmed_account(): void
+    {
+        $user = User::factory()->unverified()->create(['email' => 'owner@example.com', 'google_id' => null]);
+        Socialite::fake('google', SocialiteUser::fake([
+            'id' => 'google-mailbox-owner',
+            'email' => 'owner@example.com',
+            'email_verified' => true,
+        ]));
+        $this->get(route('google.callback'))->assertRedirect(route('login'));
+
+        $this->post(route('password.update'), [
+            'email' => $user->email, 'token' => Password::broker()->createToken($user),
+            'password' => 'recovered-password-27', 'password_confirmation' => 'recovered-password-27',
+        ])->assertSessionHasNoErrors();
+
+        $this->get(route('google.callback'))->assertRedirect(route('home'));
+        $this->assertAuthenticatedAs($user);
+        $this->assertSame('google-mailbox-owner', $user->refresh()->google_id);
     }
 
     public function test_google_callback_rejects_missing_or_empty_identifiers_without_selecting_a_local_account(): void

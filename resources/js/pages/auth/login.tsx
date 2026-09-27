@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasskeyVerify from '@/components/passkey-verify';
 import PasswordInput from '@/components/password-input';
@@ -18,6 +18,9 @@ type Props = {
 };
 
 export default function Login({ status, canResetPassword }: Props) {
+    // Set by the Google callback redirect, not by this page's own form.
+    const googleError = usePage().props.errors.google;
+
     return (
         <>
             <Head title="Log in" />
@@ -27,6 +30,7 @@ export default function Login({ status, canResetPassword }: Props) {
                     <Button asChild variant="outline" className="w-full">
                         <a href="/auth/google">Continue with Google</a>
                     </Button>
+                    <InputError message={googleError} />
                 </div>
 
                 <div className="relative">
