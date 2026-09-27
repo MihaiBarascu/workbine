@@ -187,10 +187,13 @@ Destructive browser mutations use isolated test accounts only.
 ### Change account email
 
 Route: `PATCH /settings/profile`, followed by the verification gate.
-Browser: [coverage.spec.ts](../tests/e2e/coverage.spec.ts) checks verification status,
-persisted replacement email and blocked contribution access.
-Backend: [ProfileUpdateTest.php](../tests/Feature/Settings/ProfileUpdateTest.php)
-and [AccountVerificationTest.php](../tests/Feature/Auth/AccountVerificationTest.php).
+Browser: [coverage.spec.ts](../tests/e2e/coverage.spec.ts) enters the current
+password and checks verification status, persisted replacement email and blocked
+contribution access.
+Backend: [ProfileUpdateTest.php](../tests/Feature/Settings/ProfileUpdateTest.php),
+[AccountVerificationTest.php](../tests/Feature/Auth/AccountVerificationTest.php) and
+[EmailChangeSecurityTest.php](../tests/Feature/Settings/EmailChangeSecurityTest.php)
+(password requirement, notice to the previous verified address, hourly limit).
 The current behavior replaces the email immediately and marks it unverified;
 these tests do not introduce a pending-email confirmation design. Mail delivery
 remains a deployment concern.

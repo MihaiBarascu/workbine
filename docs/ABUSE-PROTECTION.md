@@ -41,6 +41,12 @@ deployment so Laravel's configuration cache uses them.
 - Email registration: 10 attempts per minute per visitor IP.
 - Password reset email requests: 10 attempts per minute per visitor IP across
   addresses, in addition to the existing password broker's per-address cooldown.
+- Profile updates: 20 per minute per account. Email changes: 3 per hour per
+  account and 3 per hour per new address, and each one requires the current
+  password.
+- Email confirmation: 6 requests per minute per address. Resending is also limited
+  to 20 per day per address, so moving an address to another account does not
+  reset it. Opening a confirmation link does not use the daily budget.
 - Existing login, two-factor, passkey, email-confirmation resend, contribution and
   upload limits remain in place.
 

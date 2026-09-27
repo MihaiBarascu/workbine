@@ -10,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +22,12 @@ use Throwable;
 
 class ImageUploads
 {
+    /**
+     * Shared daily budget for the whole site. Only accepted uploads consume it, so
+     * rejected files cannot block other members (checked by ThrottleImageUploads).
+     */
+    public const GLOBAL_DAILY_KEY = 'media:global:day';
+
     public static function enabled(): bool
     {
         return (bool) config('media.enabled') && self::configured();
@@ -113,6 +120,8 @@ class ImageUploads
             Log::warning('Image upload failed.', ['image_id' => $image->id, 'exception' => $exception::class]);
             throw ValidationException::withMessages([$field => __('The image could not be saved. Please try again.')]);
         }
+
+        RateLimiter::hit(self::GLOBAL_DAILY_KEY, 86400);
 
         return $image;
     }

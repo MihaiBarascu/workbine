@@ -21,6 +21,8 @@ export default function Profile({
 }) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const [username, setUsername] = useState(auth.user.username);
+    const [email, setEmail] = useState(auth.user.email);
+    const changesEmail = email !== auth.user.email;
     const [socialLinks, setSocialLinks] = useState<SocialLink[]>(
         auth.user.social_links ?? [],
     );
@@ -457,6 +459,9 @@ export default function Profile({
                                     required
                                     autoComplete="email"
                                     defaultValue={auth.user.email}
+                                    onChange={(event) =>
+                                        setEmail(event.target.value)
+                                    }
                                     aria-invalid={Boolean(errors.email)}
                                     aria-describedby="email-error"
                                 />
@@ -465,6 +470,37 @@ export default function Profile({
                                     message={errors.email}
                                 />
                             </div>
+                            {changesEmail && (
+                                <div className="mt-4 grid gap-2">
+                                    <Label htmlFor="current_password">
+                                        Current password
+                                    </Label>
+                                    <Input
+                                        id="current_password"
+                                        type="password"
+                                        name="current_password"
+                                        required
+                                        autoComplete="current-password"
+                                        aria-invalid={Boolean(
+                                            errors.current_password,
+                                        )}
+                                        aria-describedby="current-password-help current-password-error"
+                                    />
+                                    <p
+                                        id="current-password-help"
+                                        className="text-muted-foreground text-sm"
+                                    >
+                                        Required to change the email that signs
+                                        you in and recovers your account. If you
+                                        joined with Google, set a password first
+                                        with “Forgot password”.
+                                    </p>
+                                    <InputError
+                                        id="current-password-error"
+                                        message={errors.current_password}
+                                    />
+                                </div>
+                            )}
                             {mustVerifyEmail &&
                                 auth.user.email_verified_at === null && (
                                     <div className="mt-4 text-sm">

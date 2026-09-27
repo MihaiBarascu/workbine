@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Fortify\Events\TwoFactorAuthenticationChallenged;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
@@ -85,6 +86,17 @@ class GoogleAuthController extends Controller
                 'password' => Str::random(64),
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
+        }
+
+        if ($user->hasEnabledTwoFactorAuthentication()) {
+            // Google proves the mailbox, not Workbine's second factor: finish through Fortify's challenge.
+            request()->session()->put([
+                'login.id' => $user->getKey(),
+                'login.remember' => true,
+            ]);
+            TwoFactorAuthenticationChallenged::dispatch($user);
+
+            return to_route('two-factor.login');
         }
 
         Auth::login($user, remember: true);
