@@ -34,6 +34,15 @@ Dedicated Composer/npm download caches remain for reuse. Logs and review
 screenshots remain in the printed `/tmp/workbine-local-tests.*/` directory. These
 are local test artifacts, not product uploads.
 
+`bash tools/test-local.sh --quick` runs the same install, build, format/lint,
+TypeScript, Pint, PHPStan, Python and PHP suites (SQLite and PostgreSQL) but skips
+the browser flows, which take most of the full run: about 2 minutes instead of 10.
+It is enough when a change cannot alter what pages render or how visitors move
+through them: backend logic, commands, configuration, tests and documentation. Run
+the full gate for changes to `resources/` (pages, components, styles, views),
+routes, middleware or response headers, authentication flows, dependencies, the
+Dockerfile or runtime configuration.
+
 A successful run for the current changes is the release gate. Rerun the relevant
 checks after fixes. Review screenshots for UI changes. Merge the tested branch
 normally; the Release workflow deploys `main` to staging and verifies it, and

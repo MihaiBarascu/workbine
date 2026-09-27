@@ -36,6 +36,8 @@ class ResetUserPassword implements ResetsUserPasswords
                     'two_factor_secret' => null,
                     'two_factor_recovery_codes' => null,
                     'two_factor_confirmed_at' => null,
+                    // The reset link reached this mailbox: the same proof as a confirmation link.
+                    'email_verified_at' => now(),
                 ]);
             }
 

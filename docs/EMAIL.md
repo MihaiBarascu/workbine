@@ -44,8 +44,10 @@ One account is retained per email. Duplicate registration does not replace an
 existing account; the form links to login and standard password recovery. A
 mailbox owner can reset the password of a preclaimed unverified account, which
 revokes previous sessions and removes previously enrolled login credentials.
-The owner then logs in and confirms the email. Google does not silently link to
-an unverified local account. No separate account-claim protocol is introduced.
+Using the emailed reset link also confirms the email, since it proves control of
+the mailbox. Google does not silently link to an unverified local account; the
+login page explains the reset step next to the Google button. No separate
+account-claim protocol is introduced.
 
 After deployment, use an owner-controlled account to request a confirmation and
 a password-reset email. Check the sender, delivery in Resend and the receiving

@@ -22,10 +22,14 @@ php artisan key:generate
 npm ci
 php artisan wayfinder:generate --with-form --no-interaction
 npm run build
-if [[ "${WORKBINE_TEST_MODE:-full}" == full ]]; then
+if [[ "${WORKBINE_TEST_MODE:-full}" == full || "${WORKBINE_TEST_MODE:-full}" == quick ]]; then
 python3 -m unittest discover -s tools -p 'test_*.py' -v
 composer ci:check
 DB_CONNECTION=pgsql DB_DATABASE=workbine_test php artisan test --compact
+fi
+# Quick runs stop before the browser flows, which take most of the full run.
+if [[ "${WORKBINE_TEST_MODE:-full}" == quick ]]; then
+    exit 0
 fi
 export DB_CONNECTION=sqlite DB_DATABASE=/tmp/workbine-preview.sqlite
 export WORKBINE_BROWSER_PILOT=1
