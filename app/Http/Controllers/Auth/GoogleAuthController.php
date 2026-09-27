@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Events\TwoFactorAuthenticationChallenged;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\GoogleProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
 
@@ -18,7 +19,12 @@ class GoogleAuthController extends Controller
 {
     public function redirect(): SymfonyRedirectResponse
     {
-        return Socialite::driver('google')->redirect();
+        /** @var GoogleProvider $google */
+        $google = Socialite::driver('google');
+
+        // Without this Google silently reuses the browser's signed-in account, so members
+        // could not switch accounts or avoid an automatic sign-in on a shared computer.
+        return $google->with(['prompt' => 'select_account'])->redirect();
     }
 
     public function callback(): RedirectResponse
