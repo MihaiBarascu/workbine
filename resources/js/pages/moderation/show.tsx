@@ -3,6 +3,7 @@ import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
         image: string | null;
         reasons: string[];
         hidden: boolean;
+        photos: number;
         details: string | null;
         note: string | null;
         author: { username: string; suspended: boolean } | null;
@@ -22,7 +24,12 @@ type Props = {
 
 export default function ModerationShow({ kind, item }: Props) {
     const [showImage, setShowImage] = useState(false);
-    const form = useForm({ action: '', note: '', publishing: 'unchanged' });
+    const form = useForm({
+        action: '',
+        note: '',
+        publishing: 'unchanged',
+        delete_images: false,
+    });
     const actions =
         kind === 'review'
             ? [
@@ -123,7 +130,7 @@ export default function ModerationShow({ kind, item }: Props) {
                         <p className="text-muted-foreground mt-2 text-sm">
                             {kind === 'review'
                                 ? 'Approval lets the author resubmit this exact content. It does not publish it automatically.'
-                                : 'Hiding a topic or method also hides its dependent contributions. Existing image links may still work until the image and cache are removed.'}
+                                : 'Hiding a topic or method also hides its dependent contributions. Their photos stay reachable by direct link unless you also delete them.'}
                         </p>
                         {item.note && (
                             <p className="mt-4 text-sm [overflow-wrap:anywhere] whitespace-pre-wrap">
@@ -147,10 +154,12 @@ export default function ModerationShow({ kind, item }: Props) {
                                     required
                                     value={form.data.action}
                                     onChange={(event) =>
-                                        form.setData(
-                                            'action',
-                                            event.target.value,
-                                        )
+                                        // Deleting photos is never carried over from an earlier choice.
+                                        form.setData({
+                                            ...form.data,
+                                            action: event.target.value,
+                                            delete_images: false,
+                                        })
                                     }
                                     className="bg-background h-10 w-full rounded-md border px-3 text-sm"
                                 >
@@ -166,6 +175,44 @@ export default function ModerationShow({ kind, item }: Props) {
                                 </select>
                                 <InputError message={form.errors.action} />
                             </div>
+                            {kind === 'report' &&
+                                form.data.action === 'hide' &&
+                                item.photos > 0 && (
+                                    <div className="flex items-start gap-3">
+                                        <Checkbox
+                                            id="delete-images"
+                                            className="mt-0.5"
+                                            checked={form.data.delete_images}
+                                            onCheckedChange={(checked) =>
+                                                form.setData(
+                                                    'delete_images',
+                                                    checked === true,
+                                                )
+                                            }
+                                        />
+                                        <div className="space-y-1">
+                                            <Label htmlFor="delete-images">
+                                                Also delete{' '}
+                                                {item.photos === 1
+                                                    ? 'its photo'
+                                                    : `its ${item.photos} photos`}
+                                            </Label>
+                                            <p className="text-muted-foreground text-sm">
+                                                Includes photos in contributions
+                                                under it. This cannot be undone:
+                                                restored content comes back with
+                                                a note instead of each photo.
+                                                Cached copies can remain for up
+                                                to an hour.
+                                            </p>
+                                            <InputError
+                                                message={
+                                                    form.errors.delete_images
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             <div className="space-y-2">
                                 <Label htmlFor="review-note">
                                     Reason for your decision

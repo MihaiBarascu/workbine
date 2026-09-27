@@ -26,7 +26,9 @@ updates commit together, and method revision tokens include formatting changes.
 
 Image uploads are staged until publication. Abandoned images older than one hour
 and images detached by an edit are eligible for the existing `media:prune` job.
-Referenced images remain protected even when their contribution is hidden.
+Referenced images remain protected even when their contribution is hidden,
+unless a moderator deletes them while hiding it; each deleted photo is replaced by
+a short note.
 Account deletion also cleans up images affected by cascading contribution deletion.
 Cached copies retain the existing media cache behavior described in MEDIA.md.
 An expired upload produces a recoverable validation error asking the writer to

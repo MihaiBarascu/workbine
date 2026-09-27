@@ -133,10 +133,15 @@ job. Account deletion cascades to review records. Do not publish private review
 screenshots or copy real flagged material to public logs, issues or test assets.
 Logs record provider failure status only, never request/response bodies.
 
-Hiding existing public content does not invalidate previously shared R2 URLs or
-cached copies. Remove prohibited originals through the existing protected media
-operations and purge relevant caches where necessary; do not assume a hidden
-page has removed the underlying file.
+Hiding keeps photos: previously shared image links keep working. When hiding
+reported content, a moderator can also delete its photos, including those in
+methods and experiences shown under it. The decision form shows how many photos
+that covers and offers the option only for **Hide content**. Deletion is permanent:
+each inline photo becomes a short "Photo removed by moderation." note, evidence
+photos are detached and the objects are deleted, so restored content comes back
+without them. Contribution timestamps are unchanged. Storage failures stay queued
+for the nightly `media:prune`. Cloudflare can serve a cached copy for up to the
+one-hour image TTL; purge that URL in Cloudflare when it must disappear at once.
 
 ## Cloudflare complement
 
@@ -150,7 +155,9 @@ See [Cloudflare CSAM scanning](https://developers.cloudflare.com/cache/reference
 
 The existing `reports:review` and `content:restore` commands remain available for
 authorized maintenance; daily review no longer requires them. Console decisions
-have no web reviewer identity. Use the web page for ordinary review.
+have no web reviewer identity. Use the web page for ordinary review. Inspecting a
+report prints its photo count; `--delete-images` with `--action=hide` deletes those
+photos as described above.
 
 ## Verification
 
