@@ -39,6 +39,10 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/workbine.conf
 COPY docker/entrypoint.sh /usr/local/bin/workbine-entrypoint
 RUN chmod +x /usr/local/bin/workbine-entrypoint
 
+# Set last so a new release revision does not invalidate the dependency and build layers.
+ARG WORKBINE_REVISION=
+ENV WORKBINE_REVISION=${WORKBINE_REVISION}
+
 EXPOSE 80
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \

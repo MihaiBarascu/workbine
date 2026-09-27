@@ -1,123 +1,145 @@
 # Workbine deployment
 
-Workbine uses a build-once release flow: GitHub Actions publishes an immutable container image to GHCR, staging validates that exact artifact, and production is promoted to the same image only after staging passes.
-
-## Phase 1: GHCR artifact pipeline
-
-`.github/workflows/publish-container.yml` runs after a push to `main` and can also be dispatched manually.
-
-The workflow:
-
-- builds the current Workbine Dockerfile once for `linux/arm64`, matching the current Dokploy host architecture;
-- publishes `ghcr.io/mihaibarascu/workbine:<git-sha>`;
-- also updates the convenience tag `ghcr.io/mihaibarascu/workbine:main`;
-- records the registry digest;
-- pulls the image back by digest and verifies PHP, Node, the SSR bundle, Supervisor, Laravel and Inertia SSR;
-- does **not** invoke a Dokploy production deployment.
-
-The SHA tag or digest is the release identifier. Do not use `latest` as the production release reference.
-
-## Current production during Phase 1
-
-Keep the existing Dokploy production application unchanged while the artifact pipeline is introduced and verified. Production still uses the current source-build deployment path until staging exists and the promotion flow is ready.
-
-The existing Dokploy integration may continue to react to merges on `main` and perform its normal source-build redeploy. Phase 1 does not disable that existing behavior; the new GHCR workflow simply adds release artifact publication alongside it.
-
-## Phase 2: Dokploy staging
-
-Create a separate `Staging` environment under the existing Workbine project. Keep staging services and credentials independent from production.
-
-Recommended services:
-
-- application: `workbine-staging`;
-- PostgreSQL: `postgres-staging` using PostgreSQL 18;
-- domain: `staging.workbine.com`;
-- container source: Docker/GHCR;
-- target container port: `80`.
-
-Use an immutable image while validating a release:
+Workbine uses a build-once release flow. GitHub Actions builds one immutable arm64
+image per `main` commit, staging runs that exact image first, and production is
+promoted to the same image only after the owner approves it. The server never
+builds from source.
 
 ```text
-ghcr.io/mihaibarascu/workbine:<git-sha>
+push to main
+  -> Release / publish      build ghcr.io/mihaibarascu/workbine:<sha> once and verify it
+  -> Release / staging      point :staging at <sha>, redeploy staging, verify the served revision
+  -> Release / production   wait for approval, point :production at <sha>, redeploy, verify
 ```
 
-Do not point staging release validation at the moving `main` tag once automatic promotion is introduced.
+## Release workflow
 
-### GHCR access from Dokploy
+`.github/workflows/release.yml` runs on every push to `main` and can be dispatched
+manually.
 
-If the GHCR package is public, Dokploy can pull it without registry credentials.
+The **publish** job:
 
-If it remains private, configure a GHCR registry credential in Dokploy using:
+- builds the Dockerfile once for `linux/arm64` on a native ARM runner, matching the
+  Dokploy host architecture;
+- bakes the commit into the image as `WORKBINE_REVISION`;
+- publishes `ghcr.io/mihaibarascu/workbine:<git-sha>` and the convenience tag `:main`;
+- pulls the exact digest back and verifies PHP, Node, the SSR bundle, Supervisor,
+  Laravel, Inertia SSR and the revision reported by `/up`.
 
-- Registry URL: `ghcr.io`;
-- Username: the GitHub account allowed to read the package;
-- Password: a GitHub personal access token (classic) with the minimum package read permission required to pull the image.
+The **staging** and **production** jobs call `.github/workflows/deploy.yml`, which:
 
-Do not put registry credentials into the Workbine image or repository.
+1. resolves the digest of `:<sha>` and fails if that revision was never published;
+2. extracts the image's Vite manifest as the expected frontend build;
+3. moves the environment tag (`:staging` or `:production`) to that digest;
+4. calls the environment's Dokploy deploy webhook, so Dokploy pulls the tag and
+   updates the service;
+5. runs `tools/release_smoke.py` until `/up` reports `X-Workbine-Revision: <sha>` and
+   the read-only public checks pass, for up to ten minutes.
 
-### Staging PostgreSQL
+The SHA tag or digest is the release identifier. `:staging` and `:production` only
+record what each environment runs; never point an environment at `:main` or `latest`.
 
-Create a new PostgreSQL database instead of reusing production. Suggested logical values:
+## Approval
 
-```text
-DB_CONNECTION=pgsql
-DB_PORT=5432
-DB_DATABASE=workbine_staging
-DB_USERNAME=workbine_staging
-```
+The `production` GitHub environment requires the owner's approval. After staging
+passes, the run waits on its production job: review staging, then approve or reject
+it from the run page in GitHub Actions (or the GitHub mobile app). Rejecting or
+ignoring a run leaves production on its current revision; staging keeps the newer
+one. Only one deployment per environment runs at a time.
 
-Generate a unique strong database password in Dokploy and use the internal hostname/value exposed by the staging PostgreSQL service as `DB_HOST`.
+## Redeploy and rollback
 
-Never point staging to the production database.
+Run **Release** manually on `main` with `revision` set to an earlier published
+commit SHA. The build is skipped; that image is redeployed to staging and, after
+approval, to production. It takes about a minute per environment because nothing is
+rebuilt.
 
-### Minimum staging application environment
+A container rollback does not reverse database migrations. The entrypoint migrates
+on every start, and Dokploy starts the new container before stopping the old one,
+so every migration must stay compatible with the previous release (expand first,
+remove columns in a later release).
 
-Start with environment-specific values and safe integrations:
+Do not change the image field in Dokploy to roll back. The next release would move
+the environment tag while Dokploy kept deploying the manually entered image; the
+release check would then fail on the revision mismatch.
 
-```text
-APP_NAME=Workbine
-APP_ENV=staging
-APP_KEY=<unique staging key>
-APP_DEBUG=false
-APP_URL=https://staging.workbine.com
+## Environments
 
-DB_CONNECTION=pgsql
-DB_HOST=<staging postgres internal hostname>
-DB_PORT=5432
-DB_DATABASE=workbine_staging
-DB_USERNAME=workbine_staging
-DB_PASSWORD=<staging-only password>
+The Dokploy project has separate `production` and `staging` environments, each with
+its own application and PostgreSQL 18 service. Both applications use the Docker
+source `ghcr.io/mihaibarascu/workbine:<environment>` without registry credentials;
+the GHCR package is public. Automatic deployment stays enabled on both applications
+because the webhook requires it. Neither application uses a Git provider, which
+would rebuild from source on the server.
 
-SESSION_DRIVER=database
-QUEUE_CONNECTION=database
-CACHE_STORE=database
+Cloudflare terminates TLS. The tunnel routes both hostnames to Traefik over HTTP;
+the Dokploy domains use container port `80` with HTTPS disabled. See
+[HTTPS.md](HTTPS.md).
 
-MAIL_MAILER=log
-MEDIA_ENABLED=false
-TURNSTILE_ENABLED=false
-CONTENT_MODERATION_ENABLED=false
-COMMUNITY_REPORTS_ENABLED=false
-```
+### Staging
 
-Generate a new staging `APP_KEY`; do not copy the production key.
+- `https://staging.workbine.com` is protected by Cloudflare Access and open only to
+  the owner. Release checks authenticate with an Access service token.
+- Staging runs the production configuration (`APP_ENV=production`, the same email,
+  Google, Turnstile and moderation integrations), so a release is exercised the way
+  production runs it.
+- It never shares state with production: it has its own PostgreSQL service,
+  `APP_KEY`, R2 bucket and public media hostname. Its R2 token can only reach the
+  staging bucket.
+- Google sign-in uses the production OAuth client with the staging callback URL
+  registered.
+- Do not copy production data into staging. Its email integration is real, so a
+  copied member list could receive staging mail.
+- CPU and memory are capped so staging cannot starve production on the shared host.
 
-After the basic deployment is healthy, configure separate staging credentials for R2/media, email, Turnstile and moderation where those integrations are needed by E2E tests.
+### Logs
+
+Both applications set `LOG_CHANNEL=stderr`. Laravel errors then appear in Dokploy's
+container logs next to Apache and SSR output, and they survive redeploys in the
+Docker log instead of disappearing with the container's filesystem.
+
+## One-time configuration
+
+GitHub environments:
+
+| Environment  | Protection                                   | Secrets                                                                 |
+| ------------ | -------------------------------------------- | ----------------------------------------------------------------------- |
+| `staging`    | deployments only from `main`                 | `DOKPLOY_DEPLOY_HOOK`, `CF_ACCESS_CLIENT_ID`, `CF_ACCESS_CLIENT_SECRET` |
+| `production` | owner approval; deployments only from `main` | `DOKPLOY_DEPLOY_HOOK`                                                   |
+
+`DOKPLOY_DEPLOY_HOOK` is the application's webhook URL from Dokploy's Deployments
+tab. It can only redeploy that one application, so GitHub never holds a Dokploy API
+key. Rotate it with Dokploy's refresh-token action if it leaks, then update the
+secret. Set secrets with `gh secret set NAME --env ENVIRONMENT`, which prompts for
+the value instead of placing it in shell history.
+
+Deployment-specific identifiers, Cloudflare account settings, backup destinations
+and credentials belong in the private operational handoff described in
+[AGENTS.md](../AGENTS.md), not in this repository.
 
 ## Deployment verification
 
-The container entrypoint runs migrations and Laravel optimization before Supervisor starts the application runtime. The image health check validates `/up` and Inertia SSR.
+`tools/release_smoke.py` never creates content. For each environment it checks:
 
-For the first staging release verify at minimum:
+1. `/up` returns HTTP 200 and the expected `X-Workbine-Revision`;
+2. the public Vite manifest matches the image's build (the application entry asset
+   is the fallback when the manifest is not public);
+3. the homepage is server-rendered and does not expose PHP in `X-Powered-By`;
+4. the sitemap parses and lists URLs for that environment;
+5. search, the topic listing and a sample topic, method, experience and member page
+   load.
 
-1. deployment reaches healthy state;
-2. migrations finish successfully against `postgres-staging`;
-3. `/up` returns success through the staging domain;
-4. SSR is active;
-5. static frontend assets load;
-6. no production database, storage bucket or external secrets are referenced.
+A passing check proves which image serves traffic and that it renders. It does not
+prove runtime environment values or external providers; an empty staging database
+also means the sampled detail pages are skipped.
 
-## Production promotion
+`production-smoke.yml` remains available for a manual read-only check of production
+against a source commit; it builds that commit's Dockerfile for the expected
+frontend and runs the same script.
 
-Production migration to GHCR is a later phase. When it is enabled, production must use the same SHA tag or digest already validated in staging. Do not rebuild from source during promotion.
+## Backups
 
-Rollback is performed by selecting a previously known-good SHA tag or digest. A container rollback does not automatically reverse database migrations, so schema changes must remain compatible with the rollback strategy.
+Production PostgreSQL is backed up daily by Dokploy to an off-host S3-compatible
+destination. Restore procedure and verification rules are in
+[RECOVERY.md](RECOVERY.md); schedules, retention and locations are recorded in the
+private handoff.

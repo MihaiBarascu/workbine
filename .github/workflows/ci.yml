@@ -66,8 +66,8 @@ jobs:
           git rev-parse HEAD
           printf 'Tested source: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Check development-controller scope guards
-        run: python3 -m unittest discover -s tools -p 'test_autodev.py' -v
+      - name: Run tool unit tests
+        run: python3 -m unittest discover -s tools -p 'test_*.py' -v
 
       - name: Prepare PHP image support
         uses: shivammathur/setup-php@v2

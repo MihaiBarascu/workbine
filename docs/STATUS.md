@@ -261,8 +261,9 @@ explicit remote mechanisms in TESTING.md: workflow dispatch or the
 checks passed. Record the tested source revision and actual results; historical
 passing tests do not validate new application changes.
 
-`main` triggers deployment automatically. Observe its result instead of starting
-another deploy or restarting services. Use the read-only production smoke when a
+`main` triggers the Release workflow: staging deploys automatically and production
+waits for the owner's approval (see [DEPLOYMENT.md](DEPLOYMENT.md)). Observe that
+run instead of starting another deploy or restarting services. Use the read-only production smoke when a
 live release must be distinguished from a healthy stale frontend. Infrastructure
 changes need a concrete explanation and applicable owner authorization. Do not
 publish credentials, production environment values, account identifiers,

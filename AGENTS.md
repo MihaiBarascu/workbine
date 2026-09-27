@@ -43,8 +43,8 @@ Keep the application as one monolith unless there is a concrete reason to split 
 - Work in feature branches.
 - Run `bash tools/test-local.sh` before merging to `main` when a local Docker environment is available. Do not also request GitHub Actions from that environment.
 - Use explicitly requested GitHub checks only for sessions without a usable local test runner; see docs/TESTING.md. Dispatch and the `run-remote-checks` PR-label event are supported.
-- `main` is the production branch.
-- Dokploy builds and deploys from `main`.
+- `main` is the release branch. GitHub Actions builds one image per commit, deploys it to staging and promotes it to production after the owner's approval; see docs/DEPLOYMENT.md.
+- The server never builds from source. Roll back by redeploying an earlier published revision, not by editing Dokploy.
 - Never commit secrets or production `.env` values.
 - Generated Wayfinder routes/actions are not committed; generate them before frontend checks/builds.
 - Keep migrations safe for an already deployed PostgreSQL database.

@@ -23,7 +23,7 @@ npm ci
 php artisan wayfinder:generate --with-form --no-interaction
 npm run build
 if [[ "${WORKBINE_TEST_MODE:-full}" == full ]]; then
-python3 -m unittest discover -s tools -p test_autodev.py -v
+python3 -m unittest discover -s tools -p 'test_*.py' -v
 composer ci:check
 DB_CONNECTION=pgsql DB_DATABASE=workbine_test php artisan test --compact
 fi

@@ -36,8 +36,9 @@ are local test artifacts, not product uploads.
 
 A successful run for the current changes is the release gate. Rerun the relevant
 checks after fixes. Review screenshots for UI changes. Merge the tested branch
-normally; Dokploy automatically deploys `main`. Observe the live result without
-starting a second deployment.
+normally; the Release workflow deploys `main` to staging and verifies it, and
+production follows after the owner's approval. Observe that run instead of
+starting another deployment.
 
 ## Independent browser pilot
 
@@ -145,8 +146,9 @@ and [pull request label events](https://docs.github.com/en/actions/reference/wor
    production verification and distinguish its base/source evidence from PR-head
    test evidence.
 6. Merge only after current results pass and the current base is still the tested
-   base. `main` deploys automatically; do not invoke deployment manually or run
-   synthetic mutations against production.
+   base. `main` deploys to staging automatically and to production after the owner's
+   approval; do not invoke deployment another way or run synthetic mutations
+   against production.
 
 ## Handoff between environments
 

@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Release Revision
+    |--------------------------------------------------------------------------
+    |
+    | Commit baked into release images. The health check reports it so a
+    | deployment can confirm which revision is serving traffic.
+    |
+    */
+
+    'revision' => env('WORKBINE_REVISION'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
