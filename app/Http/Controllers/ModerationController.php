@@ -7,6 +7,7 @@ use App\Models\Experience;
 use App\Models\Method;
 use App\Models\ModerationReview;
 use App\Models\User;
+use App\Services\ImageUploads;
 use App\Support\ReportTargets;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -68,6 +69,7 @@ class ModerationController extends Controller
                 ? [__('Automatic checking unavailable — manual review required. No violation has been determined.')]
                 : $item->categories;
             $hidden = false;
+            $photos = 0;
         } else {
             $item = ContentReport::query()->findOrFail($id);
             $target = ReportTargets::find($item->target_type, $item->target_id, true);
@@ -79,12 +81,13 @@ class ModerationController extends Controller
             $image = $target instanceof Experience ? $target->evidenceImage?->url() : null;
             $reasons = [$item->reason];
             $hidden = $target?->hidden_at !== null;
+            $photos = $target === null ? 0 : app(ImageUploads::class)->contributionImageCount($target);
         }
 
         return Inertia::render('moderation/show', [
             'kind' => $kind, 'item' => [
                 'id' => $item->id, 'status' => $item->status, 'text' => $text,
-                'image' => $image, 'reasons' => $reasons, 'hidden' => $hidden,
+                'image' => $image, 'reasons' => $reasons, 'hidden' => $hidden, 'photos' => $photos,
                 'details' => $item instanceof ContentReport ? $item->details : null,
                 'note' => $item->review_note,
                 'author' => $author === null ? null : [
@@ -114,8 +117,10 @@ class ModerationController extends Controller
             'action' => ['required', Rule::in($kind === 'review' ? ['approve', 'reject'] : ['hide', 'dismiss', 'restore'])],
             'note' => ['required', 'string', 'min:3', 'max:2000'],
             'publishing' => ['required', Rule::in(['unchanged', 'suspend', 'restore'])],
+            'delete_images' => ['sometimes', 'boolean'],
         ]);
-        DB::transaction(function () use ($kind, $id, $data, $request): void {
+        $hiddenTarget = null;
+        DB::transaction(function () use ($kind, $id, $data, $request, &$hiddenTarget): void {
             $item = $kind === 'review'
                 ? $this->review($id, true)
                 : ContentReport::query()->lockForUpdate()->findOrFail($id);
@@ -131,6 +136,7 @@ class ModerationController extends Controller
                     $target->newQueryWithoutScopes()->whereKey($target->getKey())->toBase()->update([
                         'hidden_at' => $data['action'] === 'hide' ? now() : null,
                     ]);
+                    $hiddenTarget = $data['action'] === 'hide' ? $target : null;
                 }
                 $status = match ($data['action']) {
                     'hide' => 'hidden', 'restore' => 'restored', default => 'dismissed',
@@ -147,7 +153,15 @@ class ModerationController extends Controller
                 'status' => $status, 'review_note' => $data['note'], 'reviewed_at' => now(), 'reviewed_by' => $request->user()->id,
             ])->save();
         });
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Moderation decision saved.')]);
+        $message = __('Moderation decision saved.');
+        if ($hiddenTarget !== null && ($data['delete_images'] ?? false)) {
+            // Runs after the hide commits: a storage failure never undoes the decision.
+            $removed = app(ImageUploads::class)->deleteContributionImages($hiddenTarget);
+            $message = $removed['failed'] === 0
+                ? __('Moderation decision saved. Photos deleted: :deleted.', $removed)
+                : __('Moderation decision saved. Photos deleted: :deleted. The nightly media cleanup will retry :failed.', $removed);
+        }
+        Inertia::flash('toast', ['type' => 'success', 'message' => $message]);
 
         return to_route('moderation.show', [$kind, $id]);
     }

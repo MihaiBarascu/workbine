@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\ContentReport;
+use App\Services\ImageUploads;
 use App\Support\ReportTargets;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -10,11 +11,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ReviewReports extends Command
 {
-    protected $signature = 'reports:review {id? : Report to inspect} {--action= : hide or dismiss} {--note= : Reason for the decision}';
+    protected $signature = 'reports:review {id? : Report to inspect} {--action= : hide or dismiss} {--note= : Reason for the decision}
+        {--delete-images : With --action=hide, permanently delete the photos of the content and of contributions under it}';
 
     protected $description = 'List private pending reports, inspect one, or record a moderation decision';
 
-    public function handle(): int
+    public function handle(ImageUploads $uploads): int
     {
         if ($this->argument('id') === null) {
             if ($this->option('action') !== null) {
@@ -53,6 +55,7 @@ class ReviewReports extends Command
             $this->output->writeln(json_encode([
                 'report' => $report->only(['id', 'target_type', 'target_id', 'reason', 'details', 'status', 'review_note']),
                 'content' => $target?->only(['id', 'title', 'description', 'body', 'source_url', 'evidence_url', 'evidence_image_id', 'hidden_at']),
+                'photos' => $target === null ? 0 : $uploads->contributionImageCount($target),
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR), OutputInterface::OUTPUT_RAW);
 
             return self::SUCCESS;
@@ -61,6 +64,11 @@ class ReviewReports extends Command
         $note = trim((string) $this->option('note'));
         if (! in_array($action, ['hide', 'dismiss'], true) || mb_strlen($note) < 3 || mb_strlen($note) > 2000) {
             $this->error('Use --action=hide or --action=dismiss and a --note of 3 to 2000 characters.');
+
+            return self::FAILURE;
+        }
+        if ($this->option('delete-images') && $action !== 'hide') {
+            $this->error('--delete-images only applies to --action=hide.');
 
             return self::FAILURE;
         }
@@ -78,6 +86,10 @@ class ReviewReports extends Command
             $report->forceFill(['status' => $action === 'hide' ? 'hidden' : 'dismissed', 'review_note' => $note, 'reviewed_at' => now()])->save();
         });
         $this->info('Decision saved. Hidden content and its history are retained.');
+        if ($action === 'hide' && $this->option('delete-images')) {
+            $removed = $uploads->deleteContributionImages($target);
+            $this->info("Photos deleted: {$removed['deleted']}. Left for the nightly media cleanup: {$removed['failed']}.");
+        }
 
         return self::SUCCESS;
     }

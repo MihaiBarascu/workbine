@@ -218,9 +218,11 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
 - Optional OpenAI moderation checks public text and processed images before
   publication. Held submissions and community reports share a private Moderation
   page for configured verified administrators. Provider outages send member submissions to manual review without a violation
-  classification. Human decisions, exact-content resubmission and manual publishing suspension reuse the monolith. Existing public
-  image URLs require separate removal when necessary. Activation and live provider
+  classification. Human decisions, exact-content resubmission and manual publishing suspension reuse the monolith. Hiding reported
+  content can also delete its photos, including those under it. Activation and live provider
   access are separate from code availability. See [MODERATION.md](MODERATION.md).
+- Pages send a report-only Content-Security-Policy; violations are logged without
+  URLs through `/csp-report`. See [HTTPS.md](HTTPS.md).
 - Branded HTTP errors cover normal and Inertia visits while preserving status,
   retry headers, JSON responses and local debug behavior.
 - Standard Laravel/Fortify email confirmation is sent automatically at email/password

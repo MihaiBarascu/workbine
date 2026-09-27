@@ -122,6 +122,24 @@ class RichText
         return implode('', array_map(self::text(...), $node['content'] ?? [])).($node['type'] === 'paragraph' ? "\n" : '');
     }
 
+    /**
+     * Replace every photo with a short note; paragraphs are valid wherever photos are.
+     *
+     * @param  array<string, mixed>  $node
+     * @return array<string, mixed>
+     */
+    public static function withoutImages(array $node): array
+    {
+        if ($node['type'] === 'image') {
+            return ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => __('Photo removed by moderation.')]]];
+        }
+        if (isset($node['content'])) {
+            $node['content'] = array_map(self::withoutImages(...), $node['content']);
+        }
+
+        return $node;
+    }
+
     /** Attach inside the contribution transaction, with image locks shared by pruning.
      * @param  array<string, mixed>|null  $document
      */

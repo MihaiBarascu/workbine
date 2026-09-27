@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Models\Experience;
 use App\Models\MediaImage;
 use App\Models\Method;
+use App\Models\Topic;
 use App\Models\User;
+use App\Support\RichText;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -221,6 +224,72 @@ class ImageUploads
         foreach ($images as $image) {
             $this->discard($image);
         }
+    }
+
+    public function contributionImageCount(Topic|Method|Experience $target): int
+    {
+        return $this->contributionImages($target)->count();
+    }
+
+    /**
+     * Moderation removal: hiding keeps photos reachable by direct link, so a moderator can
+     * delete those of the hidden contribution and of everything shown under it.
+     *
+     * @return array{deleted: int, failed: int}
+     */
+    public function deleteContributionImages(Topic|Method|Experience $target): array
+    {
+        $images = DB::transaction(function () use ($target) {
+            $images = $this->contributionImages($target)->lockForUpdate()->get();
+            $ids = $images->modelKeys();
+
+            // Query-builder updates keep contribution timestamps unchanged.
+            Experience::withoutGlobalScopes()->whereIn('evidence_image_id', $ids)->toBase()->update(['evidence_image_id' => null]);
+            foreach ([
+                Method::class => $images->pluck('rich_method_id'),
+                Experience::class => $images->pluck('rich_experience_id'),
+            ] as $model => $contributionIds) {
+                foreach ($model::withoutGlobalScopes()->whereKey($contributionIds->filter()->unique()->values())->get() as $contribution) {
+                    if (! is_array($contribution->body_document)) {
+                        continue;
+                    }
+                    $document = RichText::withoutImages($contribution->body_document);
+                    $model::withoutGlobalScopes()->whereKey($contribution->id)->toBase()->update([
+                        'body_document' => json_encode($document, JSON_THROW_ON_ERROR),
+                        'body' => trim(RichText::text($document)),
+                    ]);
+                }
+            }
+            MediaImage::query()->whereKey($ids)->update(['rich_method_id' => null, 'rich_experience_id' => null, 'pending_deletion' => true]);
+
+            return $images;
+        });
+
+        $result = ['deleted' => 0, 'failed' => 0];
+        foreach ($images as $image) {
+            // Failures stay marked for the scheduled media:prune retry.
+            $result[$this->discard($image) ? 'deleted' : 'failed']++;
+        }
+
+        return $result;
+    }
+
+    /** @return Builder<MediaImage> */
+    private function contributionImages(Topic|Method|Experience $target): Builder
+    {
+        $methods = match (true) {
+            $target instanceof Topic => Method::withoutGlobalScopes()->where('topic_id', $target->id)->select('id'),
+            $target instanceof Method => Method::withoutGlobalScopes()->whereKey($target->id)->select('id'),
+            default => null,
+        };
+        $experiences = $methods === null
+            ? Experience::withoutGlobalScopes()->whereKey($target->id)
+            : Experience::withoutGlobalScopes()->whereIn('method_id', $methods);
+
+        return MediaImage::query()->where(fn (Builder $query) => $query
+            ->whereIn('rich_experience_id', (clone $experiences)->select('id'))
+            ->orWhereIn('id', (clone $experiences)->whereNotNull('evidence_image_id')->select('evidence_image_id'))
+            ->when($methods !== null, fn (Builder $query) => $query->orWhereIn('rich_method_id', $methods)));
     }
 
     /** @return array{deleted: int, failed: int} */
