@@ -10,9 +10,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * @property bool $rich_text
- * @property int|null $rich_method_id
- * @property int|null $rich_experience_id
+ * @property bool $rich_text Uploaded for a contribution gallery (legacy name).
+ * @property int|null $rich_method_id Legacy photo inside a method document.
+ * @property int|null $rich_experience_id Legacy photo inside an experience document.
+ * @property int|null $gallery_method_id
+ * @property int|null $gallery_experience_id
+ * @property int|null $position
+ * @property string|null $caption
  * @property int $id
  * @property int|null $user_id
  * @property string $disk
@@ -23,7 +27,7 @@ use Illuminate\Support\Facades\Storage;
  * @property bool $pending_deletion
  * @property Carbon $created_at
  */
-#[Fillable(['user_id', 'disk', 'path', 'bytes', 'width', 'height', 'pending_deletion', 'rich_text', 'rich_method_id', 'rich_experience_id'])]
+#[Fillable(['user_id', 'disk', 'path', 'bytes', 'width', 'height', 'pending_deletion', 'rich_text', 'rich_method_id', 'rich_experience_id', 'gallery_method_id', 'gallery_experience_id', 'position', 'caption'])]
 class MediaImage extends Model
 {
     /** @return HasMany<User, $this> */
@@ -42,7 +46,8 @@ class MediaImage extends Model
     /** @param Builder<self> $query */
     public function scopeUnreferenced(Builder $query): void
     {
-        $query->doesntHave('avatars')->doesntHave('experiences')->whereNull('rich_method_id')->whereNull('rich_experience_id');
+        $query->doesntHave('avatars')->doesntHave('experiences')->whereNull('rich_method_id')->whereNull('rich_experience_id')
+            ->whereNull('gallery_method_id')->whereNull('gallery_experience_id');
     }
 
     public function url(): string
@@ -57,9 +62,15 @@ class MediaImage extends Model
         return ['url' => $this->url(), 'width' => $this->width, 'height' => $this->height];
     }
 
+    /** @return array{url: string, width: int, height: int, caption: string|null} */
+    public function galleryData(): array
+    {
+        return [...$this->publicData(), 'caption' => $this->caption];
+    }
+
     /** @return array<string, string> */
     protected function casts(): array
     {
-        return ['rich_text' => 'boolean', 'rich_method_id' => 'integer', 'rich_experience_id' => 'integer', 'pending_deletion' => 'boolean', 'bytes' => 'integer', 'width' => 'integer', 'height' => 'integer'];
+        return ['rich_text' => 'boolean', 'rich_method_id' => 'integer', 'rich_experience_id' => 'integer', 'gallery_method_id' => 'integer', 'gallery_experience_id' => 'integer', 'position' => 'integer', 'pending_deletion' => 'boolean', 'bytes' => 'integer', 'width' => 'integer', 'height' => 'integer'];
     }
 }

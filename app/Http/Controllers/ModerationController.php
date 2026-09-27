@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ContentReport;
 use App\Models\Experience;
+use App\Models\MediaImage;
 use App\Models\Method;
 use App\Models\ModerationReview;
 use App\Models\User;
@@ -64,7 +65,7 @@ class ModerationController extends Controller
             $payload = $item->payload ?? [];
             $text = $payload['text'] ?? [];
             $author = User::query()->find($item->user_id);
-            $image = isset($payload['image']) ? route('moderation.image', $id, false) : null;
+            $images = isset($payload['image']) ? [['url' => route('moderation.image', $id, false), 'caption' => null]] : [];
             $reasons = $item->categories === []
                 ? [__('Automatic checking unavailable — manual review required. No violation has been determined.')]
                 : $item->categories;
@@ -78,7 +79,9 @@ class ModerationController extends Controller
                 $text['dated_updates'] = $target->updates->map(fn ($update) => $update->created_at?->toIso8601String().': '.$update->body)->implode("\n\n");
             }
             $author = $target === null ? null : User::query()->find($target->user_id);
-            $image = $target instanceof Experience ? $target->evidenceImage?->url() : null;
+            // Reviewers see the photos and captions exactly as the gallery shows them.
+            $images = $target instanceof Method || $target instanceof Experience ? $target->photos()->get()
+                ->map(fn (MediaImage $photo): array => ['url' => $photo->url(), 'caption' => $photo->caption])->all() : [];
             $reasons = [$item->reason];
             $hidden = $target?->hidden_at !== null;
             $photos = $target === null ? 0 : app(ImageUploads::class)->contributionImageCount($target);
@@ -87,7 +90,7 @@ class ModerationController extends Controller
         return Inertia::render('moderation/show', [
             'kind' => $kind, 'item' => [
                 'id' => $item->id, 'status' => $item->status, 'text' => $text,
-                'image' => $image, 'reasons' => $reasons, 'hidden' => $hidden, 'photos' => $photos,
+                'images' => $images, 'reasons' => $reasons, 'hidden' => $hidden, 'photos' => $photos,
                 'details' => $item instanceof ContentReport ? $item->details : null,
                 'note' => $item->review_note,
                 'author' => $author === null ? null : [

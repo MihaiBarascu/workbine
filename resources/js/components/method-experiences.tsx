@@ -5,6 +5,7 @@ import { MemberAvatar, MemberLink } from '@/components/community';
 import { ExperienceForm } from '@/components/experience-form';
 import InputError from '@/components/input-error';
 import { ReportLink } from '@/components/report-link';
+import { PhotoGallery } from '@/components/photo-gallery';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Button } from '@/components/ui/button';
 import type {
@@ -315,29 +316,7 @@ export function MethodExperiences({
                                 document={experience.body_document}
                                 text={experience.body}
                             />
-                            {experience.evidence_image && (
-                                <a
-                                    href={experience.evidence_image.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="focus-visible:ring-ring mt-5 block w-fit max-w-full overflow-hidden rounded-lg border focus-visible:ring-2"
-                                >
-                                    <img
-                                        src={experience.evidence_image.url}
-                                        alt={`Evidence shared by ${experience.user.name}`}
-                                        width={experience.evidence_image.width}
-                                        height={
-                                            experience.evidence_image.height
-                                        }
-                                        loading="lazy"
-                                        decoding="async"
-                                        className="bg-muted max-h-96 max-w-full object-contain"
-                                    />
-                                    <span className="sr-only">
-                                        Open image in a new tab
-                                    </span>
-                                </a>
-                            )}
+                            <PhotoGallery photos={experience.photos} />
                             {experience.tried_on && (
                                 <p className="wb-experience-tried">
                                     Tried on{' '}

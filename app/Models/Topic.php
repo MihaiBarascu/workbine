@@ -80,10 +80,12 @@ class Topic extends Model
     public function scopeWithCover(Builder $query): void
     {
         $query->addSelect('topics.*')->selectSub(
+            // The first photo of the oldest visible method that has one.
             MediaImage::query()->select('media_images.id')
-                ->join('methods', 'methods.id', '=', 'media_images.rich_method_id')
+                ->join('methods', 'methods.id', '=', 'media_images.gallery_method_id')
                 ->whereColumn('methods.topic_id', 'topics.id')->whereNull('methods.hidden_at')
-                ->where('media_images.pending_deletion', false)->orderBy('media_images.id')->limit(1),
+                ->where('media_images.pending_deletion', false)
+                ->orderBy('methods.id')->orderBy('media_images.position')->orderBy('media_images.id')->limit(1),
             'cover_image_id'
         )->with('coverImage');
     }

@@ -174,7 +174,7 @@ For the recovery exercise:
    does not prove provider connectivity by itself.
 4. Check several restored media ledger entries and confirm that their corresponding
    objects are retrievable from the isolated media store.
-5. Include at least one avatar/profile image and one contribution/evidence image
+5. Include at least one avatar/profile image and one contribution gallery photo
    when those types exist in the selected backup.
 6. Confirm that restored images are valid WebP files and that application records
    still point to the expected object keys.

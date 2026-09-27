@@ -38,9 +38,7 @@ test('copied rich text keeps email links and explains simplified content', async
     await expect(
         page.getByText(/Pasted formatting was simplified/),
     ).toBeVisible();
-    await expect(
-        page.getByText(/Copied images were not uploaded/),
-    ).toBeVisible();
+    await expect(page.getByText(/Copied images were not added/)).toBeVisible();
     await expect(
         page.getByText(/The link on “Old download” was removed/),
     ).toBeVisible();

@@ -4,8 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -18,7 +20,7 @@ use Illuminate\Support\Carbon;
  * @property string $body
  * @property string|null $evidence_url
  * @property int|null $evidence_image_id
- * @property-read MediaImage|null $evidenceImage
+ * @property-read Collection<int, MediaImage> $photos
  * @property Carbon|null $tried_on
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -56,10 +58,10 @@ class Experience extends Model
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo<MediaImage, $this> */
-    public function evidenceImage(): BelongsTo
+    /** @return HasMany<MediaImage, $this> */
+    public function photos(): HasMany
     {
-        return $this->belongsTo(MediaImage::class, 'evidence_image_id');
+        return $this->hasMany(MediaImage::class, 'gallery_experience_id')->orderBy('position')->orderBy('id');
     }
 
     /** @return array<string, string> */

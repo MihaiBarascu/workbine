@@ -48,7 +48,7 @@ test('member can create a topic with classification and revisit it', async ({
     await expect(page.getByLabel(/Category/)).toHaveValue('ai');
 });
 
-test('member can publish a first rich-text method with an inline photo', async ({
+test('member can publish a first method with a gallery photo', async ({
     page,
     actors,
 }) => {
@@ -62,12 +62,10 @@ test('member can publish a first rich-text method with an inline photo', async (
         .getByRole('textbox', { name: 'How you do it' })
         .fill('I followed these steps and checked the result carefully.');
     await page
-        .getByLabel('Upload photo', { exact: true })
+        .getByLabel('Upload photos', { exact: true })
         .setInputFiles(imageFile);
-    await expect(page.locator('[contenteditable="true"] img')).toHaveCount(1);
-    await page.locator('[contenteditable="true"] img').click();
     await page
-        .getByLabel('Describe this photo for people who cannot see it')
+        .getByLabel('Photo 1 description', { exact: true })
         .fill('A small example photo.');
     await page
         .getByRole('button', { name: 'Publish topic & method', exact: true })

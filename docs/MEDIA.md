@@ -1,8 +1,7 @@
 # Images and Cloudflare R2
 
-Workbine accepts a profile photo and up to 10 inline photos per method or response.
-The shared editor is described in [RICH-TEXT.md](RICH-TEXT.md). Existing separate
-evidence images remain supported. Uploads pass through
+Workbine accepts a profile photo and a gallery of up to six photos per method or
+response; galleries are described in [RICH-TEXT.md](RICH-TEXT.md). Uploads pass through
 the authenticated Laravel application; browsers do not receive storage credentials
 or permission to write directly to the bucket. Images are public contributions.
 The Google avatar remains separate from the uploaded profile photo.

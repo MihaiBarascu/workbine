@@ -73,13 +73,16 @@ recreated rows, alongside the existing ownership and method-preservation rules.
 See [ExperienceRevisionTest.php](../tests/Feature/ExperienceRevisionTest.php) and
 [experience-conflict.spec.ts](../tests/e2e/experience-conflict.spec.ts).
 
-### Inline photos, evidence and avatars
+### Photo galleries and avatars
 
-Routes: `POST /editor/images`, profile/avatar upload/delete and experience image
-controls. Browser: [flows.spec.ts](../tests/e2e/flows.spec.ts) (inline method photo),
+Routes: `POST /editor/images` (gallery uploads), profile/avatar upload/delete and
+the method/experience forms that save a gallery. Browser:
+[flows.spec.ts](../tests/e2e/flows.spec.ts) (first method with a gallery photo),
 [media-flow.cjs](../tests/browser/media-flow.cjs) and
 [moderation-flow.cjs](../tests/browser/moderation-flow.cjs).
-Backend: [RichTextTest.php](../tests/Feature/RichTextTest.php) and
+Backend: [PhotoGalleryTest.php](../tests/Feature/PhotoGalleryTest.php),
+[PhotoGalleryMigrationTest.php](../tests/Feature/PhotoGalleryMigrationTest.php),
+[RichTextTest.php](../tests/Feature/RichTextTest.php) and
 [ImageUploadsTest.php](../tests/Feature/ImageUploadsTest.php).
 These cover local processing/storage, not deployment-specific R2 delivery.
 The rich-method script waits for editor focus after toolbar actions and checks

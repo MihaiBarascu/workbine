@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Photos;
 use App\Support\RichText;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,6 +27,7 @@ class StoreMethodRequest extends FormRequest
             'title' => ['required', 'string', 'max:160'],
             'body' => ['required', 'string', 'max:10000'],
             'source_url' => ['nullable', 'url:http,https', 'max:2048'],
+            ...Photos::rules('photos'),
         ];
     }
 }

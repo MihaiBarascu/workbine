@@ -20,6 +20,8 @@ class MediaMigrationTest extends TestCase
         $experience = $method->experiences()->create([
             'user_id' => $user->id, 'outcome' => 'worked', 'body' => 'Existing public experience before images are available.',
         ]);
+        $galleries = require database_path('migrations/2026_09_27_120000_add_contribution_photo_galleries.php');
+        $galleries->down();
         $richText = require database_path('migrations/2026_09_12_190000_add_rich_text_contributions.php');
         $richText->down();
         $migration = require database_path('migrations/2026_09_11_150000_create_media_images_table.php');
@@ -30,8 +32,10 @@ class MediaMigrationTest extends TestCase
         $this->assertDatabaseHas('experiences', ['id' => $experience->id, 'body' => $experience->body]);
         $migration->up();
         $richText->up();
+        $galleries->up();
         $this->assertTrue(Schema::hasColumn('methods', 'body_document'));
         $this->assertTrue(Schema::hasColumn('media_images', 'rich_method_id'));
+        $this->assertTrue(Schema::hasColumn('media_images', 'gallery_experience_id'));
         $this->assertNull($user->refresh()->avatar_image_id);
         $this->assertNull($experience->refresh()->evidence_image_id);
     }

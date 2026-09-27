@@ -13,6 +13,14 @@ export type SharedImage = {
     height: number;
 };
 
+export type GalleryPhoto = SharedImage & {
+    caption: string | null;
+};
+
+export type EditablePhoto = GalleryPhoto & {
+    id: number;
+};
+
 export type MediaSettings = {
     enabled: boolean;
     maxUploadMb: number;
@@ -46,6 +54,7 @@ export type MethodSummary = {
     title: string;
     body: string;
     body_document?: RichTextNode | null;
+    photos?: GalleryPhoto[];
     source_url: string | null;
     created_at: string | null;
     updated_at: string | null;
@@ -69,7 +78,7 @@ export type ExperienceSummary = {
     body: string;
     body_document?: RichTextNode | null;
     evidence_url: string | null;
-    evidence_image: SharedImage | null;
+    photos: GalleryPhoto[];
     tried_on: string | null;
     created_at: string | null;
     updated_at: string | null;
@@ -77,6 +86,7 @@ export type ExperienceSummary = {
 };
 
 export type OwnExperience = ExperienceSummary & {
+    photos: EditablePhoto[];
     revision: string;
 };
 

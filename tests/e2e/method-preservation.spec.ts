@@ -34,14 +34,10 @@ test('an experienced method stays intact while its author can add dated updates'
             .getByRole('textbox', { name: 'How you do it' })
             .fill(originalBody);
         await owner
-            .getByLabel('Upload photo', { exact: true })
+            .getByLabel('Upload photos', { exact: true })
             .setInputFiles(imageFile);
-        await expect(owner.locator('[contenteditable="true"] img')).toHaveCount(
-            1,
-        );
-        await owner.locator('[contenteditable="true"] img').click();
         await owner
-            .getByLabel('Describe this photo for people who cannot see it')
+            .getByLabel('Photo 1 description', { exact: true })
             .fill('The preserved method reference photo.');
         const sourceDetails = owner
             .locator('details')

@@ -17,6 +17,8 @@ class ContributionRevision
         $values = $contribution->only($fields);
         if ($contribution instanceof Topic) {
             $values['tags'] = $contribution->tags()->orderBy('name')->pluck('name')->all();
+        } else {
+            $values['photos'] = Photos::fingerprint($contribution);
         }
 
         return hash('sha256', json_encode($values, JSON_THROW_ON_ERROR));

@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, ArrowUpRight, ExternalLink, Pencil } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
+import { PhotoGallery } from '@/components/photo-gallery';
 import { PublicShell } from '@/components/public-shell';
 import { ReportLink } from '@/components/report-link';
 import { RichTextContent } from '@/components/rich-text-content';
@@ -107,6 +108,7 @@ export default function MethodShow({
                         document={method.body_document}
                         text={method.body}
                     />
+                    <PhotoGallery photos={method.photos} />
                     {method.source_url && (
                         <div className="wb-method-source">
                             <a

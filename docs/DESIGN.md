@@ -67,8 +67,8 @@ These are attributed design portfolios, not evidence that those interfaces passe
 ## Contribution writing — 2026-09-12
 
 Optimize for the person explaining something, including someone writing a short
-response on a phone. Methods and responses share a small rich-text toolbar and
-inline photos. Use gentle writing guidance instead of mandatory sections, step
+response on a phone. Methods and responses share a small rich-text toolbar and a
+photo gallery below the text. Use gentle writing guidance instead of mandatory sections, step
 counts or minimum lengths. Reveal secondary source/date/link controls only when
 needed. Keep validation recoverable and publication explicit.
 

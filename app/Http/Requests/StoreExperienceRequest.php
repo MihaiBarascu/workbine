@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Models\Method;
-use App\Services\ImageUploads;
+use App\Support\Photos;
 use App\Support\RichText;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -36,8 +36,18 @@ class StoreExperienceRequest extends FormRequest
             'body' => ['required', 'string', 'max:5000'],
             'evidence_url' => ['nullable', 'url:http,https', 'max:2048'],
             'tried_on' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
-            'evidence_image' => ['nullable', ...ImageUploads::rules()],
-            'remove_evidence_image' => ['sometimes', 'boolean'],
+            ...Photos::rules('photos'),
+            // Pages opened before galleries still offer the single evidence photo: ask to reload.
+            'evidence_image' => ['prohibited'],
+            'remove_evidence_image' => ['prohibited'],
         ];
+    }
+
+    /** @return array<string, string> */
+    public function messages(): array
+    {
+        $outdated = __('This page is out of date. Copy your text, reload the page and add photos in the gallery.');
+
+        return ['evidence_image.prohibited' => $outdated, 'remove_evidence_image.prohibited' => $outdated];
     }
 }

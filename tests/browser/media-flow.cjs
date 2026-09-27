@@ -279,21 +279,21 @@ const { chromium } = requireBrowser('playwright');
             .locator('input[name="evidence_url"]')
             .fill('ftp://example.test/evidence');
         await page
-            .getByRole('textbox', { name: 'How did it go?' })
-            .press('ControlOrMeta+End');
-        await page
-            .getByLabel('Upload photo', { exact: true })
+            .getByLabel('Upload photos', { exact: true })
             .setInputFiles(blue);
-        await page.locator('.wb-editor img').waitFor();
-        await loaded(page.locator('.wb-editor img'));
+        await page
+            .getByLabel('Photo 1 description', { exact: true })
+            .fill('Synthetic evidence for the browser test');
         await page
             .getByRole('button', { name: 'Publish my response', exact: true })
             .click();
         await page.locator('#evidence-url-error').waitFor();
         assert.equal(
-            await page.locator('.wb-editor img').count(),
-            1,
-            'Validation preserves uploaded photos',
+            await page
+                .getByLabel('Photo 1 description', { exact: true })
+                .inputValue(),
+            'Synthetic evidence for the browser test',
+            'Validation preserves uploaded photos and captions',
         );
         assert.ok(
             (
@@ -310,8 +310,12 @@ const { chromium } = requireBrowser('playwright');
         const article = page
             .locator('main article')
             .filter({ hasText: experienceBody });
-        const evidence = article.locator('.wb-rich-text img');
+        const evidence = article.locator('.wb-photo-gallery img');
         await loaded(evidence);
+        assert.equal(
+            await evidence.getAttribute('alt'),
+            'Synthetic evidence for the browser test',
+        );
         const imageUrl = await evidence.getAttribute('src');
         const response = await context.request.get(imageUrl);
         assert.equal(response.status(), 200);
@@ -326,32 +330,26 @@ const { chromium } = requireBrowser('playwright');
         assert.equal(await evidence.getAttribute('src'), imageUrl);
         await responsiveCaptures('media-experience');
         await page
-            .locator('[contenteditable="true"]')
-            .press('ControlOrMeta+End');
-        await page
-            .getByLabel('Upload photo', { exact: true })
+            .getByLabel('Upload photos', { exact: true })
             .setInputFiles(grey);
-        await page.waitForFunction(
-            () => document.querySelectorAll('.wb-editor img').length === 2,
-        );
+        await page.getByLabel('Photo 2 description', { exact: true }).waitFor();
         await page
             .getByRole('button', { name: 'Update my response', exact: true })
             .click();
         await page.waitForFunction(
             () =>
-                document.querySelectorAll('main article .wb-rich-text img')
+                document.querySelectorAll('main article .wb-photo-gallery img')
                     .length === 2,
         );
-        await page.locator(`.wb-editor img[src="${imageUrl}"]`).click();
         await page
-            .getByRole('button', { name: 'Remove photo', exact: true })
+            .getByRole('button', { name: 'Remove photo 1', exact: true })
             .click();
         await page
             .getByRole('button', { name: 'Update my response', exact: true })
             .click();
         await page.waitForFunction(
             () =>
-                document.querySelectorAll('main article .wb-rich-text img')
+                document.querySelectorAll('main article .wb-photo-gallery img')
                     .length === 1,
         );
         assert.notEqual(await evidence.getAttribute('src'), imageUrl);
@@ -374,13 +372,13 @@ const { chromium } = requireBrowser('playwright');
             .click();
         assert.equal(
             await page
-                .getByRole('button', { name: 'Photo', exact: true })
+                .getByRole('button', { name: 'Add photos', exact: true })
                 .count(),
             0,
+            'Paused uploads hide the add button',
         );
-        await page.locator('.wb-editor img').click();
         await page
-            .getByRole('button', { name: 'Remove photo', exact: true })
+            .getByRole('button', { name: 'Remove photo 1', exact: true })
             .click();
         await page
             .getByRole('button', { name: 'Update my response', exact: true })
@@ -388,14 +386,14 @@ const { chromium } = requireBrowser('playwright');
         await evidence.waitFor({ state: 'detached' });
         await page.unroute(evidencePage);
         await page.reload();
-        assert.equal(await article.locator('.wb-rich-text img').count(), 0);
+        assert.equal(await article.locator('.wb-photo-gallery img').count(), 0);
         assert.equal(
             await article
                 .getByRole('link', { name: 'View shared evidence' })
                 .getAttribute('href'),
             'https://example.test/evidence',
         );
-        // The same editor also publishes and edits a method with formatting and photos.
+        // The same editor formats the text; photos go in the gallery below it.
         await page.goto(`${root}/topics/create`);
         await page.locator('#title').fill('Sharing a clear visual method');
         await page.locator('#include_method').check();
@@ -440,15 +438,7 @@ const { chromium } = requireBrowser('playwright');
         await page
             .getByRole('button', { name: 'Apply link', exact: true })
             .click();
-        // Exercise clipboard image handling, including text retention on a failed upload.
-        await page.getByLabel('Upload photo', { exact: true }).setInputFiles({
-            name: 'invalid.svg',
-            mimeType: 'image/svg+xml',
-            buffer: Buffer.from('<svg></svg>'),
-        });
-        await page
-            .getByText('Choose a JPEG, PNG or WebP photo', { exact: false })
-            .waitFor();
+        // A pasted image never enters the text; the editor points to the gallery.
         await methodEditor.evaluate((element, base64) => {
             const bytes = Uint8Array.from(atob(base64), (character) =>
                 character.charCodeAt(0),
@@ -465,10 +455,25 @@ const { chromium } = requireBrowser('playwright');
                 }),
             );
         }, blue.buffer.toString('base64'));
-        await loaded(page.locator('.wb-editor img'));
-        await page.locator('.wb-editor img').click();
         await page
-            .getByLabel('Describe this photo for people who cannot see it')
+            .getByText('Photos go in the gallery below the text.', {
+                exact: true,
+            })
+            .waitFor();
+        assert.equal(await page.locator('.wb-editor img').count(), 0);
+        await page.getByLabel('Upload photos', { exact: true }).setInputFiles({
+            name: 'invalid.svg',
+            mimeType: 'image/svg+xml',
+            buffer: Buffer.from('<svg></svg>'),
+        });
+        await page
+            .getByText('Choose JPEG, PNG or WebP photos', { exact: false })
+            .waitFor();
+        await page
+            .getByLabel('Upload photos', { exact: true })
+            .setInputFiles(blue);
+        await page
+            .getByLabel('Photo 1 description', { exact: true })
             .fill('The completed first step');
         await page
             .getByRole('button', {
@@ -488,7 +493,10 @@ const { chromium } = requireBrowser('playwright');
             .locator('article')
             .filter({ hasText: 'Keep the explanation beside the photo' });
         await methodArticle.locator('strong').first().waitFor();
-        assert.equal(await methodArticle.locator('ol li').count(), 2);
+        assert.equal(
+            await methodArticle.locator('.wb-rich-text ol li').count(),
+            2,
+        );
         assert.equal(
             await methodArticle
                 .getByRole('link', {
@@ -503,36 +511,35 @@ const { chromium } = requireBrowser('playwright');
         await methodArticle
             .getByRole('link', { name: 'Edit method', exact: true })
             .click();
-        await page.locator('.wb-editor img').waitFor();
+        await page.getByLabel('Photo 1 description', { exact: true }).waitFor();
         assert.equal(await page.locator('.wb-editor ol li').count(), 2);
-        await page.locator('.wb-editor img').click();
         await page
-            .getByRole('button', { name: 'Remove photo', exact: true })
+            .getByRole('button', { name: 'Remove photo 1', exact: true })
             .click();
         await page
             .getByRole('button', { name: 'Save changes', exact: true })
             .click();
         await methodArticle.waitFor();
         assert.equal(
-            await methodArticle.locator('.wb-rich-text img').count(),
+            await methodArticle.locator('.wb-photo-gallery img').count(),
             0,
         );
         console.log(
-            'PASS shared method editor: bold, numbered steps, links, clipboard photos, alt text, editing and removal',
+            'PASS shared method editor: bold, numbered steps, links, gallery photos with captions, editing and removal',
         );
         await context.clearCookies();
         await page.goto(experienceUrl);
         await article.waitFor();
         assert.equal(
             await page
-                .getByRole('button', { name: 'Photo', exact: true })
+                .getByRole('button', { name: 'Add photos', exact: true })
                 .count(),
             0,
             'Guests cannot upload',
         );
         assert.deepEqual(errors, [], 'No media browser runtime errors');
         console.log(
-            'PASS evidence multipart submission, validation recovery, optimized public image, replacement, removal and responsive light/dark layouts',
+            'PASS experience gallery upload, validation recovery, optimized public image, captions, replacement, removal and responsive light/dark layouts',
         );
     } catch (error) {
         await page

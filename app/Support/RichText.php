@@ -2,9 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\Experience;
-use App\Models\MediaImage;
-use App\Models\Method;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -26,18 +23,21 @@ class RichText
         }
         $document = json_decode($raw, true, 20);
         $count = 0;
-        $images = 0;
-        $document = self::node($document, ['doc'], 0, $count, $images, $field);
+        $document = self::node($document, ['doc'], 0, $count, $field);
         $request->merge([$field.'_document' => $document, $field => trim(self::text($document))]);
     }
 
     /** @param list<string> $allowed
      * @return array<string, mixed>
      */
-    private static function node(mixed $node, array $allowed, int $depth, int &$count, int &$images, string $field): array
+    private static function node(mixed $node, array $allowed, int $depth, int &$count, string $field): array
     {
         if (++$count > 1500 || $depth > 10) {
             self::invalid($field, 'This text contains too much formatting or deeply nested lists. Simplify the lists or paste it as plain text.');
+        }
+        if (is_array($node) && ($node['type'] ?? null) === 'image') {
+            // Only a page opened before galleries existed still sends photos inside the text.
+            self::invalid($field, 'Photos now go in the gallery below the text. Reload the page, then add them there.');
         }
         if (! is_array($node) || ! in_array($node['type'] ?? null, $allowed, true)) {
             self::invalid($field);
@@ -67,27 +67,13 @@ class RichText
                 }
                 $result['marks'][] = $clean;
             }
-        } elseif ($type === 'image') {
-            $id = $node['attrs']['imageId'] ?? null;
-            $alt = $node['attrs']['alt'] ?? '';
-            if (++$images > 10) {
-                self::invalid($field, 'You can add up to 10 photos. Remove one before saving.');
-            }
-            if (! is_int($id) || $id < 1) {
-                self::invalid($field, 'A photo was not uploaded through this editor. Remove it and use the Photo button to upload it.');
-            }
-            if (! is_string($alt) || mb_strlen($alt) > 300) {
-                self::invalid($field, 'A photo description is too long. Shorten it to 300 characters or fewer.');
-            }
-            // Never trust a submitted image URL, dimensions or HTML attributes.
-            $result['attrs'] = ['imageId' => $id, 'alt' => $alt];
         } elseif ($type !== 'hardBreak') {
             $children = $node['content'] ?? [];
             if (! is_array($children) || ! array_is_list($children)) {
                 self::invalid($field);
             }
             $childTypes = match ($type) {
-                'doc', 'listItem' => ['paragraph', 'bulletList', 'orderedList', 'image'],
+                'doc', 'listItem' => ['paragraph', 'bulletList', 'orderedList'],
                 'paragraph' => ['text', 'hardBreak'],
                 default => ['listItem'],
             };
@@ -97,7 +83,7 @@ class RichText
             }
             $result['content'] = [];
             foreach ($children as $child) {
-                $result['content'][] = self::node($child, $childTypes, $depth + 1, $count, $images, $field);
+                $result['content'][] = self::node($child, $childTypes, $depth + 1, $count, $field);
             }
         }
 
@@ -112,65 +98,11 @@ class RichText
 
             return $node['text'].implode('', array_map(fn ($mark) => ' ('.$mark['attrs']['href'].')', $links));
         }
-        if ($node['type'] === 'image') {
-            return ($node['attrs']['alt'] ?? '')."\n";
-        }
         if ($node['type'] === 'hardBreak') {
             return "\n";
         }
 
         return implode('', array_map(self::text(...), $node['content'] ?? [])).($node['type'] === 'paragraph' ? "\n" : '');
-    }
-
-    /**
-     * Replace every photo with a short note; paragraphs are valid wherever photos are.
-     *
-     * @param  array<string, mixed>  $node
-     * @return array<string, mixed>
-     */
-    public static function withoutImages(array $node): array
-    {
-        if ($node['type'] === 'image') {
-            return ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => __('Photo removed by moderation.')]]];
-        }
-        if (isset($node['content'])) {
-            $node['content'] = array_map(self::withoutImages(...), $node['content']);
-        }
-
-        return $node;
-    }
-
-    /** Attach inside the contribution transaction, with image locks shared by pruning.
-     * @param  array<string, mixed>|null  $document
-     */
-    public static function save(Method|Experience $model, ?array $document, string $field = 'body'): void
-    {
-        $column = $model instanceof Method ? 'rich_method_id' : 'rich_experience_id';
-        $other = $model instanceof Method ? 'rich_experience_id' : 'rich_method_id';
-        $ids = [];
-        $walk = function (array &$node) use (&$walk, &$ids, $model, $column, $other, $field): void {
-            if ($node['type'] === 'image') {
-                $image = MediaImage::query()->whereKey($node['attrs']['imageId'])->lockForUpdate()->first();
-                if ($image === null || $image->user_id !== $model->user_id || ! $image->rich_text || $image->pending_deletion
-                    || $image->{$other} !== null || ($image->{$column} !== null && $image->{$column} !== $model->id)) {
-                    throw ValidationException::withMessages([$field => __('An image is no longer available. Remove it and upload it again.')]);
-                }
-                $image->update([$column => $model->id]);
-                $ids[] = $image->id;
-                $node['attrs'] = [...$node['attrs'], 'src' => $image->url(), 'width' => $image->width, 'height' => $image->height];
-            }
-            if (isset($node['content'])) {
-                foreach ($node['content'] as &$child) {
-                    $walk($child);
-                }
-            }
-        };
-        if ($document !== null) {
-            $walk($document);
-        }
-        MediaImage::query()->where($column, $model->id)->whereNotIn('id', $ids)
-            ->update([$column => null, 'pending_deletion' => true]);
-        $model->update(['body_document' => $document]);
     }
 
     private static function validLink(string $href): bool

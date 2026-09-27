@@ -6,11 +6,6 @@ export type RichTextNode = {
     text?: string;
     attrs?: {
         href?: string;
-        src?: string;
-        imageId?: number;
-        alt?: string;
-        width?: number;
-        height?: number;
         start?: number;
     };
     marks?: { type: string; attrs?: { href?: string } }[];
@@ -25,10 +20,6 @@ export function plainDocument(text: string): RichTextNode {
             content: line ? [{ type: 'text', text: line }] : [],
         })),
     };
-}
-
-function safeUrl(value?: string) {
-    return value && /^https?:\/\//i.test(value) ? value : undefined;
 }
 
 function renderNode(node: RichTextNode, key: number): ReactNode {
@@ -70,24 +61,6 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
             return <li key={key}>{children}</li>;
         case 'hardBreak':
             return <br key={key} />;
-        case 'image':
-            return safeUrl(node.attrs?.src) ? (
-                <a
-                    key={key}
-                    href={node.attrs?.src}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={node.attrs?.alt || 'Open photo at full size'}
-                >
-                    <img
-                        src={node.attrs?.src}
-                        alt={node.attrs?.alt ?? ''}
-                        width={node.attrs?.width}
-                        height={node.attrs?.height}
-                        loading="lazy"
-                    />
-                </a>
-            ) : null;
         default:
             return null;
     }

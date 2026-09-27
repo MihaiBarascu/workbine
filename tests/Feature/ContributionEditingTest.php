@@ -198,7 +198,7 @@ class ContributionEditingTest extends TestCase
                 ->missing('method.user_id'));
     }
 
-    public function test_tried_method_rejects_rewrites_and_preserves_experiences_and_evidence(): void
+    public function test_tried_method_rejects_rewrites_and_preserves_experiences_and_their_photos(): void
     {
         Storage::fake('public');
         $method = Method::factory()->create();
@@ -210,10 +210,11 @@ class ContributionEditingTest extends TestCase
             'bytes' => 8,
             'width' => 100,
             'height' => 100,
+            'rich_text' => true,
+            'gallery_experience_id' => $experience->id,
+            'position' => 0,
         ]);
         Storage::disk('public')->put($image->path, 'evidence');
-        $experience->evidence_image_id = $image->id;
-        $experience->save();
         $originalMethod = $method->refresh()->getAttributes();
         $originalExperience = $experience->refresh()->getAttributes();
         $revision = $this->actingAs($method->user)->get(route('methods.edit', [$method->topic, $method]))->inertiaProps('revision');
@@ -232,7 +233,7 @@ class ContributionEditingTest extends TestCase
         $this->assertSame($originalMethod, $method->refresh()->getAttributes());
         $this->assertSame($method->user_id, $this->app['auth']->id());
         $this->assertSame($originalExperience, $experience->refresh()->getAttributes());
-        $this->assertSame($image->id, $experience->evidence_image_id);
+        $this->assertSame([$image->id], $experience->photos->modelKeys());
         $this->assertFalse($image->refresh()->pending_deletion);
         Storage::disk('public')->assertExists($image->path);
 
