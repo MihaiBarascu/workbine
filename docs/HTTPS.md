@@ -65,8 +65,9 @@ For a future HTTPS change:
    hosts need HTTP.
 2. Verify a replacement redirect before removing the existing one. Status codes
    alone do not establish which component served the response.
-3. Merge tested application code into `main` and let Dokploy deploy automatically.
-   Observe that deployment instead of invoking an additional deployment or restart.
+3. Merge tested application code into `main` and let the Release workflow deploy
+   it through staging to production. Observe that run instead of invoking an
+   additional deployment or restart.
 4. Verify HTTPS home/feed/login responses, HTTPS pagination and Link preload URLs,
    Secure session cookies, and HTTP redirects preserving path/query. Confirm the
    running container matches the merged runtime files and is healthy. No production

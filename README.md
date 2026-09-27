@@ -52,6 +52,8 @@ tests. Remove and re-add the label after changes, then verify both runs against
 the current PR head and review the screenshots before merging. See
 [testing instructions](docs/TESTING.md) for the full release gate.
 
-`main` deploys automatically. The unattended coding agent remains cancelled.
+`main` deploys to staging automatically; production receives the same image after
+the owner approves it in GitHub Actions. See [deployment](docs/DEPLOYMENT.md).
+The unattended coding agent remains cancelled.
 The owner-authorized daily media cleanup is application maintenance and does not
 enable unattended development.

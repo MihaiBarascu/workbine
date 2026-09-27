@@ -1,0 +1,155 @@
+name: Deploy release
+
+# Called by release.yml. Points the environment tag at an already published
+# image digest, asks Dokploy to redeploy that environment and waits until the
+# public health check serves the expected revision. Never builds from source.
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: GitHub environment and GHCR tag to deploy (staging or production)
+        required: true
+        type: string
+      url:
+        description: Public base URL of the environment
+        required: true
+        type: string
+      revision:
+        description: Full commit SHA of the published image
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 20
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ inputs.url }}
+    # One deployment per environment at a time; a newer pending one replaces an older pending one.
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      IMAGE: ghcr.io/mihaibarascu/workbine
+      TARGET: ${{ inputs.environment }}
+      BASE_URL: ${{ inputs.url }}
+      REVISION: ${{ inputs.revision }}
+
+    steps:
+      - name: Validate requested release
+        shell: bash
+        run: |
+          if [[ ! "$REVISION" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Revision must be a full lowercase commit SHA, got: $REVISION" >&2
+            exit 1
+          fi
+          if [[ "$TARGET" != staging && "$TARGET" != production ]]; then
+            echo "Unknown environment: $TARGET" >&2
+            exit 1
+          fi
+
+      - name: Checkout release checks
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resolve the published image digest
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "$IMAGE:$REVISION" | jq -r .digest)"
+          if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "No published image for $REVISION" >&2
+            exit 1
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Deploying $IMAGE@$digest ($REVISION) to $TARGET"
+
+      - name: Extract the expected frontend build
+        shell: bash
+        env:
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          set -euo pipefail
+          docker pull --platform linux/arm64 "$IMAGE@$DIGEST"
+          container_id="$(docker create --platform linux/arm64 "$IMAGE@$DIGEST")"
+          trap 'docker rm -f "$container_id" >/dev/null 2>&1 || true' EXIT
+          docker cp "$container_id:/var/www/html/public/build/manifest.json" /tmp/expected-manifest.json
+
+      - name: Point the environment tag at the release
+        shell: bash
+        env:
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: docker buildx imagetools create --tag "$IMAGE:$TARGET" "$IMAGE@$DIGEST"
+
+      - name: Ask Dokploy to redeploy the environment
+        shell: bash
+        env:
+          DOKPLOY_DEPLOY_HOOK: ${{ secrets.DOKPLOY_DEPLOY_HOOK }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$DOKPLOY_DEPLOY_HOOK" ]]; then
+            echo "The $TARGET environment has no DOKPLOY_DEPLOY_HOOK secret" >&2
+            exit 1
+          fi
+
+          subject="$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1)"
+          title="Release ${REVISION:0:12}${subject:+: $subject}"
+          # Dokploy records a GitHub push payload's head commit as the deployment title and hash.
+          jq -n --arg id "$REVISION" --arg message "$title" '{head_commit: {id: $id, message: $message}}' > /tmp/deploy-request.json
+
+          status="$(curl --silent --show-error --max-time 30 \
+            --output /tmp/deploy-response.json --write-out '%{http_code}' \
+            --header 'Content-Type: application/json' --header 'X-GitHub-Event: push' \
+            --data @/tmp/deploy-request.json "$DOKPLOY_DEPLOY_HOOK")"
+          if [[ "$status" != 200 ]]; then
+            echo "Dokploy did not accept the $TARGET deployment (HTTP $status):" >&2
+            cat /tmp/deploy-response.json >&2
+            exit 1
+          fi
+          cat /tmp/deploy-response.json
+
+      - name: Verify the served release without writing data
+        shell: bash
+        env:
+          CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+          CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+        run: |
+          python3 tools/release_smoke.py \
+            --base-url "$BASE_URL" \
+            --manifest /tmp/expected-manifest.json \
+            --expected-revision "$REVISION" \
+            --attempts 60 --delay 10 \
+            --label "Workbine $TARGET release"
+
+      - name: Record the deployment
+        shell: bash
+        env:
+          DIGEST: ${{ steps.image.outputs.digest }}
+        run: |
+          {
+            echo "## $TARGET now serves \`${REVISION}\`"
+            echo
+            echo "- Image: \`$IMAGE@$DIGEST\`"
+            echo "- Environment tag: \`$IMAGE:$TARGET\`"
+            echo "- URL: $BASE_URL"
+            echo
+            echo "Roll back by running Release with an earlier published revision."
+          } >> "$GITHUB_STEP_SUMMARY"

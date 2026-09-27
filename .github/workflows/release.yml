@@ -1,0 +1,183 @@
+name: Release
+
+# A push to main builds one immutable arm64 image, deploys it to staging and
+# verifies the served revision. Production receives the same image only after
+# the production environment approval. Dispatch with an already published
+# revision to redeploy or roll back without rebuilding.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: Full commit SHA of an already published image. Leave empty to build the selected commit.
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: github.event_name == 'push' || inputs.revision == ''
+    # Workbine runs on ARM64. Build natively instead of emulating ARM64 through QEMU
+    # on an x64 runner; this is both faster and closer to the production host.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    # Serialize builds so the moving :main tag cannot be overwritten by an older,
+    # slower build that finishes after a newer release.
+    concurrency:
+      group: publish-container-main
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout release revision
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Resolve lowercase GHCR image name
+        id: image
+        shell: bash
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "name=$image" >> "$GITHUB_OUTPUT"
+          echo "Publishing $image"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push release image once
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          build-args: |
+            WORKBINE_REVISION=${{ github.sha }}
+          tags: |
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
+            ${{ steps.image.outputs.name }}:main
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.title=Workbine
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Pull the exact published artifact by digest
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: docker pull --platform linux/arm64 "$IMAGE@$DIGEST"
+
+      - name: Verify exact published artifact
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+
+          verify_script=$(cat <<'VERIFY'
+          set -eu
+          php --version
+          node --version
+          test -f bootstrap/ssr/app.js
+          test -x /usr/local/bin/workbine-entrypoint
+          test -f /etc/supervisor/conf.d/workbine.conf
+          test "$WORKBINE_REVISION" = "$EXPECTED_REVISION"
+          php artisan --version
+
+          supervisord -n -c /etc/supervisor/conf.d/workbine.conf > /tmp/supervisord.log 2>&1 &
+          supervisor_pid=$!
+
+          cleanup() {
+            kill -TERM "$supervisor_pid" >/dev/null 2>&1 || true
+            wait "$supervisor_pid" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          served_revision() {
+            php -r '$headers = @get_headers("http://127.0.0.1/up", true); echo is_array($headers) ? (array_change_key_case($headers)["x-workbine-revision"] ?? "") : "";'
+          }
+
+          for attempt in $(seq 1 30); do
+            if php artisan inertia:check-ssr >/dev/null 2>&1 && [ "$(served_revision)" = "$EXPECTED_REVISION" ]; then
+              exit 0
+            fi
+
+            if ! kill -0 "$supervisor_pid" 2>/dev/null; then
+              cat /tmp/supervisord.log
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          cat /tmp/supervisord.log
+          exit 1
+          VERIFY
+          )
+
+          docker run --rm --platform linux/arm64 \
+            --env EXPECTED_REVISION="$GITHUB_SHA" \
+            --entrypoint sh "$IMAGE@$DIGEST" -c "$verify_script"
+
+      - name: Record immutable release artifact
+        shell: bash
+        env:
+          IMAGE: ${{ steps.image.outputs.name }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "## Workbine release artifact"
+            echo
+            echo "- Commit: \`${GITHUB_SHA}\`"
+            echo "- Architecture: \`linux/arm64\`"
+            echo "- Immutable tag: \`${IMAGE}:${GITHUB_SHA}\`"
+            echo "- Convenience tag: \`${IMAGE}:main\`"
+            echo "- Digest: \`${DIGEST}\`"
+            echo
+            echo "Staging deploys this image next; production waits for the environment approval."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  staging:
+    needs: publish
+    # Runs after a fresh build, or directly when redeploying a published revision.
+    if: ${{ !cancelled() && (needs.publish.result == 'success' || needs.publish.result == 'skipped') }}
+    uses: ./.github/workflows/deploy.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      environment: staging
+      url: https://staging.workbine.com
+      revision: ${{ inputs.revision || github.sha }}
+    secrets: inherit
+
+  production:
+    needs: staging
+    if: ${{ !cancelled() && needs.staging.result == 'success' }}
+    uses: ./.github/workflows/deploy.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      environment: production
+      url: https://workbine.com
+      revision: ${{ inputs.revision || github.sha }}
+    secrets: inherit
