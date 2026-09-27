@@ -20,6 +20,18 @@ class GoogleAuthenticationTest extends TestCase
         $this->get(route('google.redirect'))->assertRedirect();
     }
 
+    public function test_google_always_offers_the_account_chooser(): void
+    {
+        // The Socialite fake drops extra parameters, so this builds the real Google URL (no request is sent).
+        config(['services.google.client_id' => 'test-client', 'services.google.client_secret' => 'test-secret']);
+
+        $location = (string) $this->get(route('google.redirect'))->assertRedirect()->headers->get('Location');
+        parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
+
+        $this->assertStringStartsWith('https://accounts.google.com/', $location);
+        $this->assertSame('select_account', $query['prompt'] ?? null);
+    }
+
     public function test_google_callback_creates_and_authenticates_user(): void
     {
         Notification::fake();

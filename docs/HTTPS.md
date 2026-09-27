@@ -49,13 +49,12 @@ Correct URL generation and redirect ownership are separate concerns.
   and `Referrer-Policy: strict-origin-when-cross-origin` to every response,
   including errors and `/up`, unless a response sets its own value. HSTS and the
   minimum TLS version are Cloudflare zone settings, not application behavior.
-- HTML responses also carry a `Content-Security-Policy-Report-Only` header with a
-  per-response script nonce. Nothing is blocked yet. Browsers post violations to
-  `/csp-report` (outside the session/CSRF web group, 20 per minute per visitor and
-  200 in total). The application logs the directive, the blocked origin and the
-  page's route name at warning level, never full URLs, and ignores browser
-  extension noise. Review those log lines, adjust the policy, then switch to an
-  enforcing header in a later release.
+- HTML responses also carry a `Content-Security-Policy` with a per-response
+  script nonce. It allows the site itself, Cloudflare Turnstile, Google profile
+  photos and the configured media host, and blocks everything else. It is left out
+  while `APP_DEBUG` is on, because Laravel's debug pages and the Vite dev server need
+  inline or cross-origin scripts. The browser flows run with the policy, so a page
+  that needs a new external source fails locally until the policy lists it.
 
 Proxy trust is a shared infrastructure boundary: attached containers must be
 trusted. Changing that network or attaching additional workloads requires review.

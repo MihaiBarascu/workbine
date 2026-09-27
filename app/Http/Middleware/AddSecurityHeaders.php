@@ -37,13 +37,9 @@ class AddSecurityHeaders
             }
         }
 
-        // Report-only: nothing is blocked until real reports show the policy fits every page.
-        // The Vite dev server serves scripts from another origin, so it is left out.
-        if (str_starts_with((string) $response->headers->get('Content-Type'), 'text/html')
-            && ! $response->headers->has('Content-Security-Policy-Report-Only')
-            && ! Vite::isRunningHot()) {
-            $response->headers->set('Content-Security-Policy-Report-Only', $this->policy($nonce));
-            $response->headers->set('Reporting-Endpoints', 'csp="'.route('csp.report').'"');
+        // Laravel's debug pages and the Vite dev server need inline and cross-origin scripts.
+        if (! config('app.debug') && str_starts_with((string) $response->headers->get('Content-Type'), 'text/html')) {
+            $response->headers->set('Content-Security-Policy', $this->policy($nonce));
         }
 
         return $response;
@@ -69,8 +65,6 @@ class AddSecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
             "object-src 'none'",
-            'report-uri '.route('csp.report'),
-            'report-to csp',
         ]);
     }
 }

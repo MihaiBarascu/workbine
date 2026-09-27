@@ -48,7 +48,7 @@
                 <button type="button" id="go-back" class="action" hidden>Go back</button>
             </div>
         </main>
-        <script>
+        <script nonce="{{ Vite::cspNonce() }}">
             const goBack = document.getElementById('go-back');
             if (window.history.length > 1) {
                 goBack.hidden = false;

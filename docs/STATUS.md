@@ -221,8 +221,8 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   classification. Human decisions, exact-content resubmission and manual publishing suspension reuse the monolith. Hiding reported
   content can also delete its photos, including those under it. Activation and live provider
   access are separate from code availability. See [MODERATION.md](MODERATION.md).
-- Pages send a report-only Content-Security-Policy; violations are logged without
-  URLs through `/csp-report`. See [HTTPS.md](HTTPS.md).
+- Pages send a Content-Security-Policy with a per-response script nonce. See
+  [HTTPS.md](HTTPS.md).
 - Branded HTTP errors cover normal and Inertia visits while preserving status,
   retry headers, JSON responses and local debug behavior.
 - Standard Laravel/Fortify email confirmation is sent automatically at email/password
@@ -231,7 +231,8 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
   and saved topics. Browsing, account settings, recovery and deletion remain available.
   Google-created accounts already have a verified address and receive no confirmation.
   Google cannot verify an unrelated local email or silently link an unverified
-  password account, and Google sign-in still asks for an enabled two-factor code. Password changes revoke database sessions and invalidate
+  password account, and Google sign-in still asks for an enabled two-factor code.
+  Google always shows its account chooser, so members can switch accounts. Password changes revoke database sessions and invalidate
   authenticated sessions that carry the password-hash marker. Recovery of an
   unverified account also removes previously enrolled login credentials; verified
   accounts retain their additional authentication factors.

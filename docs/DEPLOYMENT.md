@@ -15,7 +15,8 @@ push to main
 ## Release workflow
 
 `.github/workflows/release.yml` runs on every push to `main` and can be dispatched
-manually.
+manually. Pushes that only change documentation (`docs/` or Markdown files) are
+skipped: they change nothing that runs, so they need no image or approval.
 
 The **publish** job:
 

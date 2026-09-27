@@ -7,6 +7,11 @@ name: Release
 on:
   push:
     branches: [main]
+    # Documentation changes nothing that runs, so it needs no image or approval.
+    # A push that also touches any other file still releases.
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
   workflow_dispatch:
     inputs:
       revision:
