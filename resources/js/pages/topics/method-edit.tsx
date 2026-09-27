@@ -3,13 +3,14 @@ import { ArrowLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import InputError from '@/components/input-error';
+import { PhotoGallery } from '@/components/photo-gallery';
 import { RichTextContent } from '@/components/rich-text-content';
 import { Label } from '@/components/ui/label';
 import { MethodFields } from '@/components/method-fields';
 import { PublicShell } from '@/components/public-shell';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import type { MethodSummary, TopicSummary } from '@/types';
+import type { EditablePhoto, MethodSummary, TopicSummary } from '@/types';
 
 type Props = {
     topic: Pick<TopicSummary, 'id' | 'title' | 'slug'>;
@@ -21,7 +22,7 @@ type Props = {
         | 'body_document'
         | 'source_url'
         | 'protected_at'
-    >;
+    > & { photos: EditablePhoto[] };
     revision: string;
     submissionId: string;
 };
@@ -97,6 +98,7 @@ export default function MethodEdit({
                                 document={method.body_document}
                                 text={method.body}
                             />
+                            <PhotoGallery photos={method.photos} />
                         </div>
                         {method.source_url && (
                             <p className="mt-3 text-sm break-words">

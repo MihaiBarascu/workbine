@@ -163,7 +163,7 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             'Held image requires deliberate reveal',
         );
         await admin
-            .getByRole('button', { name: 'Show image for review' })
+            .getByRole('button', { name: 'Show photo for review' })
             .click();
         await admin.locator('main img').waitFor();
         const imageUrl = await admin.locator('main img').getAttribute('src');

@@ -1,8 +1,10 @@
 import { RichTextEditor } from '@/components/rich-text-editor';
 import type { RichTextNode } from '@/components/rich-text-content';
 import InputError from '@/components/input-error';
+import { PhotoGalleryField } from '@/components/photo-gallery-field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { EditablePhoto } from '@/types';
 
 type Props = {
     errors: Record<string, string>;
@@ -12,6 +14,7 @@ type Props = {
         title: string;
         body: string;
         body_document?: RichTextNode | null;
+        photos?: EditablePhoto[];
         source_url: string | null;
     };
 };
@@ -76,13 +79,19 @@ export function MethodFields({
                     initialDocument={initialValues?.body_document}
                     invalid={Boolean(errors[`${prefix}body`])}
                     describedBy={describedBy('body')}
-                    placeholder="Explain what you did and what happened. Add photos wherever they help."
+                    placeholder="Explain what you did and what happened."
                 />
                 <InputError
                     id={`${prefix}body-error`}
                     message={errors[`${prefix}body`]}
                 />
             </div>
+
+            <PhotoGalleryField
+                name={`${prefix}photos`}
+                initialPhotos={initialValues?.photos}
+                errors={errors}
+            />
 
             <details
                 className="wb-writing-help"

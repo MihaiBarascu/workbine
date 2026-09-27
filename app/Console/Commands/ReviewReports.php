@@ -54,7 +54,7 @@ class ReviewReports extends Command
             // JSON escapes control characters supplied by contributors; do not interpret console markup.
             $this->output->writeln(json_encode([
                 'report' => $report->only(['id', 'target_type', 'target_id', 'reason', 'details', 'status', 'review_note']),
-                'content' => $target?->only(['id', 'title', 'description', 'body', 'source_url', 'evidence_url', 'evidence_image_id', 'hidden_at']),
+                'content' => $target?->only(['id', 'title', 'description', 'body', 'source_url', 'evidence_url', 'hidden_at']),
                 'photos' => $target === null ? 0 : $uploads->contributionImageCount($target),
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR), OutputInterface::OUTPUT_RAW);
 

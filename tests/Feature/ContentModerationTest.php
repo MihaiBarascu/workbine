@@ -9,7 +9,6 @@ use App\Models\ModerationReview;
 use App\Models\Topic;
 use App\Models\User;
 use App\Support\ContributionRevision;
-use App\Support\ExperienceRevision;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request;
@@ -164,7 +163,7 @@ class ContentModerationTest extends TestCase
         $this->actingAs($admin)->get(route('moderation.image', $review->id))->assertOk()->assertHeader('Content-Type', 'image/webp');
         $this->assertStringContainsString('no-store', $this->get(route('moderation.image', $review->id))->headers->get('Cache-Control'));
         $this->get(route('moderation.show', ['review', $review->id]))->assertInertia(fn (Assert $page) => $page
-            ->where('item.image', route('moderation.image', $review->id, false))->missing('item.payload')->missing('item.fingerprint'));
+            ->where('item.images', [['url' => route('moderation.image', $review->id, false), 'caption' => null]])->missing('item.payload')->missing('item.fingerprint'));
         Http::assertSent(fn (Request $request) => str_starts_with($request['input'][0]['image_url']['url'], 'data:image/webp;base64,'));
         $this->post(route('moderation.decide', ['review', $review->id]), [
             'action' => 'approve', 'note' => 'Benign image approved.', 'publishing' => 'unchanged',
@@ -176,7 +175,7 @@ class ContentModerationTest extends TestCase
 
     }
 
-    public function test_evidence_image_flag_leaves_old_experience_and_image_unchanged(): void
+    public function test_flagged_gallery_upload_leaves_the_experience_unchanged(): void
     {
         config(['media.enabled' => true, 'media.disk' => 'public']);
         Storage::fake('public');
@@ -190,14 +189,27 @@ class ContentModerationTest extends TestCase
             return Http::response(['results' => [['categories' => $categories]]]);
         }]);
         $before = $experience->refresh()->getAttributes();
-        $this->actingAs($user)->post(route('experiences.store', [$experience->method->topic, $experience->method]), [
-            'method_revision' => ContributionRevision::token($experience->method),
-            'experience_revision' => ExperienceRevision::token($experience),
-            '_method' => 'put', 'outcome' => 'worked', 'body' => 'Updated useful experience with enough detail.',
-            'evidence_image' => UploadedFile::fake()->image('benign.png'),
-        ])->assertSessionHasErrors('evidence_image');
+        $this->actingAs($user)->postJson(route('editor.images.store'), ['image' => UploadedFile::fake()->image('benign.png')])
+            ->assertUnprocessable()->assertJsonValidationErrors('image');
         $this->assertSame($before, $experience->refresh()->getAttributes());
+        $this->assertDatabaseCount('media_images', 0);
         $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_photo_captions_are_checked_with_the_contribution_text(): void
+    {
+        config(['media.enabled' => true, 'media.disk' => 'public']);
+        Storage::fake('public');
+        $this->provider();
+        $user = User::factory()->create();
+        $method = Method::factory()->create();
+        $photo = $this->actingAs($user)->postJson(route('editor.images.store'), ['image' => UploadedFile::fake()->image('step.png')])->assertCreated()->json('id');
+        $this->post(route('methods.store', $method->topic), [
+            'title' => 'Another method', 'body' => 'Synthetic test with sufficient detail.',
+            'photos_present' => 1, 'photos' => [['id' => $photo, 'caption' => 'Distinctive caption wording']],
+        ])->assertSessionHasNoErrors();
+        Http::assertSent(fn (Request $request) => is_string($request['input'][0]['text'] ?? null)
+            && str_contains($request['input'][0]['text'], 'Distinctive caption wording'));
     }
 
     public function test_provider_failures_create_private_manual_reviews_without_violation_categories(): void

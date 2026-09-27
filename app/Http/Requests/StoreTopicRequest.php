@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\Photos;
 use App\Support\RichText;
 use App\Support\TopicDiscovery;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -43,6 +44,7 @@ class StoreTopicRequest extends FormRequest
             'method_title' => [Rule::excludeIf(! $this->boolean('include_method')), 'required', 'string', 'max:160'],
             'method_body' => [Rule::excludeIf(! $this->boolean('include_method')), 'required', 'string', 'max:10000'],
             'method_source_url' => [Rule::excludeIf(! $this->boolean('include_method')), 'nullable', 'url:http,https', 'max:2048'],
+            ...array_map(fn (array $rules): array => [Rule::excludeIf(! $this->boolean('include_method')), ...$rules], Photos::rules('method_photos')),
         ];
     }
 }

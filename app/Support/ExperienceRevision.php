@@ -16,7 +16,8 @@ class ExperienceRevision
         // Identity distinguishes a removed/recreated response; content catches
         // edits made in the same timestamp second, including formatting/photos.
         return hash('sha256', json_encode([
-            ...$experience->only(['id', 'method_id', 'user_id', 'outcome', 'body', 'body_document', 'evidence_url', 'evidence_image_id']),
+            ...$experience->only(['id', 'method_id', 'user_id', 'outcome', 'body', 'body_document', 'evidence_url']),
+            'photos' => Photos::fingerprint($experience),
             'tried_on' => $experience->tried_on?->toDateString(),
             'updated_at' => $experience->getRawOriginal('updated_at'),
         ], JSON_THROW_ON_ERROR));

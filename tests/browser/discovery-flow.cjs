@@ -114,13 +114,15 @@ const verifyAccount = require('./verify-account.cjs');
             return canvas.toDataURL('image/png').split(',')[1];
         });
         await contributor
-            .getByLabel('Upload photo', { exact: true })
+            .getByLabel('Upload photos', { exact: true })
             .setInputFiles({
                 name: 'practice-notebook.png',
                 mimeType: 'image/png',
                 buffer: Buffer.from(photo, 'base64'),
             });
-        await contributor.locator('.wb-editor img').waitFor();
+        await contributor
+            .getByLabel('Photo 1 description', { exact: true })
+            .waitFor();
         await contributor
             .getByRole('button', { name: 'Create method', exact: true })
             .click();

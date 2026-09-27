@@ -1,11 +1,8 @@
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { useState } from 'react';
-import { Form, usePage } from '@inertiajs/react';
-import {
-    ImageUploadField,
-    UploadProgress,
-} from '@/components/image-upload-field';
+import { Form } from '@inertiajs/react';
 import InputError from '@/components/input-error';
+import { PhotoGalleryField } from '@/components/photo-gallery-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,7 +15,6 @@ type Props = {
 };
 
 export function ExperienceForm({ action, experience, methodRevision }: Props) {
-    const { media } = usePage().props;
     const [initialMethodRevision] = useState(methodRevision);
     const [draftExperience, setDraftExperience] = useState(experience);
     const [experienceRevision, setExperienceRevision] = useState(
@@ -48,7 +44,7 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                     )
                 }
             >
-                {({ errors, processing, progress }) => (
+                {({ errors, processing }) => (
                     <>
                         <input type="hidden" name="_method" value="put" />
                         <input
@@ -136,12 +132,15 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                 message={errors.body}
                             />
                         </div>
+                        <PhotoGalleryField
+                            name="photos"
+                            initialPhotos={draftExperience?.photos}
+                            errors={errors}
+                        />
                         <details
                             className="wb-writing-help"
                             open={
-                                errors.tried_on ||
-                                errors.evidence_url ||
-                                errors.evidence_image
+                                errors.tried_on || errors.evidence_url
                                     ? true
                                     : undefined
                             }
@@ -193,23 +192,6 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                         message={errors.evidence_url}
                                     />
                                 </div>
-                                {draftExperience?.evidence_image && (
-                                    <ImageUploadField
-                                        key={String(media?.enabled)}
-                                        name="evidence_image"
-                                        label="Evidence photo (optional)"
-                                        currentImage={
-                                            draftExperience.evidence_image.url
-                                        }
-                                        maxUploadMb={media.maxUploadMb}
-                                        error={
-                                            errors.evidence_image ??
-                                            errors.remove_evidence_image
-                                        }
-                                        allowRemove
-                                        uploadEnabled={Boolean(media?.enabled)}
-                                    />
-                                )}
                             </div>
                         </details>
                         <p className="text-muted-foreground text-xs leading-5">
@@ -217,9 +199,6 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                             data or private documents. Only share evidence you
                             have permission to publish.
                         </p>
-                        {processing && (
-                            <UploadProgress percentage={progress?.percentage} />
-                        )}
                         <Button
                             type="submit"
                             disabled={processing}

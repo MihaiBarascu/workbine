@@ -42,14 +42,10 @@ test('three members complete one topic, methods, feedback and reputation journey
                 'Start with a small repeatable step, record the result, and adjust once.',
             );
         await owner
-            .getByLabel('Upload photo', { exact: true })
+            .getByLabel('Upload photos', { exact: true })
             .setInputFiles(imageFile);
-        await expect(owner.locator('[contenteditable="true"] img')).toHaveCount(
-            1,
-        );
-        await owner.locator('[contenteditable="true"] img').click();
         await owner
-            .getByLabel('Describe this photo for people who cannot see it')
+            .getByLabel('Photo 1 description', { exact: true })
             .fill('A small owner method example photo.');
         await owner
             .getByRole('button', {

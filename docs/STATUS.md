@@ -191,7 +191,7 @@ frontend release must be established before another merge. A feature being in
 | Design          | Wider white/neutral-grey/blue layout, shared branded account screens, responsive light and dark interfaces.                                                               |
 | Public profiles | `/members/{username}`, explicit public details and contribution lists/counts with clickable impact filters.                                                               |
 | Usernames       | One current username per member. Old names are released for reuse; legacy numeric links redirect.                                                                         |
-| Images          | Optional profile photos and inline photos in methods and responses; discovery shows an optional photo from a visible method.                                              |
+| Images          | Optional profile photos and galleries of up to six captioned photos in methods and responses; discovery shows the first photo of a visible method.                        |
 | Architecture    | Laravel/React/Inertia monolith with PostgreSQL, Docker deployment and R2 media storage.                                                                                   |
 
 The disabled media default in `.env.example` is for installations awaiting
@@ -300,7 +300,7 @@ leaderboards and ranking changes are not implemented. User outcomes are self-rep
 - Methods describe practical steps, context and results, with optional source
   attribution. Discovery uses bounded literal search and stable pagination.
 - Experiences record positive, partial or negative outcomes, context, an optional
-  trial date, external evidence URL and one optional image. Members can update or
+  trial date, external evidence URL and a photo gallery. Members can update or
   remove their own experience. One experience per member/method, scoped ownership,
   contribution throttling and prevention of author self-validation are enforced.
 - Public profiles serialize public fields explicitly. Private email, Google
@@ -309,7 +309,7 @@ leaderboards and ranking changes are not implemented. User outcomes are self-rep
   or reservations and may be taken by another member.
 - Custom profile photos are separate from Google avatars and survive later Google
   login. Uploaded avatars appear throughout the community, with initials as a
-  fallback. Evidence images remain optional alongside external links.
+  fallback. Photo galleries remain optional alongside external evidence links.
 - Branded Fortify authentication and Profile/Security/Appearance screens include
   password, two-factor, recovery, passkey and account-deletion flows, plus Google
   sign-in integration. Provider-specific login, mail delivery and hardware passkey
@@ -334,7 +334,7 @@ provider connectivity, billing notifications or backups. Record deployment-speci
 verification privately. Public image caching can retain a previously deleted
 image at its old URL until its TTL expires; new uploads receive different keys.
 
-Local tests cover profile/evidence image validation, ownership, replacement,
+Local tests cover profile and gallery photo validation, ownership, replacement,
 removal and cleanup. The separate production check covered a profile-photo
 upload/remove/upload flow and public R2 delivery. Do not generalize that check to
 all production mutation paths. The public production smoke is read-only and can

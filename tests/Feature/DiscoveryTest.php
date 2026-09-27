@@ -29,14 +29,14 @@ class DiscoveryTest extends TestCase
     public function test_feed_photos_come_only_from_published_visible_methods(): void
     {
         $method = Method::factory()->create();
-        $image = MediaImage::query()->create(['user_id' => $method->user_id, 'disk' => 'public', 'path' => 'test-photo.webp', 'bytes' => 100, 'width' => 600, 'height' => 400, 'rich_text' => true, 'rich_method_id' => $method->id]);
+        $image = MediaImage::query()->create(['user_id' => $method->user_id, 'disk' => 'public', 'path' => 'test-photo.webp', 'bytes' => 100, 'width' => 600, 'height' => 400, 'rich_text' => true, 'gallery_method_id' => $method->id, 'position' => 0]);
         $this->get('/topics')->assertInertia(fn (Assert $page) => $page->where('topics.data.0.cover_image.url', $image->url())->missing('topics.data.0.cover_image.user_id'));
         $method->forceFill(['hidden_at' => now()])->save();
         $this->get('/topics')->assertInertia(fn (Assert $page) => $page->where('topics.data.0.cover_image', null));
         $method->forceFill(['hidden_at' => null])->save();
         $image->update(['pending_deletion' => true]);
         $this->get('/topics')->assertInertia(fn (Assert $page) => $page->where('topics.data.0.cover_image', null));
-        $image->update(['pending_deletion' => false, 'rich_method_id' => null]);
+        $image->update(['pending_deletion' => false, 'gallery_method_id' => null]);
         $this->get('/topics')->assertInertia(fn (Assert $page) => $page->where('topics.data.0.cover_image', null));
     }
 

@@ -77,7 +77,7 @@ proof that every redesign will require zero maintenance.
 | ------------------------------------------------------------------ | --------------------- | ----------------------------------------------------------------------------- |
 | Verified login/logout                                              | Yes                   | Registration/verification and partial reset/2FA checks remain in legacy suite |
 | Topic-only publication, category, tags                             | Yes                   | Legacy suite retains draft/validation/empty-state cases                       |
-| First method, rich text, inline photo and persisted delivery       | Yes                   | Legacy media suite retains invalid/replaced/deleted uploads                   |
+| First method, rich text, gallery photo and persisted delivery      | Yes                   | Legacy media suite retains invalid/replaced/deleted uploads                   |
 | Second member experience, persistence, recipient notification/open | Yes                   | Legacy suite retains experience edits/removal and notification states         |
 | Search/category, save/unsave and persistence                       | Yes                   | Tag/sort/people/pagination and appreciations remain in legacy suite           |
 | Owner edit plus non-owner denial                                   | Yes                   | Legacy suite retains conflicts and broader contribution permissions           |

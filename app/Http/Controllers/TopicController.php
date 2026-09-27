@@ -11,7 +11,7 @@ use App\Models\TopicTag;
 use App\Models\User;
 use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
-use App\Support\RichText;
+use App\Support\Photos;
 use App\Support\TopicDiscovery;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -149,7 +149,11 @@ class TopicController extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
-        app(ContentModeration::class)->text($user, [...Arr::only($data, ['title', 'description', 'method_title', 'method_body', 'method_source_url']), 'tags' => implode(', ', $data['tags'] ?? [])], 'topic:new', 'title');
+        app(ContentModeration::class)->text($user, [
+            ...Arr::only($data, ['title', 'description', 'method_title', 'method_body', 'method_source_url']),
+            'tags' => implode(', ', $data['tags'] ?? []),
+            'method_photo_captions' => Photos::captions($data['method_photos'] ?? []),
+        ], 'topic:new', 'title');
 
         $topic = DB::transaction(function () use ($user, $data, $request): Topic {
             $topic = $user->topics()->create([
@@ -166,9 +170,10 @@ class TopicController extends Controller
                     'user_id' => $user->id,
                     'title' => $data['method_title'],
                     'body' => $data['method_body'],
+                    'body_document' => $data['method_body_document'] ?? null,
                     'source_url' => $data['method_source_url'] ?? null,
                 ]);
-                RichText::save($method, $data['method_body_document'] ?? null, 'method_body');
+                Photos::sync($method, $data['method_photos'] ?? [], 'method_photos');
             }
 
             return $topic;

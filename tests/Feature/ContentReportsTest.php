@@ -181,15 +181,15 @@ class ContentReportsTest extends TestCase
         $this->assertDatabaseCount('experiences', 0);
     }
 
-    public function test_hidden_evidence_is_not_pruned_and_account_deletion_still_cleans_it_up(): void
+    public function test_hidden_photos_are_not_pruned_and_account_deletion_still_cleans_them_up(): void
     {
         Storage::fake('public');
         $method = Method::factory()->create();
         $experience = $this->experience($method);
-        $image = MediaImage::query()->create(['user_id' => $experience->user_id, 'disk' => 'public', 'path' => 'images/test.webp', 'bytes' => 10, 'width' => 2, 'height' => 2]);
+        $image = MediaImage::query()->create(['user_id' => $experience->user_id, 'disk' => 'public', 'path' => 'images/test.webp', 'bytes' => 10, 'width' => 2, 'height' => 2, 'rich_text' => true, 'gallery_experience_id' => $experience->id, 'position' => 0]);
         $image->forceFill(['created_at' => now()->subHours(2)])->save();
         Storage::disk('public')->put($image->path, 'test-image');
-        $experience->forceFill(['evidence_image_id' => $image->id, 'hidden_at' => now()])->save();
+        $experience->forceFill(['hidden_at' => now()])->save();
         $method->topic->forceFill(['hidden_at' => now()])->save();
         $uploads = app(ImageUploads::class);
         $this->assertSame(['deleted' => 0, 'failed' => 0], $uploads->prune());

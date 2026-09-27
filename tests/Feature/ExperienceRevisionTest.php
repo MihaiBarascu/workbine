@@ -52,14 +52,6 @@ class ExperienceRevisionTest extends TestCase
             ['body_document' => ['type' => 'doc', 'content' => []]],
             ['evidence_url' => 'https://example.com/revised-evidence'],
             ['tried_on' => '2025-02-03'],
-            ['evidence_image_id' => MediaImage::query()->create([
-                'user_id' => $experience->user_id,
-                'disk' => 'public',
-                'path' => 'images/test/revision-evidence.webp',
-                'bytes' => 1,
-                'width' => 1,
-                'height' => 1,
-            ])->id],
         ] as $changes) {
             $experience->forceFill($changes)->save();
             $changed = ExperienceRevision::token($experience->refresh());
@@ -67,7 +59,19 @@ class ExperienceRevisionTest extends TestCase
             $original = $changed;
         }
 
-        $attributes = $experience->only(['outcome', 'body', 'body_document', 'evidence_url', 'tried_on', 'evidence_image_id']);
+        // Adding a photo, then recaptioning it, also changes the response.
+        $photo = MediaImage::query()->create([
+            'user_id' => $experience->user_id, 'disk' => 'public', 'path' => 'images/test/revision-photo.webp',
+            'bytes' => 1, 'width' => 1, 'height' => 1, 'rich_text' => true, 'gallery_experience_id' => $experience->id, 'position' => 0,
+        ]);
+        foreach ([null, 'A new caption'] as $caption) {
+            $photo->update(['caption' => $caption]);
+            $changed = ExperienceRevision::token($experience);
+            $this->assertNotSame($original, $changed);
+            $original = $changed;
+        }
+
+        $attributes = $experience->only(['outcome', 'body', 'body_document', 'evidence_url', 'tried_on']);
         $rowToken = ExperienceRevision::token($experience);
         $experience->delete();
         $replacement = $method->experiences()->create(['user_id' => $member->id, ...$attributes]);
@@ -204,7 +208,7 @@ class ExperienceRevisionTest extends TestCase
         $this->actingAs($member)->put(route('experiences.store', $params), $this->payload($method, 'new'))->assertRedirect();
         $original = Experience::query()->sole();
         $stale = ExperienceRevision::token($original);
-        $attributes = $original->only(['outcome', 'body', 'body_document', 'evidence_url', 'tried_on', 'evidence_image_id']);
+        $attributes = $original->only(['outcome', 'body', 'body_document', 'evidence_url', 'tried_on']);
         $original->delete();
         $replacement = $method->experiences()->create(['user_id' => $member->id, ...$attributes]);
 
@@ -212,7 +216,7 @@ class ExperienceRevisionTest extends TestCase
         $this->assertSame($attributes, $replacement->refresh()->only(array_keys($attributes)));
     }
 
-    public function test_conflicting_image_and_rich_document_submissions_leave_existing_media_and_response_unchanged(): void
+    public function test_conflicting_photo_and_rich_document_submissions_leave_existing_media_and_response_unchanged(): void
     {
         Storage::fake('public');
         config(['media.enabled' => true, 'media.disk' => 'public']);
@@ -222,24 +226,24 @@ class ExperienceRevisionTest extends TestCase
         $this->actingAs($member)->put(route('experiences.store', $params), $this->payload($method, 'new'))->assertRedirect();
         $experience = Experience::query()->sole();
         $stale = ExperienceRevision::token($experience);
-        $draft = app(ImageUploads::class)->store($member, UploadedFile::fake()->image('draft.png'), 'editor');
+        $draft = app(ImageUploads::class)->store($member, UploadedFile::fake()->image('draft.png'), 'image');
+        $draft->update(['rich_text' => true]);
         $beforeMedia = MediaImage::count();
         $beforeFiles = Storage::disk('public')->allFiles();
         $experience->update(['body' => 'The other writer saved this current version first.']);
         $document = json_encode(['type' => 'doc', 'content' => [[
             'type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'A conflicting rich text response.']],
-        ], [
-            'type' => 'image', 'attrs' => ['imageId' => $draft->id],
         ]]], JSON_THROW_ON_ERROR);
 
         $this->put(route('experiences.store', $params), $this->payload($method, $stale, [
             'body_document' => $document,
-            'evidence_image' => UploadedFile::fake()->image('replacement.png'),
+            'photos_present' => 1,
+            'photos' => [['id' => $draft->id, 'caption' => 'Conflicting photo']],
         ]))->assertSessionHasErrors('experience_revision');
 
         $this->assertSame($beforeMedia, MediaImage::count());
         $this->assertSame($beforeFiles, Storage::disk('public')->allFiles());
-        $this->assertNull($draft->refresh()->rich_experience_id);
+        $this->assertNull($draft->refresh()->gallery_experience_id);
         $this->assertSame('The other writer saved this current version first.', $experience->refresh()->body);
     }
 }

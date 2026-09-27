@@ -13,7 +13,7 @@ use App\Models\User;
 use App\Services\ContentModeration;
 use App\Support\ContributionRevision;
 use App\Support\ExperienceRevision;
-use App\Support\RichText;
+use App\Support\Photos;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -38,7 +38,7 @@ class MethodController extends Controller
 
     public function show(Request $request, Topic $topic, Method $method): Response
     {
-        $method->load(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'updates'])
+        $method->load(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'updates', 'photos'])
             ->loadCount([
                 'experiences',
                 'experiences as worked_count' => fn ($query) => $query->where('outcome', 'worked'),
@@ -49,7 +49,7 @@ class MethodController extends Controller
         $outcome = is_string($outcomeInput) && in_array($outcomeInput, ['worked', 'partly', 'did_not_work'], true) ? $outcomeInput : 'all';
         $experiences = $method->experiences()
             ->when($outcome !== 'all', fn ($query) => $query->where('outcome', $outcome))
-            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
+            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'photos'])
             ->latest('updated_at')
             ->orderByDesc('id')
             ->paginate(10)
@@ -63,7 +63,7 @@ class MethodController extends Controller
             ->pluck('total', 'outcome');
 
         $own = $request->user() === null ? null : $method->experiences()
-            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'evidenceImage'])
+            ->with(['user:id,name,username,avatar_image_id', 'user.avatarImage', 'photos'])
             ->where('user_id', $request->user()->getAuthIdentifier())
             ->first();
 
@@ -77,7 +77,11 @@ class MethodController extends Controller
             'canonicalUrl' => route('methods.show', [$topic, $method]),
             'experiences' => $experiences,
             'outcome' => $outcome,
-            'ownExperience' => $own ? [...$this->serializeExperience($own), 'revision' => ExperienceRevision::token($own)] : null,
+            'ownExperience' => $own ? [
+                ...$this->serializeExperience($own),
+                'photos' => Photos::serialize($own->photos, withIds: true),
+                'revision' => ExperienceRevision::token($own),
+            ] : null,
             'ownExperienceHidden' => $hidden !== null,
             'ownExperienceHiddenRevision' => $hidden !== null ? ExperienceRevision::token($hidden) : null,
             'summary' => [
@@ -94,7 +98,10 @@ class MethodController extends Controller
 
         return Inertia::render('topics/method-edit', [
             'topic' => $topic->only(['id', 'title', 'slug']),
-            'method' => $method->only(['id', 'title', 'body', 'body_document', 'source_url', 'protected_at']),
+            'method' => [
+                ...$method->only(['id', 'title', 'body', 'body_document', 'source_url', 'protected_at']),
+                'photos' => Photos::serialize($method->photos, withIds: true),
+            ],
             'submissionId' => (string) Str::uuid(),
             'revision' => ContributionRevision::token($method),
         ]);
@@ -103,7 +110,10 @@ class MethodController extends Controller
     public function update(UpdateMethodRequest $request, Topic $topic, Method $method): RedirectResponse
     {
         $data = $request->validated();
-        app(ContentModeration::class)->text($request->user(), Arr::only($data, ['title', 'body', 'source_url']), 'method:'.$method->id, 'body');
+        app(ContentModeration::class)->text($request->user(), [
+            ...Arr::only($data, ['title', 'body', 'source_url']),
+            'photo_captions' => Photos::captions($data['photos'] ?? []),
+        ], 'method:'.$method->id, 'body');
 
         DB::transaction(function () use ($method, $data): void {
             $current = Method::query()->whereKey($method->id)->lockForUpdate()->firstOrFail();
@@ -121,9 +131,12 @@ class MethodController extends Controller
             $current->update([
                 'title' => $data['title'],
                 'body' => $data['body'],
+                'body_document' => $data['body_document'] ?? null,
                 'source_url' => $data['source_url'] ?? null,
             ]);
-            RichText::save($current, $data['body_document'] ?? null);
+            if ($data['photos_present'] ?? false) {
+                Photos::sync($current, $data['photos'] ?? [], 'photos');
+            }
         });
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Method updated.')]);
@@ -187,17 +200,21 @@ class MethodController extends Controller
         /** @var User $user */
         $user = $request->user();
         $data = $request->validated();
-        app(ContentModeration::class)->text($user, Arr::only($data, ['title', 'body', 'source_url']), 'method:new:'.$topic->id, 'body');
+        app(ContentModeration::class)->text($user, [
+            ...Arr::only($data, ['title', 'body', 'source_url']),
+            'photo_captions' => Photos::captions($data['photos'] ?? []),
+        ], 'method:new:'.$topic->id, 'body');
 
         $method = DB::transaction(function () use ($topic, $user, $data): Method {
             $method = $topic->methods()->create([
                 'user_id' => $user->id,
                 'title' => $data['title'],
                 'body' => $data['body'],
+                'body_document' => $data['body_document'] ?? null,
                 'source_url' => $data['source_url'] ?? null,
             ]);
 
-            RichText::save($method, $data['body_document'] ?? null);
+            Photos::sync($method, $data['photos'] ?? [], 'photos');
             CommunityNotification::forMethod($method);
 
             return $method;
@@ -219,6 +236,7 @@ class MethodController extends Controller
             'title' => $method->title,
             'body' => $method->body,
             'body_document' => $method->body_document,
+            'photos' => Photos::serialize($method->photos),
             'protected_at' => $method->protected_at?->toIso8601String(),
             'updates' => $method->updates->map(fn ($update) => [
                 'id' => $update->id, 'body' => $update->body, 'created_at' => $update->created_at?->toIso8601String(),
@@ -248,7 +266,7 @@ class MethodController extends Controller
             'body' => $experience->body,
             'body_document' => $experience->body_document,
             'evidence_url' => $experience->evidence_url,
-            'evidence_image' => $experience->evidenceImage?->publicData(),
+            'photos' => Photos::serialize($experience->photos),
             'tried_on' => $experience->tried_on?->toDateString(),
             'created_at' => $experience->created_at?->toIso8601String(),
             'updated_at' => $experience->updated_at?->toIso8601String(),

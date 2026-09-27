@@ -7,7 +7,6 @@ use App\Models\MediaImage;
 use App\Models\Method;
 use App\Models\Topic;
 use App\Models\User;
-use App\Support\RichText;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -203,13 +202,16 @@ class ImageUploads
     {
         $images = DB::transaction(function () use ($user) {
             $locked = User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
+            // Contributions that the account deletion removes, including other members' under this one.
+            $methods = Method::withoutGlobalScopes()->select('id')->where('user_id', $user->id)
+                ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id));
+            $experiences = Experience::withoutGlobalScopes()->select('id')->where('user_id', $user->id)
+                ->orWhereHas('method', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)
+                    ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)));
             $images = MediaImage::query()
                 ->where(fn ($query) => $query->where('user_id', $user->id)->where('rich_text', true))
-                ->orWhereIn('rich_method_id', Method::withoutGlobalScopes()->select('id')->where('user_id', $user->id)
-                    ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)))
-                ->orWhereIn('rich_experience_id', Experience::withoutGlobalScopes()->select('id')->where('user_id', $user->id)
-                    ->orWhereHas('method', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)
-                        ->orWhereHas('topic', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id))))
+                ->orWhereIn('gallery_method_id', $methods)->orWhereIn('rich_method_id', $methods)
+                ->orWhereIn('gallery_experience_id', $experiences)->orWhereIn('rich_experience_id', $experiences)
                 ->orWhereHas('avatars', fn ($query) => $query->whereKey($user->id))
                 ->orWhereHas('experiences', fn ($query) => $query->where('user_id', $user->id)
                     ->orWhereHas('method', fn ($query) => $query->withoutGlobalScopes()->where('user_id', $user->id)
@@ -240,27 +242,11 @@ class ImageUploads
     public function deleteContributionImages(Topic|Method|Experience $target): array
     {
         $images = DB::transaction(function () use ($target) {
-            $images = $this->contributionImages($target)->lockForUpdate()->get();
-            $ids = $images->modelKeys();
-
-            // Query-builder updates keep contribution timestamps unchanged.
-            Experience::withoutGlobalScopes()->whereIn('evidence_image_id', $ids)->toBase()->update(['evidence_image_id' => null]);
-            foreach ([
-                Method::class => $images->pluck('rich_method_id'),
-                Experience::class => $images->pluck('rich_experience_id'),
-            ] as $model => $contributionIds) {
-                foreach ($model::withoutGlobalScopes()->whereKey($contributionIds->filter()->unique()->values())->get() as $contribution) {
-                    if (! is_array($contribution->body_document)) {
-                        continue;
-                    }
-                    $document = RichText::withoutImages($contribution->body_document);
-                    $model::withoutGlobalScopes()->whereKey($contribution->id)->toBase()->update([
-                        'body_document' => json_encode($document, JSON_THROW_ON_ERROR),
-                        'body' => trim(RichText::text($document)),
-                    ]);
-                }
-            }
-            MediaImage::query()->whereKey($ids)->update(['rich_method_id' => null, 'rich_experience_id' => null, 'pending_deletion' => true]);
+            $images = $this->contributionImages($target)->orderBy('id')->lockForUpdate()->get();
+            // Photos live beside the text, so removing them leaves contributions untouched.
+            MediaImage::query()->whereKey($images->modelKeys())->update([
+                'gallery_method_id' => null, 'gallery_experience_id' => null, 'position' => null, 'caption' => null, 'pending_deletion' => true,
+            ]);
 
             return $images;
         });
@@ -287,9 +273,8 @@ class ImageUploads
             : Experience::withoutGlobalScopes()->whereIn('method_id', $methods);
 
         return MediaImage::query()->where(fn (Builder $query) => $query
-            ->whereIn('rich_experience_id', (clone $experiences)->select('id'))
-            ->orWhereIn('id', (clone $experiences)->whereNotNull('evidence_image_id')->select('evidence_image_id'))
-            ->when($methods !== null, fn (Builder $query) => $query->orWhereIn('rich_method_id', $methods)));
+            ->whereIn('gallery_experience_id', $experiences->select('id'))
+            ->when($methods !== null, fn (Builder $query) => $query->orWhereIn('gallery_method_id', $methods)));
     }
 
     /** @return array{deleted: int, failed: int} */

@@ -12,7 +12,7 @@ type Props = {
         id: number;
         status: string;
         text: Record<string, string | null>;
-        image: string | null;
+        images: { url: string; caption: string | null }[];
         reasons: string[];
         hidden: boolean;
         photos: number;
@@ -101,23 +101,36 @@ export default function ModerationShow({ kind, item }: Props) {
                                     </div>
                                 ))}
                         </dl>
-                        {item.image && (
+                        {item.images.length > 0 && (
                             <div className="mt-6">
                                 <Button
                                     variant="outline"
                                     onClick={() => setShowImage(!showImage)}
                                 >
                                     {showImage
-                                        ? 'Hide image'
-                                        : 'Show image for review'}
+                                        ? 'Hide photos'
+                                        : `Show ${item.images.length === 1 ? 'photo' : `${item.images.length} photos`} for review`}
                                 </Button>
                                 {showImage && (
-                                    <img
-                                        src={item.image}
-                                        alt="Submitted image awaiting a moderation decision"
-                                        referrerPolicy="no-referrer"
-                                        className="mt-4 max-h-[560px] max-w-full rounded-md object-contain"
-                                    />
+                                    <ol className="mt-4 space-y-4">
+                                        {item.images.map((image, index) => (
+                                            <li key={image.url}>
+                                                <img
+                                                    src={image.url}
+                                                    alt={`Photo ${index + 1} awaiting a moderation decision`}
+                                                    referrerPolicy="no-referrer"
+                                                    className="max-h-[560px] max-w-full rounded-md object-contain"
+                                                />
+                                                {image.caption && (
+                                                    <p className="mt-2 text-sm [overflow-wrap:anywhere]">
+                                                        Photo {index + 1}{' '}
+                                                        description:{' '}
+                                                        {image.caption}
+                                                    </p>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ol>
                                 )}
                             </div>
                         )}
@@ -200,10 +213,9 @@ export default function ModerationShow({ kind, item }: Props) {
                                             <p className="text-muted-foreground text-sm">
                                                 Includes photos in contributions
                                                 under it. This cannot be undone:
-                                                restored content comes back with
-                                                a note instead of each photo.
-                                                Cached copies can remain for up
-                                                to an hour.
+                                                restored content comes back
+                                                without them. Cached copies can
+                                                remain for up to an hour.
                                             </p>
                                             <InputError
                                                 message={

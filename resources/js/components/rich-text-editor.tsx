@@ -1,8 +1,6 @@
-import { usePage } from '@inertiajs/react';
-import Image from '@tiptap/extension-image';
 import { EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Bold, ImagePlus, Link2, List, ListOrdered } from 'lucide-react';
+import { Bold, Link2, List, ListOrdered } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { plainDocument } from '@/components/rich-text-content';
 import type { RichTextNode } from '@/components/rich-text-content';
@@ -10,21 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { editorLinkHelp, validEditorLink } from '@/lib/editor-links';
-
-const UploadedImage = Image.extend({
-    addAttributes() {
-        return {
-            ...this.parent?.(),
-            imageId: { default: null },
-            width: { default: null },
-            height: { default: null },
-        };
-    },
-    // Images enter only through our upload action, never external pasted HTML.
-    parseHTML() {
-        return [];
-    },
-});
 
 const extensions = [
     StarterKit.configure({
@@ -37,8 +20,9 @@ const extensions = [
         underline: false,
         link: { openOnClick: false, isAllowedUri: validEditorLink },
     }),
-    UploadedImage,
 ];
+
+const photosElsewhere = 'Photos go in the gallery below the text.';
 
 type Props = {
     id: string;
@@ -61,20 +45,15 @@ export function RichTextEditor({
     placeholder,
     maxLength = 10000,
 }: Props) {
-    const { media } = usePage().props;
     const [document, setDocument] = useState<RichTextNode>(
         () => initialDocument ?? plainDocument(initialText),
     );
     const [text, setText] = useState(initialText);
-    const [uploading, setUploading] = useState(false);
-    const busy = useRef(false);
     const [error, setError] = useState('');
     const [pasteNotice, setPasteNotice] = useState('');
     const [linkOpen, setLinkOpen] = useState(false);
     const [href, setHref] = useState('');
     const wrapper = useRef<HTMLDivElement>(null);
-    const fileInput = useRef<HTMLInputElement>(null);
-    const uploadHandler = useRef<(file: File) => void>(() => {});
     const editor = useEditor({
         extensions,
         content: document,
@@ -130,15 +109,9 @@ export function RichTextEditor({
                     image.replaceWith(
                         pasted.createTextNode(image.getAttribute('alt') || ''),
                     );
-                    if (
-                        !notices.includes(
-                            'Copied images were not uploaded. Use Photo to add them.',
-                        )
-                    ) {
-                        notices.push(
-                            'Copied images were not uploaded. Use Photo to add them.',
-                        );
-                    }
+                    notices.push(
+                        `Copied images were not added. ${photosElsewhere}`,
+                    );
                 }
                 for (const link of pasted.querySelectorAll('a')) {
                     if (!validEditorLink(link.getAttribute('href') || '')) {
@@ -152,19 +125,15 @@ export function RichTextEditor({
                 return pasted.body.innerHTML;
             },
             handlePaste: (_view, event) => {
-                const file = Array.from(event.clipboardData?.files ?? []).find(
-                    (item) => item.type.startsWith('image/'),
-                );
-                if (!file) return false;
+                if (!event.clipboardData?.files.length) return false;
                 event.preventDefault();
-                uploadHandler.current(file);
+                setPasteNotice(photosElsewhere);
                 return true;
             },
             handleDrop: (_view, event) => {
-                const file = event.dataTransfer?.files[0];
-                if (!file) return false;
+                if (!event.dataTransfer?.files.length) return false;
                 event.preventDefault();
-                uploadHandler.current(file);
+                setPasteNotice(photosElsewhere);
                 return true;
             },
         },
@@ -179,8 +148,6 @@ export function RichTextEditor({
             bold: editor?.isActive('bold') ?? false,
             bullet: editor?.isActive('bulletList') ?? false,
             ordered: editor?.isActive('orderedList') ?? false,
-            image: editor?.isActive('image') ?? false,
-            alt: String(editor?.getAttributes('image').alt ?? ''),
         }),
     });
 
@@ -200,112 +167,19 @@ export function RichTextEditor({
     }, [editor, invalid]);
 
     useEffect(() => {
-        uploadHandler.current = async (file) => {
-            if (!editor || busy.current) return;
-            if (!media?.enabled) {
-                setError(
-                    'Photo uploads are currently unavailable. You can still publish your text.',
-                );
-                return;
-            }
-            let count = 0;
-            editor.state.doc.descendants((node) => {
-                if (node.type.name === 'image') count++;
-            });
-            if (count >= 10) {
-                setError(
-                    'You can add up to 10 photos. Remove one before adding another.',
-                );
-                return;
-            }
-            if (
-                !['image/jpeg', 'image/png', 'image/webp'].includes(
-                    file.type,
-                ) ||
-                file.size > media.maxUploadMb * 1024 * 1024
-            ) {
-                setError(
-                    `Choose a JPEG, PNG or WebP photo up to ${media.maxUploadMb} MB.`,
-                );
-                return;
-            }
-            busy.current = true;
-            setUploading(true);
-            setError('');
-            const insertionPoint = editor.state.selection.from;
-            // Freeze the insertion point while the photo uploads.
-            editor.setEditable(false);
-            try {
-                const data = new FormData();
-                data.append('image', file);
-                const token = documentCookie('XSRF-TOKEN');
-                const response = await fetch('/editor/images', {
-                    method: 'POST',
-                    credentials: 'same-origin',
-                    headers: {
-                        Accept: 'application/json',
-                        'X-XSRF-TOKEN': token,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    body: data,
-                });
-                const result = await response.json();
-                if (!response.ok)
-                    throw new Error(
-                        result.errors?.image?.[0] ??
-                            (response.status === 429
-                                ? 'Too many photo uploads. Please try again later.'
-                                : 'The photo could not be uploaded. Please try again.'),
-                    );
-                if (!editor.isDestroyed)
-                    editor
-                        .chain()
-                        .focus()
-                        .insertContentAt(insertionPoint, [
-                            {
-                                type: 'image',
-                                attrs: {
-                                    imageId: result.id,
-                                    src: result.url,
-                                    width: result.width,
-                                    height: result.height,
-                                    alt: '',
-                                },
-                            },
-                            { type: 'paragraph' },
-                        ])
-                        .run();
-            } catch (exception) {
-                setError(
-                    exception instanceof Error
-                        ? exception.message
-                        : 'The photo could not be uploaded. Please try again.',
-                );
-            } finally {
-                busy.current = false;
-                setUploading(false);
-                if (!editor.isDestroyed) editor.setEditable(true);
-            }
-        };
-    }, [editor, media]);
-
-    useEffect(() => {
         const form = wrapper.current?.closest('form');
         const guard = (event: Event) => {
             if (wrapper.current?.closest('fieldset')?.disabled) return;
             if (
-                busy.current ||
                 !editor?.getText().trim() ||
                 editor.getText().length > maxLength
             ) {
                 event.preventDefault();
                 event.stopImmediatePropagation();
                 setError(
-                    busy.current
-                        ? 'Wait for your photo to finish uploading.'
-                        : !editor?.getText().trim()
-                          ? 'Add a few words to explain what you did.'
-                          : `Keep your explanation under ${maxLength.toLocaleString()} characters.`,
+                    !editor?.getText().trim()
+                        ? 'Add a few words to explain what you did.'
+                        : `Keep your explanation under ${maxLength.toLocaleString()} characters.`,
                 );
                 editor?.commands.focus();
             }
@@ -339,7 +213,7 @@ export function RichTextEditor({
                             size="icon"
                             aria-label="Bold"
                             aria-pressed={selection?.bold}
-                            disabled={!editor || uploading}
+                            disabled={!editor}
                             onClick={() =>
                                 editor?.chain().focus().toggleBold().run()
                             }
@@ -352,7 +226,7 @@ export function RichTextEditor({
                             size="icon"
                             aria-label="Bulleted list"
                             aria-pressed={selection?.bullet}
-                            disabled={!editor || uploading}
+                            disabled={!editor}
                             onClick={() =>
                                 editor?.chain().focus().toggleBulletList().run()
                             }
@@ -365,7 +239,7 @@ export function RichTextEditor({
                             size="icon"
                             aria-label="Numbered steps"
                             aria-pressed={selection?.ordered}
-                            disabled={!editor || uploading}
+                            disabled={!editor}
                             onClick={() =>
                                 editor
                                     ?.chain()
@@ -382,7 +256,7 @@ export function RichTextEditor({
                             size="icon"
                             aria-label="Add link"
                             aria-expanded={linkOpen}
-                            disabled={!editor || uploading}
+                            disabled={!editor}
                             onClick={() => {
                                 setHref(
                                     String(
@@ -395,31 +269,6 @@ export function RichTextEditor({
                         >
                             <Link2 />
                         </Button>
-                        {media?.enabled && (
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                disabled={!editor || uploading}
-                                onClick={() => fileInput.current?.click()}
-                            >
-                                <ImagePlus />
-                                {uploading ? 'Uploading…' : 'Photo'}
-                            </Button>
-                        )}
-                        <input
-                            ref={fileInput}
-                            type="file"
-                            className="sr-only"
-                            tabIndex={-1}
-                            aria-label="Upload photo"
-                            accept="image/jpeg,image/png,image/webp"
-                            disabled={uploading || !media?.enabled}
-                            onChange={(event) => {
-                                const file = event.target.files?.[0];
-                                if (file) uploadHandler.current(file);
-                                event.target.value = '';
-                            }}
-                        />
                     </div>
                     {linkOpen && (
                         <div className="wb-editor-options">
@@ -502,33 +351,6 @@ export function RichTextEditor({
                     )}
                 </div>
                 <EditorContent editor={editor} />
-                {selection?.image && (
-                    <div className="wb-editor-options">
-                        <Label htmlFor={`${id}-alt`}>
-                            Describe this photo for people who cannot see it
-                        </Label>
-                        <Input
-                            id={`${id}-alt`}
-                            value={selection.alt}
-                            maxLength={300}
-                            onChange={(event) =>
-                                editor?.commands.updateAttributes('image', {
-                                    alt: event.target.value,
-                                })
-                            }
-                        />
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                                editor?.chain().focus().deleteSelection().run()
-                            }
-                        >
-                            Remove photo
-                        </Button>
-                    </div>
-                )}
             </div>
             {pasteNotice && (
                 <p role="status" className="text-muted-foreground text-sm">
@@ -544,18 +366,8 @@ export function RichTextEditor({
                         : 'text-muted-foreground text-xs'
                 }
             >
-                {error ||
-                    (uploading
-                        ? 'Uploading your photo… Your text stays here.'
-                        : '')}
+                {error}
             </p>
         </div>
     );
-}
-
-function documentCookie(name: string) {
-    const cookie = window.document.cookie
-        .split('; ')
-        .find((item) => item.startsWith(`${name}=`));
-    return cookie ? decodeURIComponent(cookie.slice(name.length + 1)) : '';
 }

@@ -35,27 +35,22 @@ class ModerationPhotoRemovalTest extends TestCase
         return MediaImage::query()->findOrFail($this->actingAs($user)->postJson(route('editor.images.store'), ['image' => UploadedFile::fake()->image('photo.png')])->assertCreated()->json('id'));
     }
 
-    private function document(string $text, MediaImage $image, string $alt): string
-    {
-        return json_encode(['type' => 'doc', 'content' => [
-            ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]],
-            ['type' => 'image', 'attrs' => ['imageId' => $image->id, 'alt' => $alt]],
-        ]], JSON_THROW_ON_ERROR);
-    }
-
-    /** A method with an inline photo, answered by an experience with evidence and an inline photo. */
+    /** A method with a photo, answered by an experience with two photos. */
     private function contributionsWithPhotos(): Method
     {
         $topic = Topic::factory()->create();
         $author = User::factory()->create();
-        $this->actingAs($author)->post(route('methods.store', $topic), ['title' => 'My photos', 'body_document' => $this->document('Before the photo.', $this->editorImage($author), 'My result')])
-            ->assertSessionHasNoErrors();
+        $methodPhoto = $this->editorImage($author);
+        $this->actingAs($author)->post(route('methods.store', $topic), [
+            'title' => 'My photos', 'body' => 'Before the photo.',
+            'photos_present' => 1, 'photos' => [['id' => $methodPhoto->id, 'caption' => 'My result']],
+        ])->assertSessionHasNoErrors();
         $method = Method::query()->latest('id')->firstOrFail();
         $member = User::factory()->create();
-        $this->actingAs($member)->post(route('experiences.store', [$topic, $method]), [
-            '_method' => 'put', 'method_revision' => ContributionRevision::token($method), 'experience_revision' => 'new', 'outcome' => 'worked',
-            'body_document' => $this->document('It worked for me too.', $this->editorImage($member), 'Their result'),
-            'evidence_image' => UploadedFile::fake()->image('evidence.jpg'),
+        $photos = [$this->editorImage($member), $this->editorImage($member)];
+        $this->actingAs($member)->put(route('experiences.store', [$topic, $method]), [
+            'method_revision' => ContributionRevision::token($method), 'experience_revision' => 'new', 'outcome' => 'worked', 'body' => 'It worked for me too.',
+            'photos_present' => 1, 'photos' => array_map(fn (MediaImage $photo): array => ['id' => $photo->id], $photos),
         ])->assertSessionHasNoErrors();
 
         return $method;
@@ -100,20 +95,16 @@ class ModerationPhotoRemovalTest extends TestCase
         $this->assertNotNull($avatar->refresh()->avatarImage);
         Storage::disk('public')->assertExists($avatar->avatarImage->path);
 
+        // Photos live beside the text, so the contributions themselves are untouched.
         $hidden = Method::withoutGlobalScopes()->findOrFail($method->id);
-        $this->assertSame('Photo removed by moderation.', $hidden->body_document['content'][1]['content'][0]['text']);
-        $this->assertStringNotContainsString('My result', $hidden->body);
-        $this->assertStringContainsString('Photo removed by moderation.', $hidden->body);
+        $this->assertSame('Before the photo.', $hidden->body);
         $this->assertSame($updatedAt, $hidden->updated_at?->toIso8601String());
-        $experience = Experience::withoutGlobalScopes()->where('method_id', $method->id)->firstOrFail();
-        $this->assertNull($experience->evidence_image_id);
-        $this->assertSame('paragraph', $experience->body_document['content'][1]['type']);
 
         $this->post(route('moderation.decide', ['report', $report->id]), ['action' => 'restore', 'note' => 'Restored without the photos.', 'publishing' => 'unchanged'])
             ->assertSessionHasNoErrors();
         $this->get(route('methods.show', [$method->topic, $method]))->assertInertia(fn (Assert $page) => $page
-            ->where('method.body_document.content.1.type', 'paragraph')
-            ->where('experiences.data.0.evidence_image', null));
+            ->where('method.photos', [])
+            ->where('experiences.data.0.photos', []));
     }
 
     public function test_hiding_keeps_photos_unless_deletion_is_chosen_for_that_hide(): void
@@ -152,7 +143,7 @@ class ModerationPhotoRemovalTest extends TestCase
     {
         $method = $this->contributionsWithPhotos();
         $experience = Experience::query()->firstOrFail();
-        $evidence = $experience->evidenceImage;
+        $evidence = $experience->photos->last();
         $fake = Storage::disk('public');
         $manager = Storage::getFacadeRoot();
         $broken = Mockery::mock(FilesystemAdapter::class);
@@ -160,10 +151,10 @@ class ModerationPhotoRemovalTest extends TestCase
         Storage::shouldReceive('disk')->with('public')->andReturn($broken);
 
         $this->assertSame(['deleted' => 0, 'failed' => 2], app(ImageUploads::class)->deleteContributionImages($experience));
-        $this->assertNull($experience->refresh()->evidence_image_id);
+        $this->assertSame([], $experience->refresh()->photos->modelKeys());
         $this->assertTrue($evidence->refresh()->pending_deletion);
         // Only the reported experience is affected; the method above it keeps its photo.
-        $this->assertFalse(MediaImage::query()->where('rich_method_id', $method->id)->firstOrFail()->pending_deletion);
+        $this->assertFalse($method->photos()->firstOrFail()->pending_deletion);
 
         Storage::swap($manager);
         $this->artisan('media:prune')->assertSuccessful();
