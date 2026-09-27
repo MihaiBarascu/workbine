@@ -18,6 +18,15 @@ on:
         description: Full commit SHA of the published image
         required: true
         type: string
+      digest:
+        description: Image digest already verified in an earlier environment. Empty resolves it from the revision.
+        required: false
+        default: ''
+        type: string
+    outputs:
+      digest:
+        description: Digest of the image deployed and verified in this environment
+        value: ${{ jobs.deploy.outputs.digest }}
 
 permissions:
   contents: read
@@ -34,6 +43,8 @@ jobs:
     concurrency:
       group: deploy-${{ inputs.environment }}
       cancel-in-progress: false
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
     env:
       IMAGE: ghcr.io/mihaibarascu/workbine
       TARGET: ${{ inputs.environment }}
@@ -54,15 +65,15 @@ jobs:
           fi
 
       - name: Checkout release checks
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -71,13 +82,28 @@ jobs:
       - name: Resolve the published image digest
         id: image
         shell: bash
+        env:
+          PINNED_DIGEST: ${{ inputs.digest }}
         run: |
           set -euo pipefail
-          digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "$IMAGE:$REVISION" | jq -r .digest)"
+          if [[ -n "$PINNED_DIGEST" ]]; then
+            # Production reuses the exact artifact staging verified instead of re-reading a tag.
+            digest="$PINNED_DIGEST"
+          else
+            digest="$(docker buildx imagetools inspect --format '{{json .Manifest}}' "$IMAGE:$REVISION" | jq -r .digest)"
+          fi
           if [[ ! "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]; then
             echo "No published image for $REVISION" >&2
             exit 1
           fi
+
+          built_from="$(docker buildx imagetools inspect --format '{{json .Image}}' "$IMAGE@$digest" \
+            | jq -r 'if has("config") then .config else .["linux/arm64"].config end | .Labels["org.opencontainers.image.revision"] // ""')"
+          if [[ "$built_from" != "$REVISION" ]]; then
+            echo "$IMAGE@$digest was built from ${built_from:-an unknown revision}, not $REVISION" >&2
+            exit 1
+          fi
+
           echo "digest=$digest" >> "$GITHUB_OUTPUT"
           echo "Deploying $IMAGE@$digest ($REVISION) to $TARGET"
 

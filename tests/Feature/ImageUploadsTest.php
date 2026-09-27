@@ -330,6 +330,16 @@ class ImageUploadsTest extends TestCase
         $this->assertDatabaseCount('media_images', 1);
     }
 
+    public function test_rejected_uploads_do_not_spend_the_daily_global_limit(): void
+    {
+        config(['media.global_uploads_per_day' => 1]);
+        $this->actingAs(User::factory()->create())->post(route('profile.avatar.store'), ['avatar' => UploadedFile::fake()->createWithContent('not-an-image.jpg', 'not an image')])
+            ->assertSessionHasErrors('avatar');
+        $this->avatar(User::factory()->create());
+        $this->actingAs(User::factory()->create())->post(route('profile.avatar.store'), ['avatar' => UploadedFile::fake()->image('profile.jpg')])->assertStatus(429);
+        $this->assertDatabaseCount('media_images', 1);
+    }
+
     public function test_processing_capacity_returns_a_field_error_without_reserving_storage(): void
     {
         $lock = Cache::lock('media:image-processing', 120);

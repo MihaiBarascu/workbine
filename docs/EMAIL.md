@@ -26,7 +26,11 @@ account notifications send synchronously and do not require a queue worker.
 Accounts use Laravel/Fortify's standard `MustVerifyEmail` contract, registration
 notification, signed expiring links, authenticated confirmation and throttled
 resending. Email/password registration sends a confirmation automatically.
-Changing the email in Profile settings clears verification and sends a new link.
+Changing the email in Profile settings requires the current password, clears
+verification and sends a new link. A previously verified address receives a notice
+that does not reveal the new one. Each account can change its email three times
+per hour. Members who have only used Google sign-in set a password through password
+recovery first.
 Google-created accounts use Google's verified email and receive no confirmation.
 
 The standard `verified` middleware protects contribution and saved-topic routes.

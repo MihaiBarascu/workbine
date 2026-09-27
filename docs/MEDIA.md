@@ -30,8 +30,10 @@ recovery configuration through that private checklist.
   1600 × 1600 while preserving its aspect ratio. Output must be at most 1 MiB.
 - Each account can hold 50 MiB, including reserved uploads and failed deletions.
 - Upload attempts are limited to 10 per hour and 30 per day per account, with
-  an initial application-wide limit of 500 per day. These are conservative
-  starting values in `config/media.php`, adjustable after observing real use.
+  an initial application-wide limit of 500 accepted uploads per day. Rejected
+  files count only against the member's own limits, so one account cannot use up
+  the shared budget. These are conservative starting values in
+  `config/media.php`, adjustable after observing real use.
 - Object keys are random and never reused. PostgreSQL holds ownership, disk,
   key, actual byte size and dimensions. Rendering URLs makes no R2 requests.
 - New objects are tracked before storage writes. Replacements keep the old image

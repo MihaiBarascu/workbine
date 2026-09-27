@@ -310,7 +310,7 @@ class ContentModerationTest extends TestCase
         $this->actingAs($user->fresh())->post(route('topics.store'), ['title' => 'Another submission'])->assertSessionHasErrors('title');
         $this->get('/topics')->assertOk();
         $this->get(route('profile.edit'))->assertOk();
-        $this->patch(route('profile.update'), ['name' => $user->name, 'email' => 'changed@example.test'])->assertSessionHasNoErrors();
+        $this->patch(route('profile.update'), ['name' => $user->name, 'email' => 'changed@example.test', 'current_password' => 'password'])->assertSessionHasNoErrors();
         $this->assertNotNull($user->refresh()->publishing_suspended_at);
         $this->actingAs($admin)->post(route('moderation.decide', ['review', $review->id]), [
             'action' => 'reject', 'note' => 'Publishing access restored after review.', 'publishing' => 'restore',

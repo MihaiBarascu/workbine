@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Settings;
 
+use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Rules\AvailableUsername;
 use App\Support\Usernames;
@@ -11,7 +12,16 @@ use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
+    use PasswordValidationRules;
     use ProfileValidationRules;
+
+    /**
+     * Whether the submission replaces the sign-in and recovery address.
+     */
+    public function changesEmail(): bool
+    {
+        return $this->input('email') !== $this->user()->email;
+    }
 
     protected function prepareForValidation(): void
     {
@@ -63,6 +73,8 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::in(['linkedin', 'github', 'x', 'instagram', 'youtube', 'facebook', 'tiktok', 'bluesky', 'mastodon']),
             ],
             'social_links.*.url' => ['required', 'url:http,https', 'max:2048'],
+            // A session alone must not be enough to redirect account recovery elsewhere.
+            ...($this->changesEmail() ? ['current_password' => $this->currentPasswordRules()] : []),
         ];
     }
 }

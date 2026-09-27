@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AddReleaseRevision;
+use App\Http\Middleware\AddSecurityHeaders;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Support\ErrorPages;
@@ -21,8 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Use the visitor IP and protocol only from configured trusted proxies.
         $middleware->trustProxies(headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO);
 
-        // Global so it also covers the framework health route outside the web group.
+        // Global so they also cover the framework health route outside the web group.
         $middleware->append(AddReleaseRevision::class);
+        $middleware->append(AddSecurityHeaders::class);
 
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 

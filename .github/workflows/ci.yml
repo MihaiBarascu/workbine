@@ -56,7 +56,7 @@ jobs:
 
     steps:
       - name: Checkout requested source revision
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
@@ -70,7 +70,7 @@ jobs:
         run: python3 -m unittest discover -s tools -p 'test_*.py' -v
 
       - name: Prepare PHP image support
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: '8.3'
           extensions: gd, exif, intl, pdo_pgsql, zip
@@ -110,7 +110,7 @@ jobs:
 
       - name: Upload formatting suggestions
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: formatting-${{ matrix.database }}
           path: /tmp/workbine-formatting/
@@ -126,7 +126,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout requested source revision
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.ref || github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false

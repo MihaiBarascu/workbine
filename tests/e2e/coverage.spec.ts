@@ -172,6 +172,9 @@ test('changing the account email requires verification before contributing', asy
         .getByLabel('Email address', { exact: true })
         .fill(replacementEmail);
     await page
+        .getByLabel('Current password', { exact: true })
+        .fill(actors.owner.password);
+    await page
         .getByRole('button', { name: 'Save changes', exact: true })
         .click();
     await expect(

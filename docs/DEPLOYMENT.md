@@ -28,7 +28,9 @@ The **publish** job:
 
 The **staging** and **production** jobs call `.github/workflows/deploy.yml`, which:
 
-1. resolves the digest of `:<sha>` and fails if that revision was never published;
+1. resolves the digest of `:<sha>` and fails unless that image's revision label is
+   the requested commit; production reuses the digest staging verified instead of
+   reading the tag again;
 2. extracts the image's Vite manifest as the expected frontend build;
 3. moves the environment tag (`:staging` or `:production`) to that digest;
 4. calls the environment's Dokploy deploy webhook, so Dokploy pulls the tag and
@@ -38,6 +40,13 @@ The **staging** and **production** jobs call `.github/workflows/deploy.yml`, whi
 
 The SHA tag or digest is the release identifier. `:staging` and `:production` only
 record what each environment runs; never point an environment at `:main` or `latest`.
+
+Every third-party action in the workflows is pinned to a full commit SHA, with its
+version in a trailing comment. Update a pin deliberately after reviewing the
+release instead of switching back to a moving tag.
+
+Inside the image, Supervisor starts Apache and the Inertia SSR server. Apache
+workers and the SSR process run as `www-data`, not root.
 
 ## Approval
 

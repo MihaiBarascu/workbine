@@ -45,6 +45,11 @@ Correct URL generation and redirect ownership are separate concerns.
   covers the actual intermediary hops before relying on per-IP limits. Do not
   use `*` or read client-supplied `CF-Connecting-IP` directly in application code.
 
+- Laravel adds `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`
+  and `Referrer-Policy: strict-origin-when-cross-origin` to every response,
+  including errors and `/up`, unless a response sets its own value. HSTS and the
+  minimum TLS version are Cloudflare zone settings, not application behavior.
+
 Proxy trust is a shared infrastructure boundary: attached containers must be
 trusted. Changing that network or attaching additional workloads requires review.
 Removing proxy trust would reintroduce HTTP URLs, even with an edge redirect.

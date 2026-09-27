@@ -224,11 +224,12 @@ notes. Consult [MEDIA.md](MEDIA.md) for behavior and the reusable setup runbook.
 - Branded HTTP errors cover normal and Inertia visits while preserving status,
   retry headers, JSON responses and local debug behavior.
 - Standard Laravel/Fortify email confirmation is sent automatically at email/password
-  registration and after an email change. Confirmation is required for contributions
+  registration and after an email change, which requires the current password and
+  notifies the previously verified address. Confirmation is required for contributions
   and saved topics. Browsing, account settings, recovery and deletion remain available.
   Google-created accounts already have a verified address and receive no confirmation.
   Google cannot verify an unrelated local email or silently link an unverified
-  password account. Password changes revoke database sessions and invalidate
+  password account, and Google sign-in still asks for an enabled two-factor code. Password changes revoke database sessions and invalidate
   authenticated sessions that carry the password-hash marker. Recovery of an
   unverified account also removes previously enrolled login credentials; verified
   accounts retain their additional authentication factors.

@@ -152,6 +152,7 @@ class GoogleAuthenticationTest extends TestCase
         $this->actingAs($user)->patch(route('profile.update'), [
             'name' => $user->name,
             'email' => 'different-inbox@example.com',
+            'current_password' => 'password',
         ])->assertSessionHasNoErrors()->assertRedirect();
         $this->assertNull($user->refresh()->email_verified_at);
         $this->post(route('logout'))->assertRedirect();
@@ -185,6 +186,31 @@ class GoogleAuthenticationTest extends TestCase
 
         $this->assertAuthenticatedAs($user);
         $this->assertTrue($user->refresh()->hasVerifiedEmail());
+    }
+
+    public function test_google_login_still_requires_the_enabled_second_factor(): void
+    {
+        $user = User::factory()->withTwoFactor()->create([
+            'email' => 'protected@example.com',
+            'google_id' => 'google-protected-member',
+        ]);
+        Socialite::fake('google', SocialiteUser::fake([
+            'id' => 'google-protected-member',
+            'email' => 'protected@example.com',
+            'email_verified' => true,
+        ]));
+
+        $this->get(route('google.callback'))
+            ->assertRedirect(route('two-factor.login'))
+            ->assertSessionHas('login.id', $user->id);
+
+        $this->assertGuest();
+        $this->get(route('two-factor.login'))->assertOk();
+
+        $this->post(route('two-factor.login.store'), ['recovery_code' => 'recovery-code-1'])
+            ->assertRedirect(route('dashboard', absolute: false));
+
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_google_login_preserves_independently_verified_local_email(): void

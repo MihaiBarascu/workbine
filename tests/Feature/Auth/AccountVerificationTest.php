@@ -77,7 +77,7 @@ class AccountVerificationTest extends TestCase
         $user = User::factory()->create();
         $oldLink = $this->verificationLink($user);
         $this->actingAs($user)->patch(route('profile.update'), [
-            'name' => $user->name, 'email' => 'corrected@example.com',
+            'name' => $user->name, 'email' => 'corrected@example.com', 'current_password' => 'password',
         ])->assertSessionHas('status', 'verification-link-sent');
         $user->refresh();
         $this->assertFalse($user->hasVerifiedEmail());
@@ -111,6 +111,31 @@ class AccountVerificationTest extends TestCase
         }
         $this->post(route('verification.send'))->assertTooManyRequests();
         Notification::assertSentToTimes($user, VerifyEmail::class, 6);
+    }
+
+    public function test_resending_has_a_daily_budget_per_address_that_confirmation_links_do_not_use(): void
+    {
+        Notification::fake();
+        $user = User::factory()->unverified()->create(['email' => 'inbox@example.com']);
+        $this->actingAs($user);
+        for ($sent = 0; $sent < 20; $sent++) {
+            $this->post(route('verification.send'))->assertRedirect();
+            $this->travel(13)->seconds();
+        }
+
+        $this->post(route('verification.send'))->assertTooManyRequests();
+        Notification::assertSentToTimes($user, VerifyEmail::class, 20);
+        $this->get($this->verificationLink($user))->assertRedirect();
+        $this->assertTrue($user->refresh()->hasVerifiedEmail());
+
+        // Moving the address to another account does not restore its budget.
+        $user->forceFill(['email' => 'moved@example.com'])->save();
+        $next = User::factory()->unverified()->create(['email' => 'inbox@example.com']);
+        $this->actingAs($next)->post(route('verification.send'))->assertTooManyRequests();
+
+        $this->travel(1)->days();
+        $this->actingAs($next)->post(route('verification.send'))->assertRedirect();
+        Notification::assertSentToTimes($next, VerifyEmail::class, 1);
     }
 
     private function verificationLink(User $user): string

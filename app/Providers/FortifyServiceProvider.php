@@ -104,6 +104,19 @@ class FortifyServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('verification-email', function (Request $request) {
+            // Keyed by recipient, so moving one address between accounts shares its budget.
+            $recipient = sha1(Str::lower((string) $request->user()?->email));
+            $limits = [Limit::perMinute(6)->by('verification-email:minute:'.$recipient)];
+
+            // Opening a confirmation link sends nothing, so only resending uses the daily budget.
+            if ($request->routeIs('verification.send')) {
+                $limits[] = Limit::perDay(20)->by('verification-email:day:'.$recipient);
+            }
+
+            return $limits;
+        });
+
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
