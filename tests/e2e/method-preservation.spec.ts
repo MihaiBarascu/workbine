@@ -64,8 +64,12 @@ test('an experienced method stays intact while its author can add dated updates'
                 exact: true,
             }),
         ).toBeVisible();
+        // The page names the source's site and links to the full address.
         await expect(
-            owner.getByText(originalSource, { exact: true }),
+            owner.getByRole('link', { name: /^Original source/ }),
+        ).toHaveAttribute('href', originalSource);
+        await expect(
+            owner.getByText('example.test', { exact: true }),
         ).toBeVisible();
         await expect
             .poll(() =>
@@ -93,11 +97,11 @@ test('an experienced method stays intact while its author can add dated updates'
         ).toBeVisible();
         await contributor.goto(`${methodUrl}/experiences/create`);
         await expect(
-            contributor.getByLabel('What was your result?'),
+            contributor.getByRole('group', { name: 'What was your result?' }),
         ).toBeVisible();
         await contributor
-            .getByLabel('What was your result?')
-            .selectOption('worked');
+            .locator('input[name="outcome"][value="worked"]')
+            .check();
         const experienceBody =
             'I tried the preserved method and it worked in my own setup.';
         await contributor
@@ -204,8 +208,8 @@ test('an experienced method stays intact while its author can add dated updates'
             staleEditor.getByText(originalBody, { exact: true }),
         ).toBeVisible();
         await expect(
-            staleEditor.getByText(originalSource, { exact: true }),
-        ).toBeVisible();
+            staleEditor.getByRole('link', { name: /^Original source/ }),
+        ).toHaveAttribute('href', originalSource);
         await expect(
             staleEditor.getByRole('img', {
                 name: 'The preserved method reference photo.',
@@ -228,9 +232,13 @@ test('an experienced method stays intact while its author can add dated updates'
         await contributor
             .getByRole('link', { name: 'Edit my experience', exact: true })
             .click();
-        contributor.once('dialog', (dialog) => dialog.accept());
         await contributor
             .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        // The removal asks in an in-app dialog before submitting.
+        await contributor
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Remove response', exact: true })
             .click();
         await expect(
             contributor.getByRole('heading', {

@@ -11,12 +11,24 @@ link are secondary controls.
 ## Photo galleries
 
 Each method and response has a gallery of up to six photos, shown below the text
-in the author's order and numbered, so the text can refer to “Photo 2”. Each photo
-may have a description of up to 140 characters, shown under it and used as its
-text alternative; writers can include a step number. Photos upload one at a time
-as soon as they are chosen, through the existing image processing, moderation,
-storage quotas and upload throttles. Publication waits for uploads to finish, and
+in the author's order as one mosaic. Tiles are numbered, so the text can refer to
+“Photo 2”. Each photo may have a description of up to 140 characters, used as its
+text alternative and shown with the photo in the viewer (and over larger tiles on
+hover); writers can include a step number. Photos upload one at a time as soon as
+they are chosen, dropped on the gallery or pasted/dropped into the text editor,
+through the existing image processing, moderation, storage quotas and upload
+throttles. The editor shows local previews with upload progress, and each queued
+or running upload can be cancelled. Publication waits for uploads to finish, and
 validation errors keep the uploaded photos, their order and descriptions.
+Photos can be reordered with their arrow buttons or by dragging them.
+
+Selecting a published photo opens a full-screen viewer on the same page instead
+of the image address: arrows, the keyboard (arrow keys, Home/End, +/−/0 for zoom,
+Escape), thumbnails, swipe between photos, pinch or double-tap zoom and swipe
+down to close. Browsing wraps around, and focus returns to the photo last shown.
+Modified clicks keep the browser's behaviour, such as opening the image in a new
+tab, and the tiles remain ordinary links before JavaScript loads. The viewer is
+built on the existing Radix dialog; no gallery dependency is added.
 
 The form submits only photo ids, order and descriptions, plus a marker that it
 manages the gallery; a form without that marker leaves the gallery unchanged.
@@ -62,9 +74,10 @@ Reference: [Tiptap React integration](https://tiptap.dev/docs/editor/getting-sta
 
 The existing editor parses pasted HTML. Unsupported presentation is simplified;
 code blocks become lines of text and table rows become paragraphs with separated
-cells. A status message explains these changes. Copied or dropped images are not
-added to the text: their alternative text is retained and the notice points to
-the gallery. Unsupported link destinations become plain text with a notice naming
+cells. A status message explains these changes. Images never enter the text:
+pasted or dropped photo files (such as screenshots) are handed to the form's
+gallery and uploaded there, while images inside copied web content keep only
+their alternative text and the notice points to the gallery. Unsupported link destinations become plain text with a notice naming
 the affected text. Plain-text clipboard content remains plain text; Markdown is
 not interpreted as formatting.
 

@@ -218,6 +218,32 @@ export function RichTextEditor({
         return () => form?.removeEventListener('submit', guard, true);
     }, [editor, maxLength]);
 
+    function applyLink() {
+        if (!validEditorLink(href)) {
+            setError(editorLinkHelp);
+            return;
+        }
+        if (editor?.state.selection.empty && !editor.isActive('link'))
+            editor
+                .chain()
+                .focus()
+                .insertContent({
+                    type: 'text',
+                    text: href,
+                    marks: [{ type: 'link', attrs: { href } }],
+                })
+                .run();
+        else
+            editor
+                ?.chain()
+                .focus()
+                .extendMarkRange('link')
+                .setLink({ href })
+                .run();
+        setLinkOpen(false);
+        setError('');
+    }
+
     return (
         <div ref={wrapper} className="space-y-2">
             <input type="hidden" name={name} value={text} />
@@ -242,6 +268,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Bold"
+                            title="Bold"
                             aria-pressed={selection?.bold}
                             disabled={!editor}
                             onClick={() =>
@@ -255,6 +282,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Bulleted list"
+                            title="Bulleted list"
                             aria-pressed={selection?.bullet}
                             disabled={!editor}
                             onClick={() =>
@@ -268,6 +296,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Numbered steps"
+                            title="Numbered steps"
                             aria-pressed={selection?.ordered}
                             disabled={!editor}
                             onClick={() =>
@@ -285,6 +314,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Add link"
+                            title="Add link"
                             aria-expanded={linkOpen}
                             disabled={!editor}
                             onClick={() => {
@@ -311,45 +341,27 @@ export function RichTextEditor({
                                 onChange={(event) =>
                                     setHref(event.target.value)
                                 }
+                                onKeyDown={(event) => {
+                                    // Enter applies the link; it must not submit the whole form.
+                                    if (
+                                        event.key === 'Enter' &&
+                                        !event.nativeEvent.isComposing
+                                    ) {
+                                        event.preventDefault();
+                                        applyLink();
+                                    } else if (event.key === 'Escape') {
+                                        event.preventDefault();
+                                        setLinkOpen(false);
+                                        editor?.commands.focus();
+                                    }
+                                }}
                                 autoFocus
                             />
                             <div className="flex gap-2">
                                 <Button
                                     type="button"
                                     size="sm"
-                                    onClick={() => {
-                                        if (!validEditorLink(href)) {
-                                            setError(editorLinkHelp);
-                                            return;
-                                        }
-                                        if (
-                                            editor?.state.selection.empty &&
-                                            !editor.isActive('link')
-                                        )
-                                            editor
-                                                .chain()
-                                                .focus()
-                                                .insertContent({
-                                                    type: 'text',
-                                                    text: href,
-                                                    marks: [
-                                                        {
-                                                            type: 'link',
-                                                            attrs: { href },
-                                                        },
-                                                    ],
-                                                })
-                                                .run();
-                                        else
-                                            editor
-                                                ?.chain()
-                                                .focus()
-                                                .extendMarkRange('link')
-                                                .setLink({ href })
-                                                .run();
-                                        setLinkOpen(false);
-                                        setError('');
-                                    }}
+                                    onClick={applyLink}
                                 >
                                     Apply link
                                 </Button>

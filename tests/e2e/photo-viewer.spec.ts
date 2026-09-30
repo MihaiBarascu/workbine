@@ -52,7 +52,9 @@ test('method photos open in a viewer instead of the image address', async ({
     await expect(viewer).toBeVisible();
     await expect(page).toHaveURL(methodUrl);
     await expect(viewer.getByText('2 / 3', { exact: true })).toBeVisible();
-    await expect(viewer.getByText('The settings', { exact: true })).toBeVisible();
+    await expect(
+        viewer.getByText('The settings', { exact: true }),
+    ).toBeVisible();
 
     await page.keyboard.press('ArrowRight');
     await expect(viewer.getByText('3 / 3', { exact: true })).toBeVisible();

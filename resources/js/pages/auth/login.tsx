@@ -25,6 +25,16 @@ export default function Login({ status, canResetPassword }: Props) {
         <>
             <Head title="Log in" />
 
+            {/* Confirmations such as a completed password reset lead the page. */}
+            {status && (
+                <div
+                    role="status"
+                    className="text-primary mb-4 text-center text-sm font-medium"
+                >
+                    {status}
+                </div>
+            )}
+
             <div className="flex flex-col gap-6">
                 <div className="grid gap-3">
                     <Button asChild variant="outline" className="w-full">
@@ -121,15 +131,6 @@ export default function Login({ status, canResetPassword }: Props) {
                     description="If you’ve already set up a passkey for your account."
                 />
             </div>
-
-            {status && (
-                <div
-                    role="status"
-                    className="text-primary mb-4 text-center text-sm font-medium"
-                >
-                    {status}
-                </div>
-            )}
         </>
     );
 }

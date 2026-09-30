@@ -414,8 +414,8 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
         await supporterPage
-            .locator('select[name="outcome"]')
-            .selectOption('worked');
+            .locator('input[name="outcome"][value="worked"]')
+            .check();
         await supporterPage
             .locator('[contenteditable="true"]')
             .fill(
@@ -427,10 +427,14 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await supporterPage
             .getByRole('heading', { name: '1 experience', exact: true })
             .waitFor();
-        await supporterPage.locator('select[name="outcome"]').waitFor();
+        await supporterPage
+            .getByRole('group', { name: 'What was your result?' })
+            .waitFor();
         await supporterPage.reload();
         assert.equal(
-            await supporterPage.locator('select[name="outcome"]').isVisible(),
+            await supporterPage
+                .getByRole('group', { name: 'What was your result?' })
+                .isVisible(),
             false,
             'A hard reload closes the experience form',
         );
@@ -526,8 +530,8 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
             .waitFor();
 
         await supporterPage
-            .locator('select[name="outcome"]')
-            .selectOption('partly');
+            .locator('input[name="outcome"][value="partly"]')
+            .check();
         await supporterPage
             .locator('[contenteditable="true"]')
             .fill(
@@ -555,9 +559,13 @@ const { chromium } = createRequire('/tmp/workbine-browser/package.json')(
         await supporterPage
             .getByRole('link', { name: 'Edit my experience', exact: true })
             .click();
-        supporterPage.once('dialog', (dialog) => dialog.accept());
         await supporterPage
             .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        // The removal asks in an in-app dialog before submitting.
+        await supporterPage
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Remove response', exact: true })
             .click();
         await supporterPage
             .getByRole('heading', { name: '0 experiences', exact: true })

@@ -15,7 +15,7 @@ test('a stale experience can reload the changed method and submit after review',
             .inputValue();
         const body =
             'I tried this approach with a small project and recorded the result.';
-        await page.getByLabel('What was your result?').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         await page.getByRole('textbox', { name: 'How did it go?' }).fill(body);
 
         const owner = await ownerContext.newPage();
@@ -55,7 +55,7 @@ test('a stale experience can reload the changed method and submit after review',
         await page
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
-        await page.getByLabel('What was your result?').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         await page.getByRole('textbox', { name: 'How did it go?' }).fill(body);
         await page
             .getByRole('button', { name: 'Publish my response', exact: true })

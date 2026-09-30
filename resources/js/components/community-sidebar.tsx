@@ -11,6 +11,7 @@ import {
     Code2,
     Rocket,
     Megaphone,
+    NotebookPen,
     ShoppingBag,
     Package,
     Video,
@@ -19,21 +20,23 @@ import {
     X,
     Settings,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { WorkbineBrand } from '@/components/community';
 import type { User } from '@/types';
 
-const icons = [
-    Bot,
-    Workflow,
-    Code2,
-    Rocket,
-    Megaphone,
-    BriefcaseBusiness,
-    ShoppingBag,
-    Package,
-    Video,
-    ChartNoAxesCombined,
-];
+// Keyed by category, so an icon never moves when empty categories are hidden.
+const icons: Record<string, LucideIcon> = {
+    ai: Bot,
+    automation: Workflow,
+    development: Code2,
+    saas: Rocket,
+    marketing: Megaphone,
+    freelancing: BriefcaseBusiness,
+    ecommerce: ShoppingBag,
+    'digital-products': Package,
+    content: Video,
+    'pricing-profit': ChartNoAxesCombined,
+};
 
 export function CommunitySidebar({
     categories,
@@ -113,7 +116,7 @@ export function CommunitySidebar({
                         onClick={onClose}
                         aria-current={ownTopics ? 'page' : undefined}
                     >
-                        <BookOpen aria-hidden="true" />
+                        <NotebookPen aria-hidden="true" />
                         My topics
                     </Link>
                     <Link
@@ -122,7 +125,7 @@ export function CommunitySidebar({
                         aria-current={path === '/saved' ? 'page' : undefined}
                     >
                         <Bookmark aria-hidden="true" />
-                        Bookmarks
+                        Saved topics
                     </Link>
                     <Link
                         href="/notifications"
@@ -172,8 +175,8 @@ export function CommunitySidebar({
                         <p className="wb-sidebar-label">Categories</p>
                         <nav aria-label="Categories">
                             {Object.entries(categories).map(
-                                ([value, label], i) => {
-                                    const Icon = icons[i] ?? BookOpen;
+                                ([value, label]) => {
+                                    const Icon = icons[value] ?? BookOpen;
                                     return (
                                         <Link
                                             key={value}
@@ -203,20 +206,23 @@ export function CommunitySidebar({
                         </nav>
                     </>
                 )}
-                <div className="wb-sidebar-invite">
-                    <Sprout aria-hidden="true" />
-                    <strong>
-                        Small steps.
-                        <br />
-                        Big impact.
-                    </strong>
-                    <p>
-                        Share something you learned. Help someone get started.
-                    </p>
-                    <Link href="/topics/create" onClick={onClose}>
-                        Create topic <ArrowRight aria-hidden="true" />
-                    </Link>
-                </div>
+                {path !== '/topics/create' && (
+                    <div className="wb-sidebar-invite">
+                        <Sprout aria-hidden="true" />
+                        <strong>
+                            Small steps.
+                            <br />
+                            Big impact.
+                        </strong>
+                        <p>
+                            Share something you learned. Help someone get
+                            started.
+                        </p>
+                        <Link href="/topics/create" onClick={onClose}>
+                            Create topic <ArrowRight aria-hidden="true" />
+                        </Link>
+                    </div>
+                )}
             </aside>
         </>
     );

@@ -48,7 +48,7 @@ conformance or measured audience growth.
 
 ## Screens and behavior
 
-The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public contribution rich text uses allowlisted React elements, not injected HTML; website links accept only HTTP/HTTPS. Profile photos and inline contribution photos are optional; legacy evidence images retain their controls. See [RICH-TEXT.md](RICH-TEXT.md) for the shared editor. Custom avatars use the shared image component with initials as a fallback; the Google avatar remains separate. See [MEDIA.md](MEDIA.md) for the deployed upload behavior.
+The public member profile (`/members/{username}`) is separate from private account settings. It shows explicitly serialized public introduction fields and paginated real methods/topics/experiences. Email, Google identity and security data are not public profile fields. Public contribution rich text uses allowlisted React elements, not injected HTML; website links accept only HTTP/HTTPS. Profile photos and contribution photo galleries are optional; legacy evidence images retain their controls. See [RICH-TEXT.md](RICH-TEXT.md) for the shared editor. Custom avatars use the shared image component with initials as a fallback; the Google avatar remains separate. See [MEDIA.md](MEDIA.md) for the deployed upload behavior.
 
 Each member has one unique lowercase username, separate from their display name. Profile settings show the current public URL and explain that changing the username makes the previous one available to others. Numeric profile links redirect to the current username; previous usernames are not retained as aliases.
 
@@ -96,6 +96,29 @@ experience lists. It opens native sharing when available, falls back to clipboar
 copy and exposes a selectable URL when clipboard access fails. Cancelling native
 sharing does not copy anything. Method links target that specific method, while
 topic sharing keeps the topic URL. Create a method is distinct from sharing a link.
+“Link copied” appears briefly beside the control without moving its neighbours.
+Topic cards keep secondary actions in a labelled menu (Share link, Report topic,
+Edit topic) built on the existing dropdown.
+
+## Modern interaction patterns — 2026-09-30
+
+The interface avoids raw browser behaviour where the product has its own pattern:
+
+- Photos open in the in-page viewer described in [RICH-TEXT.md](RICH-TEXT.md), not
+  on the image address. The gallery editor and profile photo use previews and
+  drag-and-drop instead of a bare file input.
+- Destructive confirmations use an in-app dialog with explicit Cancel and
+  Remove actions, not the browser's `confirm()` box.
+- The reported result of an experience is chosen from three labelled cards with
+  icons; result chips use an icon as well as colour.
+- In-page links use a down arrow, same-tab navigation a right arrow, and only
+  links that open a new tab use the external-link icon.
+- Pagination and profile tabs keep the reader's place instead of jumping to the
+  top of the page. Disclosures use one rotating chevron.
+- Primary actions keep their contrast in dark appearance; no green or terracotta
+  accents remain in the shell.
+
+No new dependency is introduced; these reuse Radix, Lucide, Sonner and Tailwind.
 
 ## Topics and individual methods
 

@@ -78,7 +78,10 @@ See [ExperienceRevisionTest.php](../tests/Feature/ExperienceRevisionTest.php) an
 Routes: `POST /editor/images` (gallery uploads), profile/avatar upload/delete and
 the method/experience forms that save a gallery. Browser:
 [flows.spec.ts](../tests/e2e/flows.spec.ts) (first method with a gallery photo),
-[media-flow.cjs](../tests/browser/media-flow.cjs) and
+[photo-viewer.spec.ts](../tests/e2e/photo-viewer.spec.ts) (three uploaded photos,
+reordering, the in-page viewer's keyboard, thumbnails, zoom, focus return and
+unchanged URL), [media-flow.cjs](../tests/browser/media-flow.cjs) (including a
+pasted screenshot handed from the editor to the gallery) and
 [moderation-flow.cjs](../tests/browser/moderation-flow.cjs).
 Backend: [PhotoGalleryTest.php](../tests/Feature/PhotoGalleryTest.php),
 [PhotoGalleryMigrationTest.php](../tests/Feature/PhotoGalleryMigrationTest.php),

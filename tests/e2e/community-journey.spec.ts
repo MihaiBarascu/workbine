@@ -236,8 +236,8 @@ test('three members complete one topic, methods, feedback and reputation journey
                 `${topicUrl}/methods/${methodId}/experiences/create`,
             );
             await page
-                .getByLabel('What was your result?')
-                .selectOption(outcome);
+                .locator(`input[name="outcome"][value="${outcome}"]`)
+                .check();
             await page
                 .getByRole('textbox', { name: 'How did it go?' })
                 .fill(body);
@@ -335,8 +335,8 @@ test('three members complete one topic, methods, feedback and reputation journey
             .getByRole('link', { name: 'Edit my experience', exact: true })
             .click();
         await contributor
-            .getByLabel('What was your result?')
-            .selectOption('did_not_work');
+            .locator('input[name="outcome"][value="did_not_work"]')
+            .check();
         await contributor
             .getByRole('button', { name: 'Update my response', exact: true })
             .click();

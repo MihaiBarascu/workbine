@@ -138,8 +138,8 @@ test('a second member can share an experience and notify the method recipient', 
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
         await contributorPage
-            .getByLabel('What was your result?')
-            .selectOption('worked');
+            .locator('input[name="outcome"][value="worked"]')
+            .check();
         await contributorPage
             .getByRole('textbox', { name: 'How did it go?' })
             .fill('The method worked in my own context and saved useful time.');
@@ -158,8 +158,8 @@ test('a second member can share an experience and notify the method recipient', 
             'The method worked in my own context and saved useful time.',
         );
         await expect(
-            contributorPage.getByLabel('What was your result?'),
-        ).toHaveValue('worked');
+            contributorPage.locator('input[name="outcome"][value="worked"]'),
+        ).toBeChecked();
         await contributorPage
             .getByRole('button', { name: 'Publish my response', exact: true })
             .click();

@@ -1,15 +1,23 @@
 import { Link, useForm, usePage } from '@inertiajs/react';
 import {
+    Flag,
     Heart,
     MessageSquare,
     MoreHorizontal,
     Pencil,
     ArrowRight,
+    Share2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { MemberLink } from '@/components/community';
 import { SaveTopicButton } from '@/components/save-topic-button';
-import { ShareLinkButton } from '@/components/share-link-button';
-import { ReportLink } from '@/components/report-link';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { shareLink } from '@/lib/share-link';
 
 import type { MethodSummary, TopicSummary, User } from '@/types';
 
@@ -24,6 +32,16 @@ function methodOutcomeSummary(method: MethodSummary): string {
     ].filter(Boolean);
 
     return `${method.experiences_count} ${method.experiences_count === 1 ? 'experience' : 'experiences'}${outcomes.length ? ` · ${outcomes.join(' · ')}` : ''}`;
+}
+
+async function shareTopic(slug: string) {
+    const path = `/topics/${slug}`;
+    const outcome = await shareLink(path);
+    if (outcome === 'copied') toast.success('Link copied');
+    if (outcome === 'failed')
+        toast('Copy this link', {
+            description: new URL(path, window.location.origin).href,
+        });
 }
 
 export function LikeTopicButton({ topic }: { topic: TopicSummary }) {
@@ -43,7 +61,7 @@ export function LikeTopicButton({ topic }: { topic: TopicSummary }) {
     if (!auth.user)
         return (
             <Link
-                href="/login"
+                href={`/topics/${topic.slug}/like`}
                 className="wb-topic-appreciation"
                 aria-label="Log in to appreciate this topic"
             >
@@ -87,7 +105,10 @@ export function TopicCard({
     topic: TopicSummary;
     categories: Record<string, string>;
 }) {
-    const { auth } = usePage<{ auth: { user: User | null } }>().props;
+    const { auth, reportsEnabled } = usePage<{
+        auth: { user: User | null };
+        reportsEnabled: boolean;
+    }>().props;
     return (
         <article className="wb-entry wb-topic-card">
             <div className="wb-card-content">
@@ -173,20 +194,27 @@ export function TopicCard({
             </div>
             <footer className="wb-card-actions">
                 <LikeTopicButton topic={topic} />
-                <Link
-                    href={`/topics/${topic.slug}#methods-heading`}
-                    className="wb-card-methods"
-                >
-                    <MessageSquare aria-hidden="true" />
-                    {topic.methods_count}{' '}
-                    {topic.methods_count === 1 ? 'method' : 'methods'}
-                </Link>
-                {topic.methods_count === 0 && (
+                {topic.methods_count === 0 ? (
                     <Link
                         href={`/topics/${topic.slug}/methods/create`}
                         className="wb-card-first-method"
                     >
-                        Create the first method <ArrowRight />
+                        <span className="wb-card-first-long">
+                            Create the first method
+                        </span>
+                        <span className="wb-card-first-short">
+                            Add a method
+                        </span>
+                        <ArrowRight aria-hidden="true" />
+                    </Link>
+                ) : (
+                    <Link
+                        href={`/topics/${topic.slug}#methods-heading`}
+                        className="wb-card-methods"
+                    >
+                        <MessageSquare aria-hidden="true" />
+                        {topic.methods_count}{' '}
+                        {topic.methods_count === 1 ? 'method' : 'methods'}
                     </Link>
                 )}
                 <SaveTopicButton
@@ -195,30 +223,44 @@ export function TopicCard({
                     authenticated={Boolean(auth.user)}
                     compact
                 />
-                <details className="wb-card-options">
-                    <summary
-                        className="wb-card-more"
-                        aria-label={`More options for ${topic.title}`}
-                    >
-                        <MoreHorizontal />
-                    </summary>
-
-                    <div className="wb-card-options-panel">
-                        <ShareLinkButton path={`/topics/${topic.slug}`} />
-                        <div className="mt-2 flex flex-col gap-2">
-                            <ReportLink type="topic" id={topic.id} />
-                            {auth.user?.id === topic.user.id && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            type="button"
+                            className="wb-card-more"
+                            aria-label={`More options for ${topic.title}`}
+                            title="More options"
+                        >
+                            <MoreHorizontal aria-hidden="true" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                            onSelect={() => void shareTopic(topic.slug)}
+                        >
+                            <Share2 aria-hidden="true" />
+                            Share link
+                        </DropdownMenuItem>
+                        {reportsEnabled && auth.user?.id !== topic.user.id && (
+                            <DropdownMenuItem asChild>
                                 <Link
-                                    href={`/topics/${topic.slug}/edit`}
-                                    className="flex min-h-10 items-center gap-2 text-sm"
+                                    href={`/reports/topic/${topic.id}/create`}
                                 >
-                                    <Pencil className="size-4" />
+                                    <Flag aria-hidden="true" />
+                                    Report topic
+                                </Link>
+                            </DropdownMenuItem>
+                        )}
+                        {auth.user?.id === topic.user.id && (
+                            <DropdownMenuItem asChild>
+                                <Link href={`/topics/${topic.slug}/edit`}>
+                                    <Pencil aria-hidden="true" />
                                     Edit topic
                                 </Link>
-                            )}
-                        </div>
-                    </div>
-                </details>
+                            </DropdownMenuItem>
+                        )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </footer>
         </article>
     );

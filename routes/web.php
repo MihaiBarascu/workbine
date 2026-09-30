@@ -69,6 +69,8 @@ require __DIR__.'/reports.php';
 require __DIR__.'/moderation.php';
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Guests follow this after login back to the topic; appreciating stays an explicit PUT.
+    Route::get('topics/{topic}/like', [TopicLikeController::class, 'create'])->name('topics.like.create');
     Route::put('topics/{topic}/like', [TopicLikeController::class, 'store'])->middleware('throttle:60,1')->name('topics.like');
     Route::delete('topics/{topic}/like', [TopicLikeController::class, 'destroy'])->middleware('throttle:60,1')->name('topics.unlike');
 });

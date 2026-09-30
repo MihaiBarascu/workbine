@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { ArrowUpRight, Palette, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowRight, Palette, ShieldCheck, UserRound } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { MemberAvatar } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
@@ -52,7 +52,7 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     <Button asChild variant="outline">
                         <Link href={`/members/${auth.user.username}`}>
                             View public profile
-                            <ArrowUpRight aria-hidden="true" />
+                            <ArrowRight aria-hidden="true" />
                         </Link>
                     </Button>
                 </header>

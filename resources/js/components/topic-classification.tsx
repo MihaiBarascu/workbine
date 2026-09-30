@@ -15,7 +15,7 @@ export function TopicClassification({
 }) {
     return (
         <div className="grid gap-5 sm:grid-cols-2">
-            <div className="grid gap-2">
+            <div className="grid content-start gap-2">
                 <Label htmlFor="category">
                     Category{' '}
                     <span className="text-muted-foreground font-normal">
@@ -41,7 +41,7 @@ export function TopicClassification({
                 </select>
                 <InputError id="category-error" message={errors.category} />
             </div>
-            <div className="grid gap-2">
+            <div className="grid content-start gap-2">
                 <Label htmlFor="tags">
                     Tags{' '}
                     <span className="text-muted-foreground font-normal">

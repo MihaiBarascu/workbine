@@ -204,8 +204,9 @@ const { chromium } = requireBrowser('playwright');
         assert.equal(
             await page
                 .getByRole('button', { name: 'Save photo', exact: true })
-                .isDisabled(),
-            true,
+                .count(),
+            0,
+            'Save appears only after a valid photo is chosen',
         );
         await page.locator('#avatar').setInputFiles(blue);
         await loaded(page.getByAltText('Selected photo preview'));
@@ -268,7 +269,7 @@ const { chromium } = requireBrowser('playwright');
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
         await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+#share$/);
-        await page.locator('select[name="outcome"]').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         const experienceBody =
             'I tested this approach with a small weekly batch and documented the outcome in this synthetic public evidence image.';
         await page.locator('[contenteditable="true"]').fill(experienceBody);
