@@ -1,4 +1,5 @@
-import { Form } from '@inertiajs/react';
+import { Form, usePage } from '@inertiajs/react';
+import { Trash2 } from 'lucide-react';
 import { useRef } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import Heading from '@/components/heading';
@@ -17,41 +18,34 @@ import {
 import { Label } from '@/components/ui/label';
 
 export default function DeleteUser() {
+    const { auth } = usePage().props;
     const passwordInput = useRef<HTMLInputElement>(null);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
             <Heading
                 variant="small"
                 title="Delete account"
-                description="Delete your account and all of its resources"
+                description="Permanently remove your account, your profile and everything you have shared. This cannot be undone."
             />
-            <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
-                <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
-                    <p className="font-medium">Warning</p>
-                    <p className="text-sm">
-                        Please proceed with caution, this cannot be undone.
-                    </p>
-                </div>
-
+            <div>
                 <Dialog>
                     <DialogTrigger asChild>
                         <Button
-                            variant="destructive"
+                            variant="outline"
+                            className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive dark:text-destructive-foreground"
                             data-test="delete-user-button"
                         >
+                            <Trash2 aria-hidden="true" />
                             Delete account
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
-                        <DialogTitle>
-                            Are you sure you want to delete your account?
-                        </DialogTitle>
+                        <DialogTitle>Delete your account?</DialogTitle>
                         <DialogDescription>
-                            Once your account is deleted, all of its resources
-                            and data will also be permanently deleted. Please
-                            enter your password to confirm you would like to
-                            permanently delete your account.
+                            Your profile, topics, methods, experiences and
+                            photos will be permanently deleted. Enter your
+                            password to confirm.
                         </DialogDescription>
 
                         <Form
@@ -82,6 +76,14 @@ export default function DeleteUser() {
                                         />
 
                                         <InputError message={errors.password} />
+                                        {auth.user.google_id && (
+                                            <p className="text-muted-foreground text-sm">
+                                                Joined with Google and never set
+                                                a password? Log out and choose
+                                                “Forgot your password?” on the
+                                                login page to create one first.
+                                            </p>
+                                        )}
                                     </div>
 
                                     <DialogFooter className="gap-2">

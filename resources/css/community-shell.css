@@ -110,10 +110,21 @@
 }
 
 /* A quiet reading canvas uses the same surfaces and rhythm as the feed. */
-.wb-secondary-shell .wb-topbar {
+.wb-secondary-shell .wb-topbar,
+.dark .wb-secondary-shell .wb-topbar {
     background: var(--card);
     backdrop-filter: none;
     border-bottom-color: var(--border);
+}
+/* Dark appearance: primary actions keep their contrast on dark surfaces. */
+.dark .wb-cosmos-shell .wb-compose-row button,
+.dark .wb-sidebar-invite a {
+    background: var(--primary);
+    color: var(--primary-foreground);
+}
+.dark .wb-cosmos-shell .wb-compose-row button:hover,
+.dark .wb-sidebar-invite a:hover {
+    background: color-mix(in srgb, var(--primary) 86%, white);
 }
 .wb-secondary-shell .wb-page {
     max-width: 1320px;
@@ -370,6 +381,77 @@
     .wb-cosmos-shell.is-sidebar-collapsed .wb-community-sidebar,
     .wb-cosmos-shell .wb-universe,
     .wb-desktop-sidebar-toggle {
+        transition: none;
+    }
+}
+
+/* Sharing: a short confirmation floats beside the button instead of moving it. */
+.wb-share-control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+.wb-share-bubble {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 6px);
+    z-index: 30;
+    border-radius: 999px;
+    background: var(--foreground);
+    color: var(--background);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.wb-share-bubble:not(:empty) {
+    padding: 5px 10px;
+    animation: wb-share-in 0.18s ease-out;
+}
+.wb-share-note {
+    margin-left: 6px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+}
+@keyframes wb-share-in {
+    from {
+        opacity: 0;
+        translate: 0 4px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .wb-share-bubble:not(:empty) {
+        animation: none;
+    }
+}
+
+/* Disclosures: one chevron that turns when open, instead of the browser marker. */
+.wb-public summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    cursor: pointer;
+}
+.wb-public summary::-webkit-details-marker {
+    display: none;
+}
+.wb-public summary::before {
+    flex-shrink: 0;
+    width: 7px;
+    height: 7px;
+    margin-inline: 1px 2px;
+    border-right: 1.75px solid currentColor;
+    border-bottom: 1.75px solid currentColor;
+    content: '';
+    transform: rotate(-45deg);
+    transition: transform 0.15s;
+}
+.wb-public details[open] > summary::before {
+    transform: rotate(45deg);
+}
+@media (prefers-reduced-motion: reduce) {
+    .wb-public summary::before {
         transition: none;
     }
 }

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { editorLinkHelp, validEditorLink } from '@/lib/editor-links';
+import { PHOTO_FILES_EVENT } from '@/lib/photo-files';
 
 const extensions = [
     StarterKit.configure({
@@ -23,6 +24,31 @@ const extensions = [
 ];
 
 const photosElsewhere = 'Photos go in the gallery below the text.';
+
+/**
+ * Pasted or dropped photo files go to the form's gallery instead of the text.
+ * Returns the notice to show.
+ */
+function handPhotosToGallery(element: Element | null, files: FileList) {
+    const photos = Array.from(files).filter((file) =>
+        file.type.startsWith('image/'),
+    );
+    const form = element?.closest('form') ?? null;
+    // A gallery field cancels the event when it takes the files.
+    const taken =
+        photos.length > 0 &&
+        form !== null &&
+        !form.dispatchEvent(
+            new CustomEvent(PHOTO_FILES_EVENT, {
+                detail: photos,
+                cancelable: true,
+            }),
+        );
+    if (!taken) return photosElsewhere;
+    return photos.length === 1
+        ? 'Adding your photo to the gallery below the text.'
+        : 'Adding your photos to the gallery below the text.';
+}
 
 type Props = {
     id: string;
@@ -124,16 +150,20 @@ export function RichTextEditor({
                 setPasteNotice([...new Set(notices)].join(' '));
                 return pasted.body.innerHTML;
             },
-            handlePaste: (_view, event) => {
+            handlePaste: (view, event) => {
                 if (!event.clipboardData?.files.length) return false;
                 event.preventDefault();
-                setPasteNotice(photosElsewhere);
+                setPasteNotice(
+                    handPhotosToGallery(view.dom, event.clipboardData.files),
+                );
                 return true;
             },
-            handleDrop: (_view, event) => {
+            handleDrop: (view, event) => {
                 if (!event.dataTransfer?.files.length) return false;
                 event.preventDefault();
-                setPasteNotice(photosElsewhere);
+                setPasteNotice(
+                    handPhotosToGallery(view.dom, event.dataTransfer.files),
+                );
                 return true;
             },
         },
@@ -188,6 +218,32 @@ export function RichTextEditor({
         return () => form?.removeEventListener('submit', guard, true);
     }, [editor, maxLength]);
 
+    function applyLink() {
+        if (!validEditorLink(href)) {
+            setError(editorLinkHelp);
+            return;
+        }
+        if (editor?.state.selection.empty && !editor.isActive('link'))
+            editor
+                .chain()
+                .focus()
+                .insertContent({
+                    type: 'text',
+                    text: href,
+                    marks: [{ type: 'link', attrs: { href } }],
+                })
+                .run();
+        else
+            editor
+                ?.chain()
+                .focus()
+                .extendMarkRange('link')
+                .setLink({ href })
+                .run();
+        setLinkOpen(false);
+        setError('');
+    }
+
     return (
         <div ref={wrapper} className="space-y-2">
             <input type="hidden" name={name} value={text} />
@@ -212,6 +268,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Bold"
+                            title="Bold"
                             aria-pressed={selection?.bold}
                             disabled={!editor}
                             onClick={() =>
@@ -225,6 +282,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Bulleted list"
+                            title="Bulleted list"
                             aria-pressed={selection?.bullet}
                             disabled={!editor}
                             onClick={() =>
@@ -238,6 +296,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Numbered steps"
+                            title="Numbered steps"
                             aria-pressed={selection?.ordered}
                             disabled={!editor}
                             onClick={() =>
@@ -255,6 +314,7 @@ export function RichTextEditor({
                             variant="ghost"
                             size="icon"
                             aria-label="Add link"
+                            title="Add link"
                             aria-expanded={linkOpen}
                             disabled={!editor}
                             onClick={() => {
@@ -281,45 +341,27 @@ export function RichTextEditor({
                                 onChange={(event) =>
                                     setHref(event.target.value)
                                 }
+                                onKeyDown={(event) => {
+                                    // Enter applies the link; it must not submit the whole form.
+                                    if (
+                                        event.key === 'Enter' &&
+                                        !event.nativeEvent.isComposing
+                                    ) {
+                                        event.preventDefault();
+                                        applyLink();
+                                    } else if (event.key === 'Escape') {
+                                        event.preventDefault();
+                                        setLinkOpen(false);
+                                        editor?.commands.focus();
+                                    }
+                                }}
                                 autoFocus
                             />
                             <div className="flex gap-2">
                                 <Button
                                     type="button"
                                     size="sm"
-                                    onClick={() => {
-                                        if (!validEditorLink(href)) {
-                                            setError(editorLinkHelp);
-                                            return;
-                                        }
-                                        if (
-                                            editor?.state.selection.empty &&
-                                            !editor.isActive('link')
-                                        )
-                                            editor
-                                                .chain()
-                                                .focus()
-                                                .insertContent({
-                                                    type: 'text',
-                                                    text: href,
-                                                    marks: [
-                                                        {
-                                                            type: 'link',
-                                                            attrs: { href },
-                                                        },
-                                                    ],
-                                                })
-                                                .run();
-                                        else
-                                            editor
-                                                ?.chain()
-                                                .focus()
-                                                .extendMarkRange('link')
-                                                .setLink({ href })
-                                                .run();
-                                        setLinkOpen(false);
-                                        setError('');
-                                    }}
+                                    onClick={applyLink}
                                 >
                                     Apply link
                                 </Button>

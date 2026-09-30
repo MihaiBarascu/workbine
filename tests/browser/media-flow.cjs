@@ -204,8 +204,9 @@ const { chromium } = requireBrowser('playwright');
         assert.equal(
             await page
                 .getByRole('button', { name: 'Save photo', exact: true })
-                .isDisabled(),
-            true,
+                .count(),
+            0,
+            'Save appears only after a valid photo is chosen',
         );
         await page.locator('#avatar').setInputFiles(blue);
         await loaded(page.getByAltText('Selected photo preview'));
@@ -268,7 +269,7 @@ const { chromium } = requireBrowser('playwright');
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
         await page.waitForURL(/\/topics\/[^/]+\/methods\/\d+#share$/);
-        await page.locator('select[name="outcome"]').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         const experienceBody =
             'I tested this approach with a small weekly batch and documented the outcome in this synthetic public evidence image.';
         await page.locator('[contenteditable="true"]').fill(experienceBody);
@@ -438,7 +439,7 @@ const { chromium } = requireBrowser('playwright');
         await page
             .getByRole('button', { name: 'Apply link', exact: true })
             .click();
-        // A pasted image never enters the text; the editor points to the gallery.
+        // A pasted image never enters the text; the editor hands it to the gallery.
         await methodEditor.evaluate((element, base64) => {
             const bytes = Uint8Array.from(atob(base64), (character) =>
                 character.charCodeAt(0),
@@ -456,11 +457,18 @@ const { chromium } = requireBrowser('playwright');
             );
         }, blue.buffer.toString('base64'));
         await page
-            .getByText('Photos go in the gallery below the text.', {
+            .getByText('Adding your photo to the gallery below the text.', {
                 exact: true,
             })
             .waitFor();
         assert.equal(await page.locator('.wb-editor img').count(), 0);
+        await page.getByLabel('Photo 1 description', { exact: true }).waitFor();
+        await page
+            .getByRole('button', { name: 'Remove photo 1', exact: true })
+            .click();
+        await page
+            .getByLabel('Photo 1 description', { exact: true })
+            .waitFor({ state: 'detached' });
         await page.getByLabel('Upload photos', { exact: true }).setInputFiles({
             name: 'invalid.svg',
             mimeType: 'image/svg+xml',

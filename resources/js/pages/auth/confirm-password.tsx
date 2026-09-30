@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
 import PasskeyVerify from '@/components/passkey-verify';
 
 export default function ConfirmPassword() {
+    const { auth } = usePage().props;
     return (
         <>
             <Head title="Confirm password" />
@@ -40,6 +41,14 @@ export default function ConfirmPassword() {
                             />
 
                             <InputError message={errors.password} />
+                            {auth.user?.google_id && (
+                                <p className="text-muted-foreground text-sm">
+                                    Joined with Google and never set a password?
+                                    Use your passkey, or log out and choose
+                                    “Forgot your password?” on the login page to
+                                    create one.
+                                </p>
+                            )}
                         </div>
 
                         <div className="flex items-center">
@@ -62,5 +71,5 @@ export default function ConfirmPassword() {
 ConfirmPassword.layout = {
     title: 'Confirm password',
     description:
-        'This is a secure area of the application. Please confirm your password before continuing.',
+        'For your security, confirm it is you before changing how you sign in.',
 };

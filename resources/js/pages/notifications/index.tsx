@@ -1,4 +1,4 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { ArrowRight, Bell, CheckCheck } from 'lucide-react';
 import { MemberAvatar } from '@/components/community';
 import { PublicShell } from '@/components/public-shell';
@@ -25,6 +25,9 @@ type Props = {
 
 export default function Notifications({ notifications }: Props) {
     const form = useForm({});
+    const unreadNotifications =
+        usePage<{ unreadNotifications?: number }>().props.unreadNotifications ??
+        0;
     return (
         <PublicShell>
             <Head title="Notifications" />
@@ -39,7 +42,7 @@ export default function Notifications({ notifications }: Props) {
                             methods.
                         </p>
                     </div>
-                    {notifications.total > 0 && (
+                    {unreadNotifications > 0 && (
                         <Button
                             variant="outline"
                             disabled={form.processing}

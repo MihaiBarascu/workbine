@@ -66,18 +66,22 @@ export function ProfilePhoto() {
                                     setHasSelection(selected);
                                     setSavedMessage('');
                                 }}
+                                actions={
+                                    <Button
+                                        type="submit"
+                                        disabled={processing || !hasSelection}
+                                    >
+                                        {processing
+                                            ? 'Saving photo…'
+                                            : 'Save photo'}
+                                    </Button>
+                                }
                             />
                             {processing && (
                                 <UploadProgress
                                     percentage={progress?.percentage}
                                 />
                             )}
-                            <Button
-                                type="submit"
-                                disabled={processing || !hasSelection}
-                            >
-                                {processing ? 'Saving photo…' : 'Save photo'}
-                            </Button>
                         </>
                     )}
                 </Form>

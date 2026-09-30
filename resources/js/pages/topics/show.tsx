@@ -1,13 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
-import {
-    ArrowDown,
-    ArrowLeft,
-    ArrowRight,
-    ArrowUpRight,
-    Pencil,
-    Plus,
-} from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, Pencil, Plus } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { LikeTopicButton } from '@/components/topic-card';
 import { ShareLinkButton } from '@/components/share-link-button';
@@ -27,6 +20,13 @@ function formatDate(value: string): string {
         year: 'numeric',
         timeZone: 'UTC',
     }).format(new Date(value));
+}
+
+/** Pagination keeps its place: the new page starts at the methods heading. */
+function showMethods() {
+    document
+        .getElementById('methods-heading')
+        ?.scrollIntoView({ block: 'start' });
 }
 
 export default function TopicShow({ topic, methods, saved }: Props) {
@@ -233,9 +233,10 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                                 <Link
                                                     href={`/topics/${topic.slug}/methods/${method.id}`}
                                                     aria-label={`Read method: ${method.title}`}
-                                                    className="ml-auto"
+                                                    className="wb-method-read ml-auto"
                                                 >
-                                                    <ArrowUpRight aria-hidden="true" />
+                                                    Read method
+                                                    <ArrowRight aria-hidden="true" />
                                                 </Link>
                                             </footer>
                                         </article>
@@ -259,7 +260,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                     <Button asChild className="mt-6">
                                         <Link href={contributionUrl}>
                                             Create the first method
-                                            <ArrowUpRight aria-hidden="true" />
+                                            <ArrowRight aria-hidden="true" />
                                         </Link>
                                     </Button>
                                 </div>
@@ -275,7 +276,11 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                         disabled={!methods.prev_page_url}
                                     >
                                         {methods.prev_page_url ? (
-                                            <Link href={methods.prev_page_url}>
+                                            <Link
+                                                href={methods.prev_page_url}
+                                                preserveScroll
+                                                onSuccess={showMethods}
+                                            >
                                                 <ArrowLeft aria-hidden="true" />
                                                 Previous
                                             </Link>
@@ -296,7 +301,11 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                                         disabled={!methods.next_page_url}
                                     >
                                         {methods.next_page_url ? (
-                                            <Link href={methods.next_page_url}>
+                                            <Link
+                                                href={methods.next_page_url}
+                                                preserveScroll
+                                                onSuccess={showMethods}
+                                            >
                                                 Next
                                                 <ArrowRight aria-hidden="true" />
                                             </Link>
@@ -329,7 +338,7 @@ export default function TopicShow({ topic, methods, saved }: Props) {
                             <Button asChild variant="outline">
                                 <Link href={contributionUrl}>
                                     Add your approach
-                                    <ArrowUpRight aria-hidden="true" />
+                                    <ArrowRight aria-hidden="true" />
                                 </Link>
                             </Button>
                         </section>

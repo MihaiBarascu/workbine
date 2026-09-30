@@ -208,7 +208,7 @@ export function PublicShell({ children, discovery }: Props) {
                                 href="https://github.com/MihaiBarascu/workbine"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-10 shrink-0 items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
+                                className="wb-repo-link text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-10 shrink-0 items-center justify-center rounded-md focus-visible:outline-2 focus-visible:outline-offset-2"
                                 aria-label="Workbine on GitHub (opens in a new tab)"
                                 title="GitHub"
                             >

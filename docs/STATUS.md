@@ -1,11 +1,30 @@
 # Workbine status
 
-Last updated: 2026-09-13.
+Last updated: 2026-09-30.
 
 This is a public repository. This handoff records product behavior, completed
 releases and development rules. Account details, server inventories, operational
 check results, customer activity and recovery arrangements belong in the private
 handoff described in [AGENTS.md](../AGENTS.md), not in public commits or PRs.
+
+## Photo viewer and interface pass — 2026-09-30
+
+Contribution photos form one mosaic below the text and open in an in-page
+viewer (keyboard, swipe, zoom, thumbnails, descriptions) instead of the image
+address. The gallery editor shows local previews, upload progress, drag-and-drop
+reordering and files, and accepts screenshots pasted into the text editor.
+See [RICH-TEXT.md](RICH-TEXT.md).
+
+A follow-up UI/UX pass replaced remaining raw browser patterns: the native
+`confirm()` for removing a response, the bare profile-photo file input, the
+native topic-card menu and the outcome select. It also fixed Enter in the link
+box submitting the whole form, the experiences link discarding an open response
+draft, dark-mode contrast of primary actions, card footers wrapping, topic
+controls shown in people search, category icons following list position, lost
+scroll position on profile tabs and pagination, and a guest appreciation that
+returned to the feed instead of the topic after login (a GET redirect like the
+existing save link). See “Modern interaction patterns” in [DESIGN.md](DESIGN.md).
+Release validation is recorded in the pull request.
 
 ## Experience editor conflicts
 

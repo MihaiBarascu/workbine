@@ -1,5 +1,5 @@
 import { Form, Head, Link, usePage } from '@inertiajs/react';
-import { ArrowUpRight, Globe, LockKeyhole, Plus, Trash2 } from 'lucide-react';
+import { ArrowRight, Globe, LockKeyhole, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import DeleteUser from '@/components/delete-user';
@@ -325,7 +325,7 @@ export default function Profile({
                                                                         .value,
                                                                 )
                                                             }
-                                                            className="border-input bg-background ring-offset-background focus-visible:ring-ring h-9 w-full rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                                                            className="border-input ring-offset-background focus-visible:ring-ring h-11 w-full rounded-md border bg-transparent px-3 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none dark:[&>option]:bg-[var(--popover)]"
                                                             data-test={`social-platform-${index}`}
                                                         >
                                                             {socialPlatforms.map(
@@ -433,7 +433,7 @@ export default function Profile({
                                 className="wb-inline-link mt-6"
                             >
                                 See your public profile
-                                <ArrowUpRight aria-hidden="true" />
+                                <ArrowRight aria-hidden="true" />
                             </Link>
                         </section>
                         <section className="wb-panel">

@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 class TopicLikeController extends Controller
 {
+    public function create(Topic $topic): RedirectResponse
+    {
+        return to_route('topics.show', $topic);
+    }
+
     public function store(Request $request, Topic $topic): RedirectResponse
     {
         abort_if($request->user()?->getAuthIdentifier() === $topic->user_id, 403);

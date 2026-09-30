@@ -90,6 +90,20 @@ class ConnectedDiscoveryTest extends TestCase
         $this->put(route('topics.like', $topic))->assertNotFound();
     }
 
+    public function test_guest_appreciation_link_returns_to_the_topic_after_login_without_appreciating(): void
+    {
+        $topic = Topic::factory()->create();
+
+        $this->get(route('topics.like.create', $topic))
+            ->assertRedirect(route('login'))
+            ->assertSessionHas('url.intended', route('topics.like.create', $topic));
+
+        $this->actingAs(User::factory()->create())->get(route('topics.like.create', $topic))
+            ->assertRedirect(route('topics.show', $topic));
+
+        $this->assertDatabaseCount('topic_likes', 0);
+    }
+
     public function test_rankings_use_visible_recent_methods_and_external_saves(): void
     {
         $old = Topic::factory()->create(['created_at' => now()->subDays(20)]);

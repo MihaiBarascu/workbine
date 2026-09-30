@@ -19,7 +19,7 @@ async function publishResponse(
     body: string,
 ) {
     await openResponseEditor(page, methodUrl);
-    await page.getByLabel('What was your result?').selectOption('worked');
+    await page.locator('input[name="outcome"][value="worked"]').check();
     await page.getByRole('textbox', { name: 'How did it go?' }).fill(body);
     await page
         .getByRole('button', { name: 'Publish my response', exact: true })
@@ -45,7 +45,7 @@ test('a stale new-response draft cannot replace the response created in another 
         ).toBeVisible();
         const staleBody =
             'This new response draft was opened before the other tab published.';
-        await page.getByLabel('What was your result?').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         await page
             .getByRole('textbox', { name: 'How did it go?' })
             .fill(staleBody);
@@ -227,9 +227,13 @@ test('a stale editor cannot recreate a response deleted in another tab', async (
         await page
             .getByRole('textbox', { name: 'How did it go?' })
             .fill(deletedDraft);
-        currentPage.once('dialog', (dialog) => dialog.accept());
         await currentPage
             .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        // The removal asks in an in-app dialog before submitting.
+        await currentPage
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Remove response', exact: true })
             .click();
         await expect(
             currentPage.getByRole('heading', {
@@ -266,7 +270,7 @@ test('a stale editor cannot recreate a response deleted in another tab', async (
         ).toHaveText('');
         const deliberateResponse =
             'This response was created deliberately after reloading the deleted state.';
-        await page.getByLabel('What was your result?').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         await page
             .getByRole('textbox', { name: 'How did it go?' })
             .fill(deliberateResponse);
@@ -315,9 +319,13 @@ test('a stale delete cannot remove a response updated in another tab', async ({
             }),
         ).toBeVisible();
 
-        page.once('dialog', (dialog) => dialog.accept());
         await page
             .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        // The removal asks in an in-app dialog before submitting.
+        await page
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Remove response', exact: true })
             .click();
         await expect(page.getByRole('alert')).toContainText(conflictMessage);
         await expect(
@@ -344,9 +352,13 @@ test('a stale delete cannot remove a response updated in another tab', async ({
         await expect(
             page.getByRole('textbox', { name: 'How did it go?' }),
         ).toHaveText(currentBody);
-        page.once('dialog', (dialog) => dialog.accept());
         await page
             .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        // The removal asks in an in-app dialog before submitting.
+        await page
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Remove response', exact: true })
             .click();
         await expect(
             page.getByRole('heading', { name: '0 experiences', exact: true }),

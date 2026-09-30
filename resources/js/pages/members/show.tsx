@@ -1,7 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import {
     ArrowRight,
-    ArrowUpRight,
+    ExternalLink,
     BookOpen,
     CalendarDays,
     Mail,
@@ -82,6 +82,13 @@ const outcomes = {
     did_not_work: 'Did not work for me',
 };
 
+/** Pagination keeps its place: the new page starts at the top of the list. */
+function showContributions() {
+    document
+        .getElementById('contributions')
+        ?.scrollIntoView({ block: 'start' });
+}
+
 export default function MemberProfile({
     member,
     view,
@@ -134,9 +141,6 @@ export default function MemberProfile({
                     className="wb-profile-header"
                     aria-labelledby="member-name"
                 >
-                    <div className="wb-profile-cover" aria-hidden="true">
-                        <span>Ideas are better with experience.</span>
-                    </div>
                     <div className="wb-profile-intro">
                         <MemberAvatar
                             name={member.name}
@@ -189,7 +193,7 @@ export default function MemberProfile({
                                     rel="noopener noreferrer nofollow ugc"
                                 >
                                     Personal website
-                                    <ArrowUpRight aria-hidden="true" />
+                                    <ExternalLink aria-hidden="true" />
                                     <span className="sr-only">
                                         (opens in a new tab)
                                     </span>
@@ -209,7 +213,7 @@ export default function MemberProfile({
                                     rel="noopener noreferrer nofollow ugc"
                                 >
                                     {socialLabel(link.platform)}
-                                    <ArrowUpRight aria-hidden="true" />
+                                    <ExternalLink aria-hidden="true" />
                                     <span className="sr-only">
                                         (opens in a new tab)
                                     </span>
@@ -267,7 +271,7 @@ export default function MemberProfile({
                 <div className="wb-member-grid">
                     <section
                         id="contributions"
-                        className="wb-panel wb-contributions scroll-mt-6"
+                        className="wb-panel wb-contributions scroll-mt-24"
                         aria-label="Member contributions"
                     >
                         <nav
@@ -278,6 +282,7 @@ export default function MemberProfile({
                                 <Link
                                     key={tab.value}
                                     href={`/members/${member.username}?view=${tab.value}`}
+                                    preserveScroll
                                     aria-current={
                                         view === tab.value ? 'page' : undefined
                                     }
@@ -367,8 +372,11 @@ export default function MemberProfile({
                                     {entry.saves_count !== null &&
                                         entry.saves_count > 0 && (
                                             <p className="text-muted-foreground text-sm">
-                                                {entry.saves_count} saves from
-                                                other members
+                                                {entry.saves_count}{' '}
+                                                {entry.saves_count === 1
+                                                    ? 'save'
+                                                    : 'saves'}{' '}
+                                                from other members
                                             </p>
                                         )}
                                     <Link
@@ -421,6 +429,8 @@ export default function MemberProfile({
                                     {contributions.prev_page_url ? (
                                         <Link
                                             href={contributions.prev_page_url}
+                                            preserveScroll
+                                            onSuccess={showContributions}
                                         >
                                             Previous
                                         </Link>
@@ -442,6 +452,8 @@ export default function MemberProfile({
                                     {contributions.next_page_url ? (
                                         <Link
                                             href={contributions.next_page_url}
+                                            preserveScroll
+                                            onSuccess={showContributions}
                                         >
                                             Next
                                         </Link>

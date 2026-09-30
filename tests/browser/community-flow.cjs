@@ -75,7 +75,7 @@ const { chromium } = browserRequire('playwright');
             0,
             'Community pages must not use the starter layout',
         );
-        await page.locator('select[name="outcome"]').selectOption('partly');
+        await page.locator('input[name="outcome"][value="partly"]').check();
         await page
             .locator('[contenteditable="true"]')
             .fill(
@@ -115,7 +115,7 @@ const { chromium } = browserRequire('playwright');
             'PASS intended login and real browser experience submission',
         );
 
-        await page.locator('select[name="outcome"]').selectOption('worked');
+        await page.locator('input[name="outcome"][value="worked"]').check();
         await page
             .locator('[contenteditable="true"]')
             .fill(
@@ -129,9 +129,25 @@ const { chromium } = browserRequire('playwright');
             .getByText('After adding one validation step', { exact: false })
             .waitFor();
         assert.equal(await page.locator('main article').count(), 2);
-        page.once('dialog', (dialog) => dialog.accept());
+        // Cancelling the confirmation keeps the response.
         await page
             .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        await page
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Cancel', exact: true })
+            .click();
+        await page
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .waitFor({ state: 'detached' });
+        assert.equal(await page.locator('main article').count(), 2);
+        await page
+            .getByRole('button', { name: 'Remove my response', exact: true })
+            .click();
+        // The removal asks in an in-app dialog before submitting.
+        await page
+            .getByRole('dialog', { name: 'Remove your response?' })
+            .getByRole('button', { name: 'Remove response', exact: true })
             .click();
         await page
             .getByRole('heading', { name: '0 experiences', exact: true })
@@ -143,8 +159,8 @@ const { chromium } = browserRequire('playwright');
             .click();
         await page.waitForURL(/#share$/);
         await page
-            .locator('select[name="outcome"]')
-            .selectOption('did_not_work');
+            .locator('input[name="outcome"][value="did_not_work"]')
+            .check();
         await page
             .locator('[contenteditable="true"]')
             .fill(
@@ -251,7 +267,7 @@ const { chromium } = browserRequire('playwright');
                 exact: true,
             })
             .waitFor();
-        assert.equal(await page.locator('select[name="outcome"]').count(), 0);
+        assert.equal(await page.locator('input[name="outcome"]').count(), 0);
         console.log(
             'PASS authenticated Topic -> Method creation, copy link and no self-validation form',
         );
@@ -381,7 +397,7 @@ const { chromium } = browserRequire('playwright');
                 exact: true,
             })
             .waitFor();
-        assert.equal(await page.locator('select[name="outcome"]').count(), 0);
+        assert.equal(await page.locator('input[name="outcome"]').count(), 0);
         assert.deepEqual(errors, [], 'No browser runtime errors');
         console.log(
             'PASS public persisted experience and zero browser runtime errors',

@@ -174,7 +174,7 @@ const verifyAccount = require('./verify-account.cjs');
         await owner
             .getByRole('link', { name: 'I tried this', exact: true })
             .click();
-        await owner.locator('select[name="outcome"]').selectOption('partly');
+        await owner.locator('input[name="outcome"][value="partly"]').check();
         await owner
             .locator('[contenteditable="true"]')
             .fill(

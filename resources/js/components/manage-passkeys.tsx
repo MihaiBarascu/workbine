@@ -48,7 +48,7 @@ export default function ManagePasskeys(props: Props) {
             <Heading
                 variant="small"
                 title="Passkeys"
-                description="Manage your passkeys for passwordless sign-in"
+                description="Sign in with your fingerprint, face or device PIN instead of a password."
             />
 
             <div className="border-border overflow-hidden rounded-lg border">

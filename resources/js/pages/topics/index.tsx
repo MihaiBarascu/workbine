@@ -153,7 +153,10 @@ export default function TopicsIndex({
                 <option value="topics">Topics</option>
                 <option value="people">People</option>
             </select>
-            <button type="submit">Search</button>
+            <button type="submit">
+                <ArrowRight aria-hidden="true" />
+                <span>Search</span>
+            </button>
         </Form>
     );
 
@@ -264,60 +267,70 @@ export default function TopicsIndex({
                             </div>
                         </Form>
 
-                        <div className="wb-feed-toolbar">
-                            <nav
-                                aria-label="Filter topics"
-                                className="wb-feed-nav"
-                            >
-                                <Link
-                                    href={filterUrl('latest')}
-                                    preserveState
-                                    aria-current={
-                                        view === 'latest' ? 'page' : undefined
-                                    }
+                        {scope !== 'people' && (
+                            <div className="wb-feed-toolbar">
+                                <nav
+                                    aria-label="Filter topics"
+                                    className="wb-feed-nav"
                                 >
-                                    <BookOpen aria-hidden="true" />
-                                    Latest
-                                </Link>
-                                <Link
-                                    href={filterUrl('unanswered')}
-                                    preserveState
-                                    aria-current={
-                                        unanswered ? 'page' : undefined
-                                    }
-                                >
-                                    <MessagesSquare aria-hidden="true" />
-                                    Needs a method
-                                </Link>
-                                <Link
-                                    href={filterUrl('trending')}
-                                    preserveState
-                                    aria-current={
-                                        view === 'trending' ? 'page' : undefined
-                                    }
-                                >
-                                    <Flame aria-hidden="true" />
-                                    Trending
-                                </Link>
-                                <Link
-                                    href={filterUrl('saved')}
-                                    preserveState
-                                    aria-current={
-                                        view === 'saved' ? 'page' : undefined
-                                    }
-                                >
-                                    <Bookmark aria-hidden="true" />
-                                    Most saved
-                                </Link>
-                            </nav>
+                                    <Link
+                                        href={filterUrl('latest')}
+                                        preserveState
+                                        aria-current={
+                                            view === 'latest'
+                                                ? 'page'
+                                                : undefined
+                                        }
+                                    >
+                                        <BookOpen aria-hidden="true" />
+                                        Latest
+                                    </Link>
+                                    <Link
+                                        href={filterUrl('unanswered')}
+                                        preserveState
+                                        aria-current={
+                                            unanswered ? 'page' : undefined
+                                        }
+                                    >
+                                        <MessagesSquare aria-hidden="true" />
+                                        Needs a method
+                                    </Link>
+                                    <Link
+                                        href={filterUrl('trending')}
+                                        preserveState
+                                        aria-current={
+                                            view === 'trending'
+                                                ? 'page'
+                                                : undefined
+                                        }
+                                    >
+                                        <Flame aria-hidden="true" />
+                                        Trending
+                                    </Link>
+                                    <Link
+                                        href={filterUrl('saved')}
+                                        preserveState
+                                        aria-current={
+                                            view === 'saved'
+                                                ? 'page'
+                                                : undefined
+                                        }
+                                    >
+                                        <Bookmark aria-hidden="true" />
+                                        Most saved
+                                    </Link>
+                                </nav>
 
-                            {!emptyCommunity && (
-                                <span className="wb-topic-count">
-                                    {topics.total}{' '}
-                                    {topics.total === 1 ? 'topic' : 'topics'}
-                                </span>
-                            )}
-                        </div>
+                                {!emptyCommunity && (
+                                    <span className="wb-topic-count">
+                                        {topics.total}{' '}
+                                        {topics.total === 1
+                                            ? 'topic'
+                                            : 'topics'}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                         <Form
                             action="/topics#topics"
                             method="get"
@@ -331,57 +344,77 @@ export default function TopicsIndex({
                                 name="category"
                                 value={category}
                             />
-                            <label>
-                                <span className="sr-only">Filter by tag</span>
-                                <select
-                                    name="tag"
-                                    aria-label="Filter by tag"
-                                    defaultValue={tag}
-                                    key={`tag:${tag}`}
-                                    onChange={(event) =>
-                                        event.currentTarget.form?.requestSubmit()
-                                    }
-                                >
-                                    <option value="">All tags</option>
-                                    {availableTags.map((value) => (
-                                        <option key={value} value={value}>
-                                            {value}
-                                        </option>
-                                    ))}
-                                    {tag && !availableTags.includes(tag) && (
-                                        <option value={tag}>{tag}</option>
+                            {scope !== 'people' && (
+                                <>
+                                    <label>
+                                        <span className="sr-only">
+                                            Filter by tag
+                                        </span>
+                                        <select
+                                            name="tag"
+                                            aria-label="Filter by tag"
+                                            defaultValue={tag}
+                                            key={`tag:${tag}`}
+                                            onChange={(event) =>
+                                                event.currentTarget.form?.requestSubmit()
+                                            }
+                                        >
+                                            <option value="">All tags</option>
+                                            {availableTags.map((value) => (
+                                                <option
+                                                    key={value}
+                                                    value={value}
+                                                >
+                                                    {value}
+                                                </option>
+                                            ))}
+                                            {tag &&
+                                                !availableTags.includes(
+                                                    tag,
+                                                ) && (
+                                                    <option value={tag}>
+                                                        {tag}
+                                                    </option>
+                                                )}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span className="sr-only">
+                                            Sort topics
+                                        </span>
+                                        <select
+                                            name="sort"
+                                            aria-label="Sort topics"
+                                            defaultValue={sort}
+                                            key={`sort:${sort}`}
+                                            onChange={(event) =>
+                                                event.currentTarget.form?.requestSubmit()
+                                            }
+                                        >
+                                            <option value="newest">
+                                                Newest first
+                                            </option>
+                                            <option value="oldest">
+                                                Oldest first
+                                            </option>
+                                            <option value="active">
+                                                Recent activity
+                                            </option>
+                                        </select>
+                                    </label>
+                                    {category && (
+                                        <Link
+                                            href={`/topics?view=${view}#topics`}
+                                            className="wb-filter-context"
+                                        >
+                                            {categories[category]}{' '}
+                                            <X className="size-3" />
+                                            <span className="sr-only">
+                                                Clear category
+                                            </span>
+                                        </Link>
                                     )}
-                                </select>
-                            </label>
-                            <label>
-                                <span className="sr-only">Sort topics</span>
-                                <select
-                                    name="sort"
-                                    aria-label="Sort topics"
-                                    defaultValue={sort}
-                                    key={`sort:${sort}`}
-                                    onChange={(event) =>
-                                        event.currentTarget.form?.requestSubmit()
-                                    }
-                                >
-                                    <option value="newest">Newest first</option>
-                                    <option value="oldest">Oldest first</option>
-                                    <option value="active">
-                                        Recent activity
-                                    </option>
-                                </select>
-                            </label>
-                            {category && (
-                                <Link
-                                    href={`/topics?view=${view}#topics`}
-                                    className="wb-filter-context"
-                                >
-                                    {categories[category]}{' '}
-                                    <X className="size-3" />
-                                    <span className="sr-only">
-                                        Clear category
-                                    </span>
-                                </Link>
+                                </>
                             )}
                             {!guideOpen && (
                                 <button type="button" onClick={toggleGuide}>
@@ -389,13 +422,13 @@ export default function TopicsIndex({
                                 </button>
                             )}
                         </Form>
-                        {view === 'trending' && (
+                        {view === 'trending' && scope !== 'people' && (
                             <p className="wb-ranking-note">
                                 Based on methods shared and topics saved in the
                                 last 14 days.
                             </p>
                         )}
-                        {view === 'saved' && (
+                        {view === 'saved' && scope !== 'people' && (
                             <p className="wb-ranking-note">
                                 Most saved by other members. Personal lists stay
                                 private.
@@ -439,8 +472,14 @@ export default function TopicsIndex({
                                         <MemberLink user={person} avatar />
                                         <p>@{person.username}</p>
                                         <span>
-                                            {person.methods_count} methods ·{' '}
-                                            {person.topics_count} topics
+                                            {person.methods_count}{' '}
+                                            {person.methods_count === 1
+                                                ? 'method'
+                                                : 'methods'}{' '}
+                                            · {person.topics_count}{' '}
+                                            {person.topics_count === 1
+                                                ? 'topic'
+                                                : 'topics'}
                                         </span>
                                         <Link
                                             href={`/members/${person.username}`}
@@ -692,40 +731,43 @@ export default function TopicsIndex({
                                 <TopicStarters onChoose={chooseStarter} />
                             </div>
                         )}
-                        <div className="wb-category-overview">
-                            <h2>
-                                <Flame />
-                                Explore categories
-                            </h2>
-                            <p>Find something you want to try.</p>
-                            {Object.entries(categories)
-                                .sort(
-                                    ([a], [b]) =>
-                                        Number(categoryCounts[b] ?? 0) -
-                                        Number(categoryCounts[a] ?? 0),
-                                )
-                                .slice(0, 5)
-                                .map(([key, name]) => (
-                                    <Link
-                                        key={key}
-                                        href={`/topics?category=${key}#topics`}
-                                        preserveState
-                                    >
-                                        <span>{name}</span>
-                                        {Number(categoryCounts[key] ?? 0) >
-                                            0 && (
-                                            <span>
-                                                {categoryCounts[key]}{' '}
-                                                {Number(categoryCounts[key]) ===
-                                                1
-                                                    ? 'topic'
-                                                    : 'topics'}
-                                            </span>
-                                        )}
-                                        <ArrowRight />
-                                    </Link>
-                                ))}
-                        </div>
+                        {Object.keys(categories).length > 0 && (
+                            <div className="wb-category-overview">
+                                <h2>
+                                    <Flame />
+                                    Explore categories
+                                </h2>
+                                <p>Find something you want to try.</p>
+                                {Object.entries(categories)
+                                    .sort(
+                                        ([a], [b]) =>
+                                            Number(categoryCounts[b] ?? 0) -
+                                            Number(categoryCounts[a] ?? 0),
+                                    )
+                                    .slice(0, 5)
+                                    .map(([key, name]) => (
+                                        <Link
+                                            key={key}
+                                            href={`/topics?category=${key}#topics`}
+                                            preserveState
+                                        >
+                                            <span>{name}</span>
+                                            {Number(categoryCounts[key] ?? 0) >
+                                                0 && (
+                                                <span>
+                                                    {categoryCounts[key]}{' '}
+                                                    {Number(
+                                                        categoryCounts[key],
+                                                    ) === 1
+                                                        ? 'topic'
+                                                        : 'topics'}
+                                                </span>
+                                            )}
+                                            <ArrowRight />
+                                        </Link>
+                                    ))}
+                            </div>
+                        )}
                     </aside>
                 </div>
             </main>

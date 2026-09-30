@@ -1,4 +1,4 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
 import SecurityController from '@/actions/App/Http/Controllers/Settings/SecurityController';
 import Heading from '@/components/heading';
@@ -19,6 +19,7 @@ type Props = {
     ManageTwoFactorProps;
 
 export default function Security(props: Props) {
+    const { auth } = usePage().props;
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
 
@@ -34,8 +35,15 @@ export default function Security(props: Props) {
                 <Heading
                     variant="small"
                     title="Update password"
-                    description="Ensure your account is using a long, random password to stay secure"
+                    description="Use a long password that you do not use anywhere else."
                 />
+                {auth.user.google_id && (
+                    <p className="text-muted-foreground text-sm">
+                        You joined with Google, so you may not have a password
+                        yet. To create one, log out and choose “Forgot your
+                        password?” on the login page.
+                    </p>
+                )}
 
                 <Form
                     {...SecurityController.update.form()}

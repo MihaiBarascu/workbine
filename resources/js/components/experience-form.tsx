@@ -1,7 +1,10 @@
 import { RichTextEditor } from '@/components/rich-text-editor';
-import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import { useId, useState } from 'react';
 import { Form } from '@inertiajs/react';
+import { ConfirmSubmit } from '@/components/confirm-submit';
 import InputError from '@/components/input-error';
+import { OutcomeChoice } from '@/components/outcome';
 import { PhotoGalleryField } from '@/components/photo-gallery-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +26,7 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
     const [submission, setSubmission] = useState<'save' | 'delete' | null>(
         null,
     );
+    const removeForm = useId();
     const acceptCurrentExperience = (current: OwnExperience | null) => {
         setDraftExperience(current);
         setExperienceRevision(current?.revision ?? 'new');
@@ -83,33 +87,10 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                     </a>
                                 </div>
                             )}
-                        <div className="grid gap-2">
-                            <Label htmlFor="outcome">
-                                What was your result?
-                            </Label>
-                            <select
-                                id="outcome"
-                                name="outcome"
-                                required
-                                defaultValue={draftExperience?.outcome ?? ''}
-                                aria-invalid={Boolean(errors.outcome)}
-                                aria-describedby="outcome-error"
-                                className="border-input bg-background focus-visible:ring-ring h-10 w-full rounded-md border px-3 text-sm focus-visible:ring-2"
-                            >
-                                <option value="" disabled>
-                                    Choose a result
-                                </option>
-                                <option value="worked">Worked for me</option>
-                                <option value="partly">Partly worked</option>
-                                <option value="did_not_work">
-                                    Did not work for me
-                                </option>
-                            </select>
-                            <InputError
-                                id="outcome-error"
-                                message={errors.outcome}
-                            />
-                        </div>
+                        <OutcomeChoice
+                            defaultValue={draftExperience?.outcome}
+                            error={errors.outcome}
+                        />
                         <div className="grid gap-2">
                             <Label
                                 id="experience-body-label"
@@ -215,6 +196,7 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
             </Form>
             {draftExperience && (
                 <Form
+                    id={removeForm}
                     action={action}
                     method="delete"
                     disableWhileProcessing
@@ -222,12 +204,6 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                     onSuccess={(page) =>
                         acceptCurrentExperience(
                             page.props.ownExperience as OwnExperience | null,
-                        )
-                    }
-                    onBefore={(visit) =>
-                        visit.method !== 'delete' ||
-                        window.confirm(
-                            'Remove your public response? This cannot be undone.',
                         )
                     }
                 >
@@ -260,14 +236,18 @@ export function ExperienceForm({ action, experience, methodRevision }: Props) {
                                         </a>
                                     </div>
                                 )}
-                            <Button
-                                type="submit"
-                                variant="outline"
-                                className="w-full"
+                            <ConfirmSubmit
+                                form={removeForm}
+                                title="Remove your response?"
+                                description="Your response and its photos will be removed from this method. This cannot be undone."
+                                confirmLabel="Remove response"
+                                variant="ghost"
+                                className="text-destructive hover:text-destructive dark:text-destructive-foreground w-fit"
                                 disabled={processing}
                             >
+                                <Trash2 aria-hidden="true" />
                                 Remove my response
-                            </Button>
+                            </ConfirmSubmit>
                         </div>
                     )}
                 </Form>

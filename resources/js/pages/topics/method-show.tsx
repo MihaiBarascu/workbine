@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ArrowLeft, ArrowUpRight, ExternalLink, Pencil } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ExternalLink, Pencil } from 'lucide-react';
 import { MemberAvatar, MemberLink } from '@/components/community';
 import { PhotoGallery } from '@/components/photo-gallery';
 import { PublicShell } from '@/components/public-shell';
@@ -26,6 +26,14 @@ function formatDate(value: string): string {
         year: 'numeric',
         timeZone: 'UTC',
     }).format(new Date(value));
+}
+
+function hostname(url: string): string {
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+        return url;
+    }
 }
 
 export default function MethodShow({
@@ -122,7 +130,7 @@ export default function MethodShow({
                                     (opens in a new tab)
                                 </span>
                             </a>
-                            <p>{method.source_url}</p>
+                            <p>{hostname(method.source_url)}</p>
                         </div>
                     )}
                     {method.protected_at && (
@@ -189,13 +197,14 @@ export default function MethodShow({
                                 </span>
                             </Link>
                         )}
-                        <Link href="#experiences">
+                        {/* A plain anchor: an Inertia visit would discard an open response draft. */}
+                        <a href="#experiences">
                             {method.experiences_count}{' '}
                             {method.experiences_count === 1
                                 ? 'experience'
                                 : 'experiences'}
-                            <ArrowUpRight aria-hidden="true" />
-                        </Link>
+                            <ArrowDown aria-hidden="true" />
+                        </a>
                         <ReportLink type="method" id={method.id} />
                     </footer>
                 </article>

@@ -20,8 +20,8 @@ for (const changedDraft of [false, true]) {
                 await login(contributor, actors.contributor);
                 await contributor.goto(`${methodUrl}/experiences/create`);
                 await contributor
-                    .getByLabel('What was your result?')
-                    .selectOption('worked');
+                    .locator('input[name="outcome"][value="worked"]')
+                    .check();
                 await contributor
                     .getByRole('textbox', { name: 'How did it go?' })
                     .fill(

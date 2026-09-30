@@ -1,0 +1,886 @@
+/*
+ * Contribution photos: a compact mosaic below the text and a full-screen viewer.
+ * Descriptions stay out of the mosaic; the viewer shows them with each photo.
+ */
+.wb-photo-gallery {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    max-width: 46rem;
+    margin: 1.5rem 0 0.25rem;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    list-style: none;
+    isolation: isolate;
+}
+.wb-photo-gallery > li {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    container-type: inline-size;
+}
+.wb-photo-gallery a {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--muted);
+    cursor: zoom-in;
+    outline: none;
+}
+.wb-photo-gallery img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.wb-photo-gallery a::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    box-shadow: inset 0 0 0 1px rgb(15 23 42 / 8%);
+    transition:
+        background-color 0.25s,
+        box-shadow 0.15s;
+}
+.dark .wb-photo-gallery a::after {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
+}
+.wb-photo-gallery a:hover img {
+    transform: scale(1.035);
+}
+.wb-photo-gallery a:hover::after {
+    background: rgb(15 23 42 / 10%);
+}
+.wb-photo-gallery a:focus-visible::after {
+    box-shadow:
+        inset 0 0 0 3px var(--ring),
+        inset 0 0 0 5px var(--card);
+}
+
+/* One photo keeps its own shape, within limits; several share one mosaic. */
+.wb-photo-gallery[data-count='1'] {
+    display: block;
+    width: min(100%, 46rem, calc(min(30rem, 64vh) * var(--wb-photo-ratio)));
+    aspect-ratio: var(--wb-photo-ratio);
+    border-radius: 12px;
+}
+.wb-photo-gallery[data-count='1'] > li {
+    height: 100%;
+}
+.wb-photo-gallery[data-count='2'] {
+    grid-template-columns: 1fr 1fr;
+    aspect-ratio: 16 / 9;
+}
+.wb-photo-gallery[data-count='3'] {
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    aspect-ratio: 16 / 10;
+}
+.wb-photo-gallery[data-count='3'] > li:first-child {
+    grid-row: span 2;
+}
+.wb-photo-gallery[data-count='4'] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 2fr 1fr;
+    aspect-ratio: 4 / 3;
+}
+.wb-photo-gallery[data-count='4'] > li:first-child {
+    grid-column: span 3;
+}
+.wb-photo-gallery[data-count='5'] {
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: 3fr 2fr;
+    aspect-ratio: 5 / 4;
+}
+.wb-photo-gallery[data-count='5'] > li:nth-child(-n + 2) {
+    grid-column: span 3;
+}
+.wb-photo-gallery[data-count='5'] > li:nth-child(n + 3) {
+    grid-column: span 2;
+}
+.wb-photo-gallery[data-count='6'] {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+    aspect-ratio: 3 / 2;
+}
+
+.wb-photo-number,
+.wb-photo-expand {
+    position: absolute;
+    top: 8px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: rgb(12 16 24 / 58%);
+    color: #fff;
+    pointer-events: none;
+    backdrop-filter: blur(6px);
+}
+.wb-photo-number {
+    left: 8px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.wb-photo-expand {
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+    transform: scale(0.9);
+    transition:
+        opacity 0.2s,
+        transform 0.2s;
+}
+.wb-photo-expand svg {
+    width: 15px;
+    height: 15px;
+}
+.wb-photo-caption {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: none;
+    padding: 32px 12px 10px;
+    background: linear-gradient(transparent, rgb(8 12 20 / 72%));
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.45;
+    pointer-events: none;
+}
+@container (min-width: 220px) {
+    .wb-photo-caption {
+        display: -webkit-box;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+            opacity 0.2s,
+            transform 0.2s;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+}
+@media (hover: hover) {
+    .wb-photo-gallery a:hover .wb-photo-expand,
+    .wb-photo-gallery a:hover .wb-photo-caption {
+        opacity: 1;
+        transform: none;
+    }
+}
+.wb-photo-gallery a:focus-visible .wb-photo-expand,
+.wb-photo-gallery a:focus-visible .wb-photo-caption {
+    opacity: 1;
+    transform: none;
+}
+@media (max-width: 639px) {
+    .wb-photo-gallery {
+        margin-top: 1.25rem;
+        border-radius: 12px;
+    }
+    .wb-photo-gallery[data-count='4'],
+    .wb-photo-gallery[data-count='5'] {
+        aspect-ratio: 1;
+    }
+    .wb-photo-gallery[data-count='6'] {
+        aspect-ratio: 4 / 3;
+    }
+}
+
+/* Gallery editor: photos in their published order, each with its description. */
+.wb-photo-field {
+    display: grid;
+    gap: 12px;
+    container-type: inline-size;
+}
+.wb-photo-field-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-radius: 12px;
+    outline: 2px dashed transparent;
+    outline-offset: 6px;
+    transition: outline-color 0.15s;
+}
+.wb-photo-field[data-files-over='true'] .wb-photo-field-grid {
+    outline-color: var(--primary);
+}
+/* Narrow forms: a compact list, thumbnail beside a wide description. */
+.wb-photo-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    gap: 4px 12px;
+    min-width: 0;
+    transition: opacity 0.15s;
+}
+.wb-photo-card-media {
+    position: relative;
+    grid-row: span 2;
+    align-self: start;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--muted);
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+.wb-photo-card.is-uploading {
+    grid-template-rows: auto;
+    align-items: center;
+}
+.wb-photo-card.is-uploading .wb-photo-card-media {
+    grid-row: auto;
+}
+.wb-photo-add {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+.wb-photo-add-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 64px;
+    padding: 12px 16px;
+    border: 1.5px dashed var(--input);
+    border-radius: 10px;
+    background: var(--background);
+    color: var(--muted-foreground);
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+        border-color 0.15s,
+        color 0.15s,
+        background-color 0.15s;
+}
+/* Wider forms: cards in the same reading order as the published mosaic. */
+@container (min-width: 520px) {
+    .wb-photo-field-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px 12px;
+    }
+    .wb-photo-card {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: none;
+        gap: 6px;
+    }
+    .wb-photo-card-media {
+        grid-row: auto;
+        aspect-ratio: 4 / 3;
+    }
+    .wb-photo-add-button {
+        flex-direction: column;
+        gap: 6px;
+        aspect-ratio: 4 / 3;
+        min-height: 0;
+    }
+    .wb-photo-field-grid[data-empty='true'] .wb-photo-add {
+        grid-column: 1 / -1;
+    }
+    .wb-photo-field-grid[data-empty='true'] .wb-photo-add-button {
+        flex-direction: row;
+        aspect-ratio: auto;
+        min-height: 88px;
+    }
+}
+@container (min-width: 860px) {
+    .wb-photo-field-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+.wb-photo-card.is-dragging {
+    opacity: 0.45;
+}
+.wb-photo-card.is-drop-target .wb-photo-card-media {
+    box-shadow:
+        inset 0 0 0 1px var(--border),
+        0 0 0 3px var(--ring);
+}
+.wb-photo-card-media[draggable='true'] {
+    cursor: grab;
+}
+.wb-photo-card-media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.wb-photo-card-view {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: zoom-in;
+}
+.wb-photo-card-view:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: -3px;
+    border-radius: 10px;
+}
+.wb-photo-card-tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: rgb(12 16 24 / 62%);
+    color: #fff;
+    backdrop-filter: blur(6px);
+    transition:
+        background-color 0.15s,
+        opacity 0.15s;
+}
+.wb-photo-card-tool:hover {
+    background: rgb(12 16 24 / 82%);
+}
+.wb-photo-card-tool:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+    box-shadow: 0 0 0 4px var(--ring);
+}
+.wb-photo-card-tool:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+.wb-photo-card-tool svg {
+    width: 16px;
+    height: 16px;
+}
+.wb-photo-card-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+}
+.wb-photo-card-order {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    display: flex;
+    gap: 4px;
+}
+.wb-photo-card .wb-photo-number {
+    top: 6px;
+    left: 6px;
+}
+.wb-photo-card-label {
+    align-self: end;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-weight: 500;
+}
+.wb-photo-field .wb-photo-card-caption {
+    display: block;
+    width: 100%;
+    min-height: calc(2lh + 14px);
+    padding: 6px 10px;
+    resize: none;
+    border: 1px solid var(--input);
+    border-radius: 8px;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1.45;
+    field-sizing: content;
+    overflow-wrap: anywhere;
+}
+.wb-photo-card-caption::placeholder {
+    color: var(--muted-foreground);
+}
+.wb-photo-card-count {
+    grid-column: 2;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+@container (min-width: 520px) {
+    .wb-photo-card-count {
+        grid-column: auto;
+    }
+}
+.wb-photo-card.is-uploading img {
+    opacity: 0.55;
+}
+.wb-photo-card-file {
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.wb-photo-card-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 10px 12px;
+    background: linear-gradient(transparent, rgb(8 12 20 / 70%));
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+.wb-photo-card-progress svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    animation: wb-lightbox-spin 1s linear infinite;
+}
+.wb-photo-card-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--primary);
+    transition: width 0.2s;
+}
+.wb-photo-add-button svg {
+    width: 22px;
+    height: 22px;
+}
+.wb-photo-add-button:hover,
+.wb-photo-field[data-files-over='true'] .wb-photo-add-button {
+    border-color: var(--primary);
+    background: var(--accent);
+    color: var(--accent-foreground);
+}
+.wb-photo-add-button:focus-visible {
+    border-style: solid;
+    border-color: var(--ring);
+}
+.wb-photo-add-hint {
+    color: var(--muted-foreground);
+    font-size: 12px;
+    line-height: 1.45;
+}
+.wb-photo-field-grid[data-empty='true'] .wb-photo-add-hint {
+    text-align: center;
+}
+
+/* A single photo, such as the profile photo: preview beside its actions. */
+.wb-image-field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 20px;
+    margin: -8px;
+    padding: 8px;
+    border-radius: 14px;
+    transition:
+        background-color 0.15s,
+        box-shadow 0.15s;
+}
+.wb-image-field[data-drag-over='true'] {
+    background: var(--accent);
+    box-shadow: inset 0 0 0 2px var(--primary);
+}
+.wb-image-field-preview {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 132px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--muted);
+    color: var(--muted-foreground);
+    box-shadow: inset 0 0 0 1px var(--border);
+}
+.wb-image-field.is-round .wb-image-field-preview {
+    width: 96px;
+    aspect-ratio: 1;
+    border-radius: 999px;
+}
+.wb-image-field-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.wb-image-field-preview svg {
+    width: 26px;
+    height: 26px;
+}
+.wb-image-field-controls {
+    display: grid;
+    flex: 1 1 240px;
+    gap: 8px;
+    min-width: 0;
+}
+.wb-image-field-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+.wb-image-field
+    > input:focus-visible
+    ~ .wb-image-field-controls
+    .wb-image-field-choose {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+}
+.wb-upload-progress {
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--muted);
+}
+.wb-upload-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+    transition: width 0.2s;
+}
+
+/* Full-screen viewer. Dark in both appearances, like the photos it frames. */
+.wb-lightbox-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgb(7 9 13 / 94%);
+}
+.wb-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 81;
+    color: #fff;
+    outline: none;
+    --wb-lightbox-top: 64px;
+    --wb-lightbox-bottom: 24px;
+    --wb-lightbox-side: 88px;
+}
+.wb-lightbox[data-has-footer='true'] {
+    --wb-lightbox-bottom: 132px;
+}
+.wb-lightbox-backdrop[data-state='open'],
+.wb-lightbox[data-state='open'] {
+    animation: wb-lightbox-in 0.22s ease-out;
+}
+.wb-lightbox-backdrop[data-state='closed'],
+.wb-lightbox[data-state='closed'] {
+    animation: wb-lightbox-out 0.16s ease-in forwards;
+}
+.wb-lightbox-stage {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+.wb-lightbox-frame {
+    position: absolute;
+    top: var(--wb-lightbox-top);
+    right: var(--wb-lightbox-side);
+    bottom: var(--wb-lightbox-bottom);
+    left: var(--wb-lightbox-side);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    container-type: size;
+}
+.wb-lightbox-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.wb-lightbox-slide.is-settling {
+    transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.wb-lightbox-image {
+    display: block;
+    max-width: none;
+    border-radius: 4px;
+    box-shadow: 0 18px 60px rgb(0 0 0 / 45%);
+    cursor: zoom-in;
+    transform-origin: center;
+    -webkit-user-drag: none;
+}
+.wb-lightbox-image.is-zoomed {
+    cursor: grab;
+}
+.wb-lightbox-image.is-zoomed:active {
+    cursor: grabbing;
+}
+.wb-lightbox-error {
+    position: absolute;
+    max-width: 32ch;
+    padding: 0 16px;
+    color: rgb(255 255 255 / 80%);
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: center;
+}
+.wb-lightbox-image.is-settling {
+    transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.wb-lightbox-slide[data-enter='next'] .wb-lightbox-image {
+    animation: wb-lightbox-from-right 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.wb-lightbox-slide[data-enter='previous'] .wb-lightbox-image {
+    animation: wb-lightbox-from-left 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.wb-lightbox-spinner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    color: rgb(255 255 255 / 70%);
+    opacity: 0;
+    animation:
+        wb-lightbox-spinner-in 0.2s 0.25s forwards,
+        wb-lightbox-spin 1s linear infinite;
+}
+.wb-lightbox-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: var(--wb-lightbox-top);
+    padding: 0 12px 0 20px;
+    background: linear-gradient(rgb(7 9 13 / 55%), transparent);
+}
+.wb-lightbox-counter {
+    font-size: 14px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    color: rgb(255 255 255 / 82%);
+}
+.wb-lightbox-tools {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.wb-lightbox-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    color: rgb(255 255 255 / 88%);
+    transition:
+        background-color 0.15s,
+        color 0.15s,
+        opacity 0.15s;
+}
+.wb-lightbox-button:hover {
+    background: rgb(255 255 255 / 12%);
+    color: #fff;
+}
+.wb-lightbox-button:focus-visible,
+.wb-lightbox-thumb:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+.wb-lightbox-button svg {
+    width: 22px;
+    height: 22px;
+}
+.wb-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    width: 52px;
+    height: 52px;
+    margin-top: calc((var(--wb-lightbox-top) - var(--wb-lightbox-bottom)) / 2);
+    background: rgb(255 255 255 / 10%);
+    transform: translateY(-50%);
+    backdrop-filter: blur(8px);
+}
+.wb-lightbox-nav:disabled {
+    opacity: 0;
+    pointer-events: none;
+}
+.wb-lightbox-nav[data-side='previous'] {
+    left: 18px;
+}
+.wb-lightbox-nav[data-side='next'] {
+    right: 18px;
+}
+.wb-lightbox-nav svg {
+    width: 26px;
+    height: 26px;
+}
+.wb-lightbox-footer {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 20px 16px max(16px, env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, rgb(7 9 13 / 60%));
+    pointer-events: none;
+}
+.wb-lightbox-footer > * {
+    pointer-events: auto;
+}
+.wb-lightbox-caption {
+    max-width: 62ch;
+    min-height: 1.5em;
+    color: rgb(255 255 255 / 92%);
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+.wb-lightbox-thumbs {
+    display: flex;
+    gap: 8px;
+    max-width: 100%;
+    padding: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.wb-lightbox-thumb {
+    position: relative;
+    flex: 0 0 auto;
+    width: 56px;
+    height: 56px;
+    overflow: hidden;
+    border-radius: 8px;
+    opacity: 0.55;
+    transition:
+        opacity 0.15s,
+        transform 0.15s;
+}
+.wb-lightbox-thumb:hover {
+    opacity: 0.85;
+}
+.wb-lightbox-thumb[aria-current='true'] {
+    opacity: 1;
+    box-shadow: 0 0 0 2px #fff;
+}
+.wb-lightbox-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.wb-lightbox[data-chrome='hidden'] .wb-lightbox-bar,
+.wb-lightbox[data-chrome='hidden'] .wb-lightbox-nav,
+.wb-lightbox[data-chrome='hidden'] .wb-lightbox-footer {
+    opacity: 0;
+    pointer-events: none;
+}
+.wb-lightbox-bar,
+.wb-lightbox-footer {
+    transition: opacity 0.2s;
+}
+@media (max-width: 639px) {
+    .wb-lightbox {
+        --wb-lightbox-top: 56px;
+        --wb-lightbox-side: 0px;
+    }
+    .wb-lightbox[data-has-footer='true'] {
+        --wb-lightbox-bottom: 118px;
+    }
+    .wb-lightbox-bar {
+        padding: 0 4px 0 16px;
+    }
+    .wb-lightbox-nav {
+        display: none;
+    }
+    .wb-lightbox-image {
+        border-radius: 0;
+    }
+    .wb-lightbox-thumb {
+        width: 44px;
+        height: 44px;
+    }
+    .wb-lightbox-caption {
+        font-size: 14px;
+    }
+}
+@media (max-height: 520px) {
+    .wb-lightbox[data-has-footer='true'] {
+        --wb-lightbox-bottom: 56px;
+    }
+    .wb-lightbox-thumbs {
+        display: none;
+    }
+}
+
+@keyframes wb-lightbox-in {
+    from {
+        opacity: 0;
+    }
+}
+@keyframes wb-lightbox-out {
+    to {
+        opacity: 0;
+    }
+}
+@keyframes wb-lightbox-from-right {
+    from {
+        opacity: 0.2;
+        translate: 18% 0;
+    }
+}
+@keyframes wb-lightbox-from-left {
+    from {
+        opacity: 0.2;
+        translate: -18% 0;
+    }
+}
+@keyframes wb-lightbox-spinner-in {
+    to {
+        opacity: 1;
+    }
+}
+@keyframes wb-lightbox-spin {
+    to {
+        rotate: 360deg;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wb-photo-gallery img,
+    .wb-photo-gallery a::after,
+    .wb-photo-expand,
+    .wb-photo-caption,
+    .wb-lightbox-slide.is-settling,
+    .wb-lightbox-image.is-settling,
+    .wb-photo-card-bar {
+        transition: none;
+    }
+    .wb-photo-gallery a:hover img {
+        transform: none;
+    }
+    .wb-lightbox-slide[data-enter] .wb-lightbox-image {
+        animation: none;
+    }
+    .wb-lightbox-backdrop[data-state],
+    .wb-lightbox[data-state] {
+        animation-duration: 1ms;
+    }
+}

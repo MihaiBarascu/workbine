@@ -46,10 +46,11 @@ export default function CommunityGuide() {
                             <h2>Share a method that helped</h2>
                             <p>
                                 Explain what you did, when it helped, and
-                                anything you would change. Use the editor to add
-                                paragraphs, lists, links and photos where they
-                                make your explanation clearer. Credit the source
-                                if the approach comes from someone else.
+                                anything you would change. Use the editor for
+                                paragraphs, lists and links, and add up to six
+                                photos below your text where they make the steps
+                                clearer. Credit the source if the approach comes
+                                from someone else.
                             </p>
                         </div>
                     </section>
@@ -61,7 +62,7 @@ export default function CommunityGuide() {
                                 Open a method and choose “I tried this”. Say
                                 whether it worked, partly worked, or didn’t work
                                 for you, then explain your situation. You can
-                                add photos in the same editor and update your
+                                add photos below your text and update your
                                 response later. A different result is useful
                                 too.
                             </p>

@@ -1,9 +1,11 @@
 import { Form, Link, usePage } from '@inertiajs/react';
 import { ExternalLink, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { MemberAvatar, MemberLink } from '@/components/community';
+import { ConfirmSubmit } from '@/components/confirm-submit';
 import { ExperienceForm } from '@/components/experience-form';
 import InputError from '@/components/input-error';
+import { OutcomeBadge, outcomeLabels } from '@/components/outcome';
 import { ReportLink } from '@/components/report-link';
 import { PhotoGallery } from '@/components/photo-gallery';
 import { RichTextContent } from '@/components/rich-text-content';
@@ -29,11 +31,7 @@ type Props = MethodExperienceProps & {
     authorId: number;
     methodRevision: string;
 };
-const outcomes: Record<ExperienceOutcome, string> = {
-    worked: 'Worked for me',
-    partly: 'Partly worked',
-    did_not_work: 'Did not work for me',
-};
+const outcomes = outcomeLabels;
 function formatDate(value: string): string {
     return new Intl.DateTimeFormat('en', {
         month: 'short',
@@ -60,6 +58,7 @@ export function MethodExperiences({
     } = usePage<{ auth: { user: User | null } }>();
     const isAuthor = auth.user?.id === authorId;
     const triggerRef = useRef<HTMLAnchorElement>(null);
+    const removeHiddenForm = useId();
     const [formOpen, setFormOpen] = useState(false);
     const [hiddenRevision, setHiddenRevision] = useState(
         ownExperienceHiddenRevision,
@@ -201,16 +200,11 @@ export function MethodExperiences({
                             can still remove it.
                         </p>
                         <Form
+                            id={removeHiddenForm}
                             action={`${base}/experience`}
                             method="delete"
                             disableWhileProcessing
                             onSuccess={() => setHiddenRevision(null)}
-                            onBefore={(visit) =>
-                                visit.method !== 'delete' ||
-                                window.confirm(
-                                    'Remove your experience? This cannot be undone.',
-                                )
-                            }
                         >
                             {({ errors, processing }) => (
                                 <div className="space-y-3">
@@ -239,13 +233,15 @@ export function MethodExperiences({
                                             </a>
                                         </div>
                                     )}
-                                    <Button
-                                        type="submit"
-                                        variant="outline"
+                                    <ConfirmSubmit
+                                        form={removeHiddenForm}
+                                        title="Remove your response?"
+                                        description="Your hidden response and its photos will be removed. This cannot be undone."
+                                        confirmLabel="Remove response"
                                         disabled={processing}
                                     >
                                         Remove my response
-                                    </Button>
+                                    </ConfirmSubmit>
                                 </div>
                             )}
                         </Form>
@@ -260,18 +256,21 @@ export function MethodExperiences({
                 )}
             </div>
             {experiences.data.length === 0 ? (
-                <div className="wb-detail-empty">
-                    <h3>
-                        {outcome === 'all'
-                            ? 'Tried it? Your context matters.'
-                            : 'No experiences with this outcome yet.'}
-                    </h3>
-                    <p>
-                        Share what happened, even when it only partly worked or
-                        did not help. An honest limitation can save someone
-                        time.
-                    </p>
-                </div>
+                // The open form already invites a response.
+                !formOpen && (
+                    <div className="wb-detail-empty">
+                        <h3>
+                            {outcome === 'all'
+                                ? 'Tried it? Your context matters.'
+                                : 'No experiences with this outcome yet.'}
+                        </h3>
+                        <p>
+                            Share what happened, even when it only partly worked
+                            or did not help. An honest limitation can save
+                            someone time.
+                        </p>
+                    </div>
+                )
             ) : (
                 <div className="wb-experience-list">
                     {experiences.data.map((experience) => (
@@ -308,9 +307,15 @@ export function MethodExperiences({
                                         )}
                                     </div>
                                 </div>
-                                <span className="wb-experience-outcome">
-                                    {outcomes[experience.outcome]}
-                                </span>
+                                <div className="wb-experience-tags">
+                                    <OutcomeBadge
+                                        outcome={experience.outcome}
+                                    />
+                                    <ReportLink
+                                        type="experience"
+                                        id={experience.id}
+                                    />
+                                </div>
                             </div>
                             <RichTextContent
                                 document={experience.body_document}
@@ -339,12 +344,6 @@ export function MethodExperiences({
                                     </span>
                                 </a>
                             )}
-                            <div className="mt-4">
-                                <ReportLink
-                                    type="experience"
-                                    id={experience.id}
-                                />
-                            </div>
                         </article>
                     ))}
                 </div>
