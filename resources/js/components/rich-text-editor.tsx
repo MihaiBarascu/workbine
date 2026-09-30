@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { editorLinkHelp, validEditorLink } from '@/lib/editor-links';
+import { PHOTO_FILES_EVENT } from '@/lib/photo-files';
 
 const extensions = [
     StarterKit.configure({
@@ -23,6 +24,31 @@ const extensions = [
 ];
 
 const photosElsewhere = 'Photos go in the gallery below the text.';
+
+/**
+ * Pasted or dropped photo files go to the form's gallery instead of the text.
+ * Returns the notice to show.
+ */
+function handPhotosToGallery(element: Element | null, files: FileList) {
+    const photos = Array.from(files).filter((file) =>
+        file.type.startsWith('image/'),
+    );
+    const form = element?.closest('form') ?? null;
+    // A gallery field cancels the event when it takes the files.
+    const taken =
+        photos.length > 0 &&
+        form !== null &&
+        !form.dispatchEvent(
+            new CustomEvent(PHOTO_FILES_EVENT, {
+                detail: photos,
+                cancelable: true,
+            }),
+        );
+    if (!taken) return photosElsewhere;
+    return photos.length === 1
+        ? 'Adding your photo to the gallery below the text.'
+        : 'Adding your photos to the gallery below the text.';
+}
 
 type Props = {
     id: string;
@@ -124,16 +150,20 @@ export function RichTextEditor({
                 setPasteNotice([...new Set(notices)].join(' '));
                 return pasted.body.innerHTML;
             },
-            handlePaste: (_view, event) => {
+            handlePaste: (view, event) => {
                 if (!event.clipboardData?.files.length) return false;
                 event.preventDefault();
-                setPasteNotice(photosElsewhere);
+                setPasteNotice(
+                    handPhotosToGallery(view.dom, event.clipboardData.files),
+                );
                 return true;
             },
-            handleDrop: (_view, event) => {
+            handleDrop: (view, event) => {
                 if (!event.dataTransfer?.files.length) return false;
                 event.preventDefault();
-                setPasteNotice(photosElsewhere);
+                setPasteNotice(
+                    handPhotosToGallery(view.dom, event.dataTransfer.files),
+                );
                 return true;
             },
         },
