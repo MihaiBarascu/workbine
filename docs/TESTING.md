@@ -16,7 +16,7 @@ is an explicit `run-remote-checks` label event, not unattended development.
 ## On this machine
 
 Run `bash tools/test-local.sh` from the repository root. Docker with Compose is the
-only host runtime prerequisite. The first run builds the PHP 8.3 / Node 24 /
+only host runtime prerequisite. The first run builds the PHP 8.4 / Node 24 /
 Playwright image; later runs reuse image layers and dependency download caches.
 
 The runner snapshots tracked and non-ignored untracked files, including

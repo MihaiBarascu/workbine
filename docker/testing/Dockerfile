@@ -1,5 +1,8 @@
 FROM node:24-bookworm-slim AS node
-FROM php:8.3-cli-bookworm
+FROM php:8.4-cli-bookworm
+
+# Keep local tests on a PHP release with the October 2026 security fixes.
+RUN php -r 'if (PHP_VERSION_ID < 80427) { fwrite(STDERR, "PHP 8.4.27 or later is required\n"); exit(1); }'
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip python3 libjpeg62-turbo-dev libpng-dev libwebp-dev libicu-dev libpq-dev libzip-dev \
@@ -15,4 +18,5 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
     && node /tmp/workbine-browser/node_modules/playwright/cli.js install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/*
 COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+COPY docker/security.ini /usr/local/etc/php/conf.d/security.ini
 WORKDIR /app

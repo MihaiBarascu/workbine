@@ -1,6 +1,9 @@
 FROM node:22-bookworm-slim AS node
 
-FROM php:8.3-apache-bookworm
+FROM php:8.4-apache-bookworm
+
+# Require the fixes for CVE-2026-109618 and CVE-2026-109619.
+RUN php -r 'if (PHP_VERSION_ID < 80427) { fwrite(STDERR, "PHP 8.4.27 or later is required\n"); exit(1); }'
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

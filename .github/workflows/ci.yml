@@ -72,10 +72,13 @@ jobs:
       - name: Prepare PHP image support
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
           extensions: gd, exif, intl, pdo_pgsql, zip
           coverage: none
-          ini-values: memory_limit=256M, upload_max_filesize=5M, post_max_size=8M, max_file_uploads=2
+          ini-values: memory_limit=256M, upload_max_filesize=5M, post_max_size=8M, max_file_uploads=2, session.upload_progress.enabled=0
+
+      - name: Verify patched PHP runtime
+        run: php -r 'if (PHP_VERSION_ID < 80427) { fwrite(STDERR, "PHP 8.4.27 or later is required\n"); exit(1); }'
 
       - name: Install PHP dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
