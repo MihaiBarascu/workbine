@@ -56,10 +56,31 @@ export function PublicShell({ children, discovery }: Props) {
         props.sidebarOpen ?? true,
     );
     const [navigationOpen, setNavigationOpen] = useState(false);
+    const [mobileHeaderCompact, setMobileHeaderCompact] = useState(false);
+    const hasDiscovery = Boolean(discovery);
     const mobileTrigger = useRef<HTMLButtonElement>(null);
     const desktopTrigger = useRef<HTMLButtonElement>(null);
 
     useEffect(() => router.on('navigate', () => setNavigationOpen(false)), []);
+    useEffect(() => {
+        if (!hasDiscovery) return;
+
+        const mobile = window.matchMedia('(max-width: 760px)');
+        const updateHeader = () => {
+            // Hysteresis avoids a jump when the search row leaves the layout.
+            setMobileHeaderCompact((compact) =>
+                mobile.matches && window.scrollY > (compact ? 12 : 72),
+            );
+        };
+
+        updateHeader();
+        window.addEventListener('scroll', updateHeader, { passive: true });
+        mobile.addEventListener('change', updateHeader);
+        return () => {
+            window.removeEventListener('scroll', updateHeader);
+            mobile.removeEventListener('change', updateHeader);
+        };
+    }, [hasDiscovery]);
     useEffect(() => {
         if (!navigationOpen) return;
         const menu = document.getElementById('community-navigation');
@@ -120,7 +141,7 @@ export function PublicShell({ children, discovery }: Props) {
 
     return (
         <div
-            className={`wb-public wb-cosmos-shell min-h-screen ${discovery ? 'wb-discovery-shell' : 'wb-secondary-shell'} ${sidebarExpanded ? '' : 'is-sidebar-collapsed'}`}
+            className={`wb-public wb-cosmos-shell min-h-screen ${discovery ? 'wb-discovery-shell' : 'wb-secondary-shell'} ${sidebarExpanded ? '' : 'is-sidebar-collapsed'} ${mobileHeaderCompact ? 'is-mobile-scrolled' : ''}`}
         >
             <a href="#main-content" className="wb-skip" inert={navigationOpen}>
                 Skip to content
