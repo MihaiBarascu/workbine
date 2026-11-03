@@ -324,6 +324,15 @@
     }
 }
 @media (max-width: 760px) {
+    /* On mobile, keep navigation sticky, but let the search row disappear. */
+    .wb-discovery-shell.is-mobile-scrolled .wb-universe-search {
+        display: none;
+    }
+    .wb-discovery-shell.is-mobile-scrolled .wb-topbar-inner {
+        min-height: 56px;
+        padding-block: 6px;
+        row-gap: 0;
+    }
     .wb-secondary-shell .wb-page,
     .wb-secondary-shell #main-content > main {
         padding: 24px 16px 40px;
